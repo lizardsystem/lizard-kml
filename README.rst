@@ -1,11 +1,7 @@
 lizard-kml
 ==========================================
 
-Introduction
-
-Usage, etc.
-
-
+Keyhole Markup Language support for Lizard using the Google Earth plugin.
 
 Symlink a buildout configuration
 --------------------------------
@@ -16,4 +12,3 @@ correct configuration. On your development machine, that is
 on the server)::
 
     $> ln -s development.cfg buildout.cfg
-
