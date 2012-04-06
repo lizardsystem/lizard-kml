@@ -1,0 +1,363 @@
+[
+  {
+    "pk": 1,
+    "model": "lizard_kml.kmltype",
+    "fields": {
+      "name": "Vaklodingen"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "lizard_kml.kmltype",
+    "fields": {
+      "name": "Jarkusprofielen"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "lizard_kml.kmltype",
+    "fields": {
+      "name": "Info Jarkusprofielen"
+    }
+  },
+
+
+
+
+
+
+
+
+
+  {
+    "pk": 1,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Ameland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Ameland.kmz",
+      "description": "Ameland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Delfland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Delfland.kmz",
+      "description": "Delfland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Goeree",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Goeree.kmz",
+      "description": "Goeree",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Maasvlakte",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Maasvlakte.kmz",
+      "description": "Maasvlakte",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Noord-Beveland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Noord-Beveland.kmz",
+      "description": "Noord-Beveland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Noord-Holland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Noord-Holland.kmz",
+      "description": "Noord-Holland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Rijnland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Rijnland.kmz",
+      "description": "Rijnland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 8,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Schiermonnikoog",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Schiermonnikoog.kmz",
+      "description": "Schiermonnikoog",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 9,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Schouwen",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Schouwen.kmz",
+      "description": "Schouwen",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 10,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Terschelling",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Terschelling.kmz",
+      "description": "Terschelling",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 11,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Texel",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Texel.kmz",
+      "description": "Texel",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 12,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Vlieland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Vlieland.kmz",
+      "description": "Vlieland",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 13,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Voorne",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Voorne.kmz",
+      "description": "Voorne",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 14,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Walcheren",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Walcheren.kmz",
+      "description": "Walcheren",
+      "kml_type": "2"
+    }
+  },
+  {
+    "pk": 15,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Zeeuws-Vlaanderen",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_timeseries/Zeeuws-Vlaanderen.kmz",
+      "description": "Zeeuws-Vlaanderen",
+      "kml_type": "2"
+    }
+  },
+
+
+
+
+
+
+
+
+
+
+
+  {
+    "pk": 16,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Ameland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Ameland.kml",
+      "description": "Ameland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 17,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Delfland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Delfland.kml",
+      "description": "Delfland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 18,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Goeree",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Goeree.kml",
+      "description": "Goeree",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 19,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Maasvlakte",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Maasvlakte.kml",
+      "description": "Maasvlakte",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 20,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Noord-Beveland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Noord-Beveland.kml",
+      "description": "Noord-Beveland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 21,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Noord-Holland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Noord-Holland.kml",
+      "description": "Noord-Holland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 22,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Rijnland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Rijnland.kml",
+      "description": "Rijnland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 23,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Schiermonnikoog",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Schiermonnikoog.kml",
+      "description": "Schiermonnikoog",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 24,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Schouwen",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Schouwen.kml",
+      "description": "Schouwen",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 25,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Terschelling",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Terschelling.kml",
+      "description": "Terschelling",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 26,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Texel",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Texel.kml",
+      "description": "Texel",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 27,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Vlieland",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Vlieland.kml",
+      "description": "Vlieland",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 28,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Voorne",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Voorne.kml",
+      "description": "Voorne",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 29,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Walcheren",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Walcheren.kml",
+      "description": "Walcheren",
+      "kml_type": "3"
+    }
+  },
+  {
+    "pk": 30,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Zeeuws-Vlaanderen",
+      "url": "http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Zeeuws-Vlaanderen.kml",
+      "description": "Zeeuws-Vlaanderen",
+      "kml_type": "3"
+    }
+  },
+
+
+
+
+
+
+
+
+
+  {
+    "pk": 31,
+    "model": "lizard_kml.area",
+    "fields": {
+      "name": "Vaklodingen Nederland",
+      "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/Vaklodingen.kml",
+      "description": "Vaklodingen Nederland",
+      "kml_type": "1"
+    }
+  }
+
+]
