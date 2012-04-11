@@ -1,0 +1,33 @@
+<kml xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:atom="http://www.w3.org/2005/Atom" xmlns="http://www.opengis.net/kml/2.2">
+    <Placemark>
+        <name>build_test_kml output</name>
+        <LookAt>
+            <longitude>146.806</longitude>
+            <latitude>12.219</latitude>
+            <heading>-60</heading>
+            <tilt>70</tilt>
+            <range>{{ look_at_range }}</range>
+            <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+        </LookAt>
+        {% if show_some_example_shape %}
+        <LineString>
+            <extrude>1</extrude>
+            <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
+            <coordinates>146.825,12.233,400 146.820,12.222,400 146.812,12.212,400 146.796,12.209,400 146.788,12.205,400</coordinates>
+        </LineString>
+        {% endif %}
+    </Placemark>
+    {% comment %}
+    <NetworkLink>
+        <name>Random Placemark</name>
+        <visibility>0</visibility>
+        <open>0</open>
+        <description>A simple server-side script that generates a new random placemark on each call</description>
+        <refreshVisibility>0</refreshVisibility>
+        <flyToView>0</flyToView>
+        <Link>
+            <href>http://yourserver.com/cgi-bin/randomPlacemark.py</href>
+        </Link>
+    </NetworkLink>
+    {% endcomment %}
+</kml>

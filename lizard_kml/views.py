@@ -14,7 +14,7 @@ from lizard_ui.views import ViewContextMixin
 
 from lizard_kml.models import KmlType, Area
 
-from lizard_kml.kml import build_test_kml
+from lizard_kml.kml import build_kml, build_test_kml
 
 gzip_middleware = GZipMiddleware()
 
@@ -27,7 +27,8 @@ class KmlView(View):
         # generate KML XML tree into a string buffer
         # TODO: should stream this directly to the client, instead allocating
         # a big memory buffer
-        kml_str = build_test_kml()
+        #kml_str = build_test_kml()
+        kml_str = build_kml("example", area_id)
 
         # return gzipped response
         response = HttpResponse(kml_str, mimetype='application/vnd.google-earth.kmz')
