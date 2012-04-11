@@ -1,0 +1,61 @@
+{% extends "lizard_ui/lizardbase.html" %}
+
+{% block subtitle %}Pilot 3D kustdata voor Deltares{% endblock %}
+
+{% block map-javascript %}
+<script src="https://www.google.com/jsapi?key=YOURAPIKEY"></script>
+<script src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
+{% endblock map-javascript %}
+
+{% block sidebar %}
+<div class="sidebarbox sidebarbox-stretched"
+     id="accordion">
+  <h2>
+  KML type{% if view.kml_type %} ({{ view.kml_type }}){% endif %}
+  </h2>
+  <ul id="type-pane"
+      class="automatic-tree filetree pane accordion-load-next"
+      data-next-pane-id="#area-pane"
+      data-title-id="#type-pane-title">
+    {% if view.types_tree %}
+      {% with "lizard_ui/tree_snippet.html" as tree_template %}
+        {% with view.types_tree as tree_items %}
+          {% include tree_template %}
+        {% endwith %}
+      {% endwith %}
+    {% else %}
+      <li>Geen KML types beschikbaar.</li>
+    {% endif %}
+  </ul>
+  <h2>
+  Gebied
+  </h2>
+  <ul id="area-pane"
+      class="automatic-tree filetree pane">
+    {% if view.areas_tree %}
+      {% with "lizard_kml/tree_snippet.html" as tree_template %}
+        {% with view.areas_tree as tree_items %}
+          {% include tree_template %}
+        {% endwith %}
+      {% endwith %}
+    {% else %}
+      {% if view.kml_type %}
+        <li>Geen gebieden beschikbaar voor "{{ view.kml_type }}".</li>
+      {% else %}
+        <li>Kies KML type.</li>
+      {% endif %}
+    {% endif %}
+  </ul>
+</div>
+
+{% endblock %}
+
+{% block above-content %}
+{% endblock %}
+
+{% block content %}
+<div id="map3d" style="width:100%; height:100%;"></div>
+<script>
+kmlViewerInit();
+</script>
+{% endblock %}
