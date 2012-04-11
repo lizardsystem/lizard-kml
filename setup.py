@@ -15,6 +15,7 @@ install_requires = [
     'django-nose',
     'lizard-ui >= 3.0',
     'pkginfo',
+    'netCDF4',
     ],
 
 tests_require = [

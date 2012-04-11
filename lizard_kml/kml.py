@@ -1,4 +1,6 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
+import os
+
 from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
@@ -6,17 +8,22 @@ from pykml.factory import KML_ElementMaker as KML
 from pykml.factory import GX_ElementMaker as GX
 from lxml import etree
 
-#import netCDF
+from netCDF4 import Dataset
 
 import random; random.seed()
+
+NC_RESOURCE = '/root/transect.nc'
 
 #@cached(expiry=60) # TODO
 def build_kml(template_name, area_id):
     '''builds a dynamic KML file'''
 
     # query the db
-    # foo = netCDF.load("jarkusdata.bin")
-    # matrix = foo.query(a=3)
+    nc_resource = NC_RESOURCE
+    if os.path.isfile(nc_resource):
+        with Dataset(nc_resource, 'r') as ds:
+            print ds.file_format
+            # matrix = ds.query(a=3)
 
     # 'calculate' range based on input
     if area_id == 3 or random.choice([True, False]):
