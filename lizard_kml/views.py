@@ -6,16 +6,16 @@ from django.template.loader import render_to_string
 from django.utils import simplejson as json
 from django.views.generic import TemplateView, View
 from django.middleware.gzip import GZipMiddleware
-
+from django.contrib.gis.shortcuts import render_to_kmz
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 
 from lizard_ui.views import ViewContextMixin
 
-from lizard_kml.models import KmlType, Area
+from lizard_kml.models import makejarkustransect, makejarkusoverview
 
-from lizard_kml.kml import build_kml, build_test_kml
-
+from lizard_kml.kml import build_kml
+import lizard_kml.helpers as h
 gzip_middleware = GZipMiddleware()
 
 class KmlView(View):
@@ -23,16 +23,29 @@ class KmlView(View):
     Renders a dynamic KML file.
     """
 
-    def get(self, request, area_id=None):
-        # generate KML XML tree into a string buffer
+    def get(self, request, **kwargs):
+        """generate KML XML tree into a zipfile response"""
         # TODO: should stream this directly to the client, instead allocating
+        # If the result needs to be streamed it can't be a kmz
+        # because kmz is a zipfile that contains a file doc.kml
         # a big memory buffer
-        #kml_str = build_test_kml()
-        kml_str = build_kml("example", area_id)
+        # The least memory consumption would probably be something like:
+        # zf.writestr("doc.kml", stringio.getvalue())
+        # you have to replace the render_to_kmz as that only supports strings.
+        template_name = 'transect'
+        if template_name == 'transect':
+            # assume transectid as extra argument
+            transect = makejarkustransect(id=int(kwargs['id']))
+        elif template_name == 'overview':
+            # assume transectid as extra argument
+            overview = makejarkusoverview()
+        
+        response = render_to_kmz(
+            "kml/{}.kml".format(template_name),
+            locals()
+            )
+        return response
 
-        # return gzipped response
-        response = HttpResponse(kml_str, mimetype='application/vnd.google-earth.kmz')
-        return gzip_middleware.process_response(request, response)
 
 class ViewerView(ViewContextMixin, TemplateView):
     """
