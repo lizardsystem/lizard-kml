@@ -1,4 +1,5 @@
 {% extends "lizard_ui/lizardbase.html" %}
+{% load tools %}
 
 {% block subtitle %}Pilot 3D kustdata voor Deltares{% endblock %}
 
@@ -59,7 +60,7 @@
       class="automatic-tree filetree pane">
     <li>
       <div class="workspace-acceptable">
-        <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{{ view.default_kml_url }}')">Default</a>
+        <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='overview' %}')">Default</a>
       </div>
     </li>
   </ul>

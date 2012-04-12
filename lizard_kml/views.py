@@ -49,9 +49,6 @@ class ViewerView(ViewContextMixin, TemplateView):
 
         return super(ViewerView, self).get(self, request)
 
-    def default_kml_url(self):
-        return self.request.build_absolute_uri(reverse('lizard-kml-kml', kwargs={'kml_type': 'overview'}))
-
     @property
     def kml_type(self):
         return self._kml_type

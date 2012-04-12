@@ -10,9 +10,9 @@ from nc_models import makejarkustransect, makejarkusoverview
 # creates a dict of factory functions that correspond to views
 factories = {
     # assume transectid as extra argument
-    'transect': ('example', makejarkustransect),
+    'transect': ('transect', makejarkustransect),
     # assume transectid as extra argument
-    'overview': ('example', makejarkusoverview),
+    'overview': ('overview', makejarkusoverview),
 }
 
 def build_kml(kml_type, kml_args_dict):
