@@ -12,7 +12,7 @@ from django.http import HttpResponse
 
 from lizard_ui.views import ViewContextMixin
 
-from lizard_kml.models import makejarkustransect, makejarkusoverview
+from lizard_kml.models import makejarkustransect, makejarkusoverview,  KmlType
 
 from lizard_kml.kml import build_kml
 import lizard_kml.helpers as h
@@ -84,7 +84,7 @@ class ViewerView(ViewContextMixin, TemplateView):
             return [
                 {
                     'name': area.name,
-                    'kml_url': self.request.build_absolute_uri(reverse('lizard-kml-kml', kwargs={'area_id': area.id})),
+                    'kml_url': self.request.build_absolute_uri(reverse('lizard-kml-kml', kwargs={'id': area.id})),
                     #'kml_url': area.url,
                     'description': area.description,
                 }
