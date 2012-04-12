@@ -32,7 +32,8 @@ class KmlView(View):
         # The least memory consumption would probably be something like:
         # zf.writestr("doc.kml", stringio.getvalue())
         # you have to replace the render_to_kmz as that only supports strings.
-        template_name = 'transect'
+        template_name = kwargs.get('view')
+        print template_name
         if template_name == 'transect':
             # assume transectid as extra argument
             transect = makejarkustransect(id=int(kwargs['id']))

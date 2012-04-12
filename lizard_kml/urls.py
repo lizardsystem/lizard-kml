@@ -14,7 +14,9 @@ urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^kml/viewer/(?P<kml_type_id>.*)$', ViewerView.as_view(), name='lizard-kml-viewer'),
-    url(r'^kml/kml/(?P<id>.*)/$', KmlView.as_view(), name='lizard-kml-kml'),
+    # long urls before short ones.
+    url(r'^kml/kml/(?P<view>.*?)/(?P<id>\d+)[/]?$', KmlView.as_view(), name='lizard-kml-view-id'),
+    url(r'^kml/kml/(?P<view>.*?)[/]?$', KmlView.as_view(), name='lizard-kml-view'),
     # url(r'^something/',
     #     direct.import.views.some_method,
     #     name="name_it"),
