@@ -14,7 +14,8 @@ urlpatterns = patterns(
     '',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^kml/viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
-    url(r'^kml/kml/(?P<kml_type>.*?)/$', KmlView.as_view(), name='lizard-kml-kml'),
+    # final backslash optional
+    url(r'^kml/kml/(?P<kml_type>.*?)/?$', KmlView.as_view(), name='lizard-kml-kml'),
     # url(r'^something/',
     #     direct.import.views.some_method,
     #     name="name_it"),

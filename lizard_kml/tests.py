@@ -2,7 +2,7 @@
 from django.test.client import Client
 import nose.tools as nt
 from django.test import TestCase
-from lizard_kml.models import Transect
+from lizard_kml.nc_models import Transect
 import numpy as np
 
 # inherit from testcase, so we can use assert equal and get expected and observed...
@@ -32,6 +32,6 @@ class TestView(TestCase):
         self.assertEqual(200, resp.status_code)
         
     def test_transect(self):
-        resp = self.client.get('/kml/kml/transect/7003800')
+        resp = self.client.get('/kml/kml/transect/?id=7003800')
         self.assertEqual(200, resp.status_code)
 

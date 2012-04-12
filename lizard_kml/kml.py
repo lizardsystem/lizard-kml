@@ -7,22 +7,27 @@ from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 from nc_models import makejarkustransect, makejarkusoverview
 
 
-# creates a dict of factory functions that correspond to views
+# creates a dict of factory functions
 factories = {
     # assume transectid as extra argument
-    'transect': ('transect', makejarkustransect),
+    'transect': makejarkustransect,
     # assume transectid as extra argument
-    'overview': ('overview', makejarkusoverview),
+    'overview': makejarkusoverview,
+    # Just a dict with the extra options.
+    'lod': dict
 }
 
 def build_kml(kml_type, kml_args_dict):
     '''builds a dynamic KML file'''
-
-    template_name, factory_meth = factories[kml_type]
+    factory_meth = factories[kml_type]
     # n.b.: kml_args_dict containts direct USER input
-    template_context = factory_meth(kml_args_dict)
-
-    return render_to_kmz("kml/{}.kml".format(template_name), template_context)
+    # This means that we should process input as unsafe in the factory methods...
+    # Do that here (only get the id, convert it to int)
+    if 'id' in kml_args_dict:
+        template_context = factory_meth(id=int(kml_args_dict['id']))
+    else:
+        template_context = factory_meth()
+    return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
 
 def build_test_kml():
     '''build a simple KML file with a simple LineString, for testing purposes'''

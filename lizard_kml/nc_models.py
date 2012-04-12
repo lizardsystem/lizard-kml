@@ -56,9 +56,9 @@ class PointCollection(object):
 
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
 # @cache.beaker_cache('id', expire=60)
-def makejarkustransect(kml_args_dict):
+def makejarkustransect(id,**args):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
-    id = kml_args_dict['id']
+    id = int(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
     dataset = netCDF4.Dataset(settings.NC_RESOURCE)
     tr = Transect(id)
@@ -99,7 +99,7 @@ def makejarkustransect(kml_args_dict):
 
 
 #TODO: @cache.beaker_cache(None, expire=600)
-def makejarkusoverview(kml_args_dict):
+def makejarkusoverview():
     dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
     points = PointCollection()
     id = dataset.variables['id'][:] # ? why
