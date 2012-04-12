@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
 <Document>
-	<name>${transect.id}</name>
+	<name>{{ transect.id }}</name>
 
 	<!-- this the style for the upper line -->
 	<Style id="transect">
@@ -14,9 +14,9 @@
 			<outline>0</outline>
 		</PolyStyle>
 	</Style>
-	% for i, year in enumerate(transect.t):
+	{% for year, val in years.items %}
 	<Placemark>
-		<name>${year}</name>
+		<name>{{ year }}</name>
 		<styleUrl>#transect</styleUrl>
 		## first one without extrude
 		<LineString>
@@ -25,14 +25,14 @@
 			<altitudeMode>relativeToGround</altitudeMode>
 			<gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
 			<coordinates>
-			  ${h.textcoordinates(transect.lon, transect.lat, transect.z[i,:] * 4 + 40)}
+			  {{ val.coordinates }}
 			</coordinates>
 		</LineString>
 		<TimeSpan id="ID">
-		  <begin>${h.kmldate(transect.begindates()[i])}</begin>     <!-- kml:dateTime -->
-		  <end>${h.kmldate(transect.enddates()[i])}</end>         <!-- kml:dateTime -->
+		  <begin>{{ val.begindate }}</begin>     <!-- kml:dateTime -->
+		  <end>{{ val.enddate }}</end>         <!-- kml:dateTime -->
 		</TimeSpan>
 	</Placemark>
-	% endfor
+	{% endfor %}
 </Document>
 </kml>

@@ -95,7 +95,8 @@ def makejarkustransect(id,**args):
     tr.mlw = mlw.squeeze()
 
     dataset.close()
-    return tr
+    # return dict to conform to the "rendering context"
+    return {'transect' : tr}
 
 
 #TODO: @cache.beaker_cache(None, expire=600)
@@ -110,4 +111,5 @@ def makejarkusoverview():
     points.lon = lon
     points.lat = lat
     dataset.close()
-    return points
+    # return dict to conform to the "rendering context"
+    return {'points': points}

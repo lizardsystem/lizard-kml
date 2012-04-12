@@ -1,11 +1,12 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
 import os
+import collections
 
 from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
 from nc_models import makejarkustransect, makejarkusoverview
-
+from lizard_kml import helpers 
 
 # creates a dict of factory functions
 factories = {
@@ -27,6 +28,30 @@ def build_kml(kml_type, kml_args_dict):
         template_context = factory_meth(id=int(kml_args_dict['id']))
     else:
         template_context = factory_meth()
+    template_context['h'] = helpers
+
+    # Where to do this....
+    # I can't put any code in django templates so where to put formatting logic and stuff.....
+    if 'transect' in template_context:
+        # update with kml formatting....
+        transect = template_context['transect']
+        years = collections.OrderedDict()
+        exaggeration = float(kml_args_dict.get('exaggeration', 4))
+        lift = float(kml_args_dict.get('lift', 40))
+        for i, year in enumerate(transect.t):
+            coords = helpers.textcoordinates(
+                transect.lon,
+                transect.lat,
+                transect.z[i,:] * exaggeration + lift
+                )
+            years[year] = {
+                'coordinates': coords,
+                'begindate': helpers.kmldate(transect.begindates()[i]),
+                'enddate': helpers.kmldate(transect.enddates()[i])
+                }
+        template_context['years'] = years
+            
+    
     return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
 
 def build_test_kml():
