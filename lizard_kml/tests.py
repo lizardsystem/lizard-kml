@@ -3,7 +3,7 @@ from django.test.client import Client
 import nose.tools as nt
 
 def test():
-    assert True
+    1/0
 
 class TestView(object):
     def setup(self):
@@ -14,18 +14,18 @@ class TestView(object):
         resp = self.client.get('/kml/viewer/')
         assert resp.status_code == 200
 
-    def test_kml1(self):
+    def test_kml(self):
         resp = self.client.get('/kml/kml/')
         assert resp.status_code == 200
         
-    def test_kml2(self):
+    def test_lod(self):
         resp = self.client.get('/kml/kml/lod/')
         assert resp.status_code == 200
         
-    def test_kml3(self):
+    def test_overview(self):
         resp = self.client.get('/kml/kml/overview/')
         assert resp.status_code == 200
         
-    def test_kml4(self):
+    def test_transect(self):
         resp = self.client.get('/kml/kml/transect/7003800/')
         assert resp.status_code == 200
