@@ -8,6 +8,8 @@
 {% endblock map-javascript %}
 
 {% block sidebar %}
+{# disabled: don't support zooming to specific areas yet #}
+{% comment %}
 <div class="sidebarbox sidebarbox-stretched"
      id="accordion">
   <h2>
@@ -45,6 +47,21 @@
         <li>Kies KML type.</li>
       {% endif %}
     {% endif %}
+  </ul>
+</div>
+{% endcomment %}
+<div class="sidebarbox sidebarbox-stretched"
+     id="accordion">
+  <h2>
+  Categorie
+  </h2>
+  <ul id="type-pane"
+      class="automatic-tree filetree pane">
+    <li>
+      <div class="workspace-acceptable">
+        <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{{ view.default_kml_url }}')">Default</a>
+      </div>
+    </li>
   </ul>
 </div>
 {% endblock %}

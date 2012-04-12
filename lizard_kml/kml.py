@@ -4,29 +4,57 @@ import os
 from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
+from nc_models import makejarkustransect, makejarkusoverview
 
-from netCDF4 import Dataset
-
-import random; random.seed()
-
-NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
-# optional, download local: wget http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc
-
-#@cached(expiry=60) # TODO
-
-from models import makejarkustransect, makejarkusoverview
 
 # creates a dict of factory functions that correspond to views
-factories = {'transect': makejarkustransect,
-             'overview': makejarkusoverview}
-def build_kml(template_name, **kwargs):
+factories = {
+    # assume transectid as extra argument
+    'transect': ('example', makejarkustransect),
+    # assume transectid as extra argument
+    'overview': ('example', makejarkusoverview),
+}
+
+def build_kml(kml_type, kml_args_dict):
     '''builds a dynamic KML file'''
 
-    if template_name == 'transect':
-        # assume transectid as extra argument
-        transect = makejarkustransect(kwargs['transectid'])
-    elif template_name == 'overview':
-        # assume transectid as extra argument
-        overview = makejarkusoverview()
-    return render_to_kmz("kml/{}.kml".format(template_name), locals())
+    template_name, factory_meth = factories[kml_type]
+    # n.b.: kml_args_dict containts direct USER input
+    template_context = factory_meth(kml_args_dict)
 
+    return render_to_kmz("kml/{}.kml".format(template_name), template_context)
+
+def build_test_kml():
+    '''build a simple KML file with a simple LineString, for testing purposes'''
+
+    from pykml.factory import KML_ElementMaker as KML
+    from pykml.factory import GX_ElementMaker as GX
+    from lxml import etree
+    from django.http import HttpResponse
+
+    kml = KML.kml(
+        KML.Placemark(
+            KML.name("build_test_kml output"),
+            KML.LookAt(
+                KML.longitude(146.806),
+                KML.latitude(12.219),
+                KML.heading(-60),
+                KML.tilt(70),
+                KML.range(6300),
+                GX.altitudeMode("relativeToSeaFloor"),
+            ),
+            KML.LineString(
+                KML.extrude(1),
+                GX.altitudeMode("relativeToSeaFloor"),
+                KML.coordinates(
+                    "146.825,12.233,400 "
+                    "146.820,12.222,400 "
+                    "146.812,12.212,400 "
+                    "146.796,12.209,400 "
+                    "146.788,12.205,400"
+                )
+            )
+        )
+    )
+    kml_str = etree.tostring(kml)
+    return HttpResponse(kml_str, mimetype='application/vnd.google-earth.kml')

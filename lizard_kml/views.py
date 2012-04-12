@@ -5,47 +5,29 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
 from django.views.generic import TemplateView, View
-from django.middleware.gzip import GZipMiddleware
-from django.contrib.gis.shortcuts import render_to_kmz
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.conf import settings
 
 from lizard_ui.views import ViewContextMixin
+from lizard_kml.kml import build_kml, build_test_kml
 
-from lizard_kml.models import makejarkustransect, makejarkusoverview,  KmlType
-
-from lizard_kml.kml import build_kml
-import lizard_kml.helpers as h
-gzip_middleware = GZipMiddleware()
 
 class KmlView(View):
     """
     Renders a dynamic KML file.
     """
 
-    def get(self, request, **kwargs):
+    def get(self, request, kml_type):
         """generate KML XML tree into a zipfile response"""
-        # TODO: should stream this directly to the client, instead allocating
-        # If the result needs to be streamed it can't be a kmz
-        # because kmz is a zipfile that contains a file doc.kml
-        # a big memory buffer
-        # The least memory consumption would probably be something like:
-        # zf.writestr("doc.kml", stringio.getvalue())
-        # you have to replace the render_to_kmz as that only supports strings.
-        template_name = kwargs.get('view')
-        print template_name
-        if template_name == 'transect':
-            # assume transectid as extra argument
-            transect = makejarkustransect(id=int(kwargs['id']))
-        elif template_name == 'overview':
-            # assume transectid as extra argument
-            overview = makejarkusoverview()
-        
-        response = render_to_kmz(
-            "kml/{}.kml".format(template_name),
-            locals()
-            )
-        return response
+
+        try:
+            return build_kml(kml_type, request.GET)
+        except:
+            if settings.DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION:
+                return build_test_kml()
+            else:
+                raise
 
 
 class ViewerView(ViewContextMixin, TemplateView):
@@ -57,14 +39,18 @@ class ViewerView(ViewContextMixin, TemplateView):
     template_name = 'lizard_kml/viewer.html'
 
     def get(self, request, kml_type_id=None):
-        self.kml_type_id = kml_type_id
-
-        if self.kml_type_id:
-            self._kml_type = KmlType.objects.get(id=int(self.kml_type_id))
-        else:
-            self._kml_type = None
+        #disabled: don't support zooming to specific areas yet
+        #self.kml_type_id = kml_type_id
+        #
+        #if self.kml_type_id:
+        #    self._kml_type = KmlType.objects.get(id=int(self.kml_type_id))
+        #else:
+        #    self._kml_type = None
 
         return super(ViewerView, self).get(self, request)
+
+    def default_kml_url(self):
+        return self.request.build_absolute_uri(reverse('lizard-kml-kml', kwargs={'kml_type': 'overview'}))
 
     @property
     def kml_type(self):
