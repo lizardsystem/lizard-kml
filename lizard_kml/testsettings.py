@@ -68,6 +68,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     )
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = ['--with-doctest', '--verbosity=3']
+SOUTH_TESTS_MIGRATE = False # To disable migrations and use syncdb instead
+SKIP_SOUTH_TESTS = True # To disable South's own unit tests
 
 # Used for django-staticfiles (and for media files
 STATIC_URL = '/static_media/'
