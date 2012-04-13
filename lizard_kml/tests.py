@@ -1,22 +1,32 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
+from django.conf import settings
 from django.test.client import Client
 import nose.tools as nt
 from django.test import TestCase
+
 from lizard_kml.nc_models import Transect, makejarkustransect
+
 import numpy as np
 import logging
 
+
 logger = logging.getLogger(__name__)
+
+
 # inherit from testcase, so we can use assert equal and get expected and observed...
 class TestModel(TestCase):
     def test_transect(self):
         transect = Transect(7003800)
         self.assertEqual(transect.x.shape, np.array([]).shape)
+
+    def test_settings(self):
+        self.assertNotEqual(settings.NC_RESOURCE, None)
+
     def test_transect_from_opendap(self):
         # Test a transect data from opendap...
-        from django.conf import settings
         # TODO: When I run the tests this is not defined otherwise...
         settings.NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
+        # n.b.: ejnens: works for me
         transect = makejarkustransect(7003800)['transect']
         self.assertNotEqual(transect.x.shape, np.array([]).shape)
         self.assertTrue(
@@ -33,6 +43,7 @@ class TestModel(TestCase):
                     )
                 )
             )
+
 
 class TestView(TestCase):
     def setup(self):
