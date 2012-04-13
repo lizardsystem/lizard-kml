@@ -13,13 +13,26 @@ class TestModel(TestCase):
         transect = Transect(7003800)
         self.assertEqual(transect.x.shape, np.array([]).shape)
     def test_transect_from_opendap(self):
+        # Test a transect data from opendap...
         from django.conf import settings
+        # TODO: When I run the tests this is not defined otherwise...
         settings.NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
         transect = makejarkustransect(7003800)['transect']
         self.assertNotEqual(transect.x.shape, np.array([]).shape)
-        logger.debug(type(transect.z))
-        logger.debug(transect.z.min())
-        self.assertTrue(np.alltrue(np.logical_and(transect.z < 50, transect.z > -50)), np.min(transect.z.ravel()))
+        self.assertTrue(
+            np.alltrue(
+                # Everything should be nan or in expected range
+                np.logical_or(
+                    np.isnan(transect.z),
+                    # numpy arrays don't support:
+                    # -50 < x < 50
+                    np.logical_and(
+                        # bathymetry and topography should be within this range....
+                        transect.z < 50,
+                        transect.z > -50)
+                    )
+                )
+            )
 
 class TestView(TestCase):
     def setup(self):
