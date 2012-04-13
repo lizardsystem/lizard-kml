@@ -25,6 +25,11 @@ def textcoordinates(x,y,z=None):
     1.0,-20000000000.0,0.0
     1.0,3.0000001,0.0
     <BLANKLINE>
+    >>> x = np.array([1])
+    >>> y = np.array([1])
+    >>> z = np.array([np.nan])
+    >>> print(textcoordinates(x, y, z))
+    <BLANKLINE>
 
     """
     if z is None:

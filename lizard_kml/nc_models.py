@@ -3,7 +3,8 @@ import netCDF4
 import datetime
 
 # Copied from openearthtools/kmldap
-from numpy import any, all, ma, apply_along_axis, nonzero, array, isnan
+from numpy import any, all, ma, apply_along_axis, nonzero, array, isnan, logical_or, nan
+from numpy.ma import filled
 from scipy.interpolate import interp1d
 from functools import partial
 
@@ -56,7 +57,7 @@ class PointCollection(object):
 
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
 # @cache.beaker_cache('id', expire=60)
-def makejarkustransect(id,**args):
+def makejarkustransect(id, **args):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
     id = int(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
@@ -74,14 +75,24 @@ def makejarkustransect(id,**args):
     lat = dataset.variables['lat'][alongshoreindex,:] 
     #filter out the missing to make it a bit smaller
     z = dataset.variables['altitude'][:,alongshoreindex,:]
-    filter = z == dataset.variables['altitude']._FillValue # why are missings not taken into account?
-    z[filter] = None
+    # why are missings not taken into account?, just in case also filter out fill value.
+    filter = logical_or(
+        isnan(z),
+        z == dataset.variables['altitude']._FillValue
+        )
+    # Convert from masked to regular array
+    z = filled(z, nan)
+    # Make sure we set all missings and nans to nan 
+    z[filter] = nan
     # convert to datetime objects. (netcdf only stores numbers, we use years here (ignoring the measurement date))
     t = array([datetime.datetime.fromtimestamp(days*3600*24) for days in years])
     cross_shore = dataset.variables['cross_shore'][:]
     # leave out empty crossections and empty dates
     tr.lon = lon[(~filter).any(0)]
     tr.lat = lat[(~filter).any(0)]
+    # use lat, lon as x here...
+    tr.x = tr.lon
+    tr.y = tr.lat
     # keep what is not filtered in 2 steps 
     #         [over x            ][over t            ]
     tr.z = z[:,(~filter).any(0)][(~filter).any(1),:] 
