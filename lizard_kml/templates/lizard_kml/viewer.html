@@ -72,6 +72,6 @@
 {% block content %}
 <div id="map3d" style="width:100%; height:100%;"></div>
 <script>
-kmlViewerInit();
+kmlViewerInit('{% absurl lizard-kml-kml kml_type='overview' %}');
 </script>
 {% endblock %}

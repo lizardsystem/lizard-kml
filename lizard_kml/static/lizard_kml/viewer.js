@@ -1,7 +1,9 @@
 google.load('earth', '1');
 var ge = null;
+var initialKmlUrl = null;
 
-function kmlViewerInit() {
+function kmlViewerInit(argInitialKmlUrl) {
+    initialKmlUrl = argInitialKmlUrl;
     google.earth.createInstance('map3d', initCallback, failureCallback);
 }
 
@@ -20,6 +22,8 @@ function kmlViewerLoadKml(kmlUrl) {
 function initCallback(pluginInstance) {
     ge = pluginInstance;
     ge.getWindow().setVisibility(true);
+
+    kmlViewerLoadKml(initialKmlUrl);
 }
 
 function failureCallback() {
