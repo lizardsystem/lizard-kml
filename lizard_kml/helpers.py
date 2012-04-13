@@ -3,7 +3,14 @@ import cStringIO
 import numpy as np
 # copied from openearthtools/kmldap
 def compress_kml(kml):
-    "Returns compressed KMZ from the given KML string."
+    """
+    Returns compressed KMZ from the given KML string.
+
+    >>> kml = "<kml>"
+    >>> # returns a zip file containing a doc.xml
+    >>> compress_kml(kml)[:2]
+    'PK'
+    """
     import cStringIO, zipfile
     kmz = cStringIO.StringIO()
     zf = zipfile.ZipFile(kmz, 'a', zipfile.ZIP_DEFLATED)
