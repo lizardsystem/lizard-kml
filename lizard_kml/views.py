@@ -12,6 +12,11 @@ from django.conf import settings
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.kml import build_kml, build_test_kml
 
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 
 class KmlView(View):
     """
@@ -25,6 +30,7 @@ class KmlView(View):
             return build_kml(kml_type, request.GET)
         except:
             if settings.DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION:
+                logger.exception('error building kml')
                 return build_test_kml()
             else:
                 raise
