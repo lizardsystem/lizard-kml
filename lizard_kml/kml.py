@@ -7,52 +7,90 @@ from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
 from nc_models import makejarkustransect, makejarkusoverview
 from lizard_kml import helpers 
-
-# creates a dict of factory functions
-factories = {
-    # assume transectid as extra argument
-    'transect': makejarkustransect,
-    # assume transectid as extra argument
-    'overview': makejarkusoverview,
-    # Just a dict with the extra options.
-    'lod': dict
-}
+import numpy as np
 
 def build_kml(kml_type, kml_args_dict):
     '''builds a dynamic KML file'''
-    factory_meth = factories[kml_type]
     # n.b.: kml_args_dict containts direct USER input
     # This means that we should process input as unsafe in the factory methods...
-    # Do that here (only get the id, convert it to int)
-    if 'id' in kml_args_dict:
-        template_context = factory_meth(id=int(kml_args_dict['id']))
-    else:
-        template_context = factory_meth()
-    template_context['h'] = helpers
+    template_context = {}
+    if kml_type == 'transect':
+        id = int(kml_args_dict['id'])
+        transect = makejarkustransect(id)
+        extra_context = build_transect_context(transect, kml_args_dict)
+        template_context.update(extra_context)
+    if kml_type == 'lod':
+        overview = makejarkusoverview()
+        extra_context = build_overview_context(overview, kml_args_dict)
+    return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
 
-    # Where to do this....
-    # I can't put any code in django templates so where to put formatting logic and stuff.....
-    if 'transect' in template_context:
-        # update with kml formatting....
-        transect = template_context['transect']
-        years = collections.OrderedDict()
-        exaggeration = float(kml_args_dict.get('exaggeration', 4))
-        lift = float(kml_args_dict.get('lift', 40))
-        for i, year in enumerate(transect.t):
-            coords = helpers.textcoordinates(
-                transect.lon,
-                transect.lat,
-                transect.z[i,:] * exaggeration + lift
-                )
-            years[year] = {
-                'coordinates': coords,
-                'begindate': helpers.kmldate(transect.begindates()[i]),
-                'enddate': helpers.kmldate(transect.enddates()[i])
-                }
-        template_context['years'] = years
+def build_overview_context(overview, kml_args_dict):
+    """
+    Return the formatted overview as input for the kml
+    >>> overview = makejarkusoverview()
+    >>> build_overview_context(overview, {}) # doctest:+ELLIPSIS
+    {'overview': <lizard...>, 'lines': [{'bbox': {'west': ...}, 'coordinates':...
+    """
+    result = {}
+    result['overview'] = overview
+    lines = []
+    for (north,
+         south,
+         east,
+         west,
+         lat0,
+         lat1,
+         lon0,
+         lon1) in zip(overview.north,
+                      overview.south,
+                      overview.east,
+                      overview.west,
+                      overview.lat0,
+                      overview.lat1,
+                      overview.lon0,
+                      overview.lon1):
+        line = {}
+        bbox = {
+            'north': north,
+            'south': south,
+            'east': east,
+            'west': west
+            }
+        coordinates = helpers.textcoordinates(x0=lon0, y0=lat0, x1=lon1, y1=lat1)
+        line['coordinates'] = coordinates
+        line['bbox'] = bbox
+        lines.append(line)
+    result['lines'] = lines
+    return result
+        
+
+def build_transect_context(transect, kml_args_dict):
+    """
+    Return a formatted transect object as input for the kml
+    >>> transect = makejarkustransect(7003800)
+    >>> build_transect_context(transect, {}) # doctest:+ELLIPSIS
+    {'transect': <lizard_kml...>, 'years': OrderedDict([(datetime..., {'begindate': '19...Z', 'enddate': '19...Z', 'coordinates': '...}
+    """
+    result = {}
+    result['transect'] = transect
+    years = collections.OrderedDict()
+    exaggeration = float(kml_args_dict.get('exaggeration', 4))
+    lift = float(kml_args_dict.get('lift', 40))
+    for i, year in enumerate(transect.t):
+        coords = helpers.textcoordinates(
+            transect.lon,
+            transect.lat,
+            transect.z[i,:] * exaggeration + lift
+            )
+        years[year] = {
+            'coordinates': coords,
+            'begindate': helpers.kmldate(transect.begindates()[i]),
+            'enddate': helpers.kmldate(transect.enddates()[i])
+            }
+    result['years'] = years
+    return result
             
     
-    return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
 
 def build_test_kml():
     '''build a simple KML file with a simple LineString, for testing purposes'''

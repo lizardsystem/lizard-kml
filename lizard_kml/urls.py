@@ -12,7 +12,7 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/?', include(admin.site.urls)),
     url(r'^kml/viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
     # final backslash optional
     url(r'^kml/kml/(?P<kml_type>.*?)/?$', KmlView.as_view(), name='lizard-kml-kml'),

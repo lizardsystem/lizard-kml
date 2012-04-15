@@ -1,28 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
-<Document>
-	<name>lod.kml</name>
-	<open>1</open>
-	<NetworkLink>
-		<name>Ameland</name>
-		<Region>
-			<LatLonAltBox>
-				<north>53.5</north>
-				<south>53.4</south>
-				<east>x6</east>
-				<west>5.6</west>
-				<minAltitude>0</minAltitude>
-				<maxAltitude>0</maxAltitude>
-			</LatLonAltBox>
-			<Lod>
-				<minLodPixels>128</minLodPixels>
-				<maxLodPixels>1024</maxLodPixels>
-			</Lod>
-		</Region>
-		<Link>
-			<href>http://kml.deltares.nl/kml/rijkswaterstaat/jarkus/jarkus_info/Ameland.kml</href>
-      <viewRefreshMode>onRegion</viewRefreshMode>
-		</Link>
-	</NetworkLink>
-</Document>
+  <Document>
+    <name>lod.kml</name>
+    <open>1</open>
+    <NetworkLink>
+      <name>Nederland</name>
+      <Region>
+	<LatLonAltBox>
+	  <north>55</north>
+	  <south>51</south>
+	  <east>1</east>
+	  <west>6</west>
+	  <minAltitude>-50</minAltitude>
+	  <maxAltitude>50</maxAltitude>
+	  <altitudeMode>absolute</altitudeMode>
+	</LatLonAltBox>
+	<Lod>
+	  <minLodPixels>128</minLodPixels>
+	  <maxLodPixels>1024</maxLodPixels>
+	</Lod>
+      </Region>
+      <Link>
+	<href>//kml/kml/overview</href>
+	<viewRefreshMode>onRegion</viewRefreshMode>
+      </Link>
+    </NetworkLink>
+    <Folder>
+      {% for transect in transects %}
+      <NetworkLink>
+	<name>Transect {{ transect.id }} </name>
+	<Region>
+	  <LatLonAltBox>
+	    <north>{{ transect.north }} </north>
+	    <south>{{ transect.south }} </south>
+	    <east>{{ transect.east }}</east>
+	    <west>{{ transect.west }}</west>
+	    <minAltitude>-50</minAltitude>
+	    <maxAltitude>50</maxAltitude>
+	    <altitudeMode>absolute</altitudeMode>
+	  </LatLonAltBox>
+	  <Lod>
+	    <minLodPixels>128</minLodPixels>
+	    <maxLodPixels>1024</maxLodPixels>
+	  </Lod>
+	</Region>
+	<Link>
+	  <href>//kml/kml/transect/{{ transect.id }}</href>
+	  <viewRefreshMode>onRegion</viewRefreshMode>
+	</Link>
+      </NetworkLink>
+      {% endfor %}
+    </Folder>
+
+  </Document>
 </kml>

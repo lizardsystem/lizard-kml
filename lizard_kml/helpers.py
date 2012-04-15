@@ -1,6 +1,7 @@
 # by convention.
 import cStringIO
 import numpy as np
+import re
 # copied from openearthtools/kmldap
 def compress_kml(kml):
     """
@@ -20,7 +21,7 @@ def compress_kml(kml):
     kmz.seek(0)
     return kmz.read()
 
-def textcoordinates(x,y,z=None):
+def textcoordinates(x0, y0, z0=None, x1=None, y1=None, z1=None):
     """
     convert the coordinates to a string so they can be used by kml
 
@@ -32,6 +33,16 @@ def textcoordinates(x,y,z=None):
     1.0,-20000000000.0,0.0
     1.0,3.0000001,0.0
     <BLANKLINE>
+    >>> # Allow for coordinate pairs
+    >>> x0 = x
+    >>> y0 = y
+    >>> x1 = x
+    >>> y1 = y
+    >>> print(textcoordinates(x0=x0, y0=y0, x1=x1, y1=y1))
+    1.0,1.0,0.0 1.0,1.0,0.0
+    1.0,-20000000000.0,0.0 1.0,-20000000000.0,0.0
+    1.0,3.0000001,0.0 1.0,3.0000001,0.0
+    <BLANKLINE>
     >>> x = np.array([1])
     >>> y = np.array([1])
     >>> z = np.array([np.nan])
@@ -39,9 +50,14 @@ def textcoordinates(x,y,z=None):
     <BLANKLINE>
 
     """
-    if z is None:
-        z = np.zeros(x.shape)
-    coordinates = np.vstack([x, y, z]).T
+    if z0 is None:
+        z0 = np.zeros(x0.shape)
+    if x1 is None:
+        coordinates = np.vstack([x0, y0, z0]).T
+    else:
+        if z1 is None:
+            z1 = np.zeros(x1.shape)
+        coordinates = np.vstack([x0, y0, z0, x1, y1, z1]).T
     # only write coordinates where none is nan
     filter = np.isnan(coordinates).any(1)
     # use cStringIO for performance
@@ -50,7 +66,14 @@ def textcoordinates(x,y,z=None):
     # I think this is faster than other methods
     # Use %s to get reduced string output
     np.savetxt(output, coordinates[~filter],delimiter=',',fmt='%s' )
-    return output.getvalue()
+    coordstr = output.getvalue()
+    if x1 is not None:
+        # replace all the 3rd , by a space...
+        #re.sub(r'(.*?,.*?,.*?),(.*)',  r'\1 \2', '1,1,2,4,5,6',)
+        #'1,1,2 4,5,6'
+        # TODO double check this regex
+        coordstr = re.sub(r'(.*?,.*?,.*?),(.*)',  r'\1 \2', coordstr)
+    return coordstr
 
 def kmldate(date):
     """

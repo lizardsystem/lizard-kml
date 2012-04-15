@@ -27,7 +27,7 @@ class TestModel(TestCase):
         # TODO: When I run the tests this is not defined otherwise...
         settings.NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
         # n.b.: ejnens: works for me
-        transect = makejarkustransect(7003800)['transect']
+        transect = makejarkustransect(7003800)
         self.assertNotEqual(transect.x.shape, np.array([]).shape)
         self.assertTrue(
             np.alltrue(
