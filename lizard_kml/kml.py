@@ -9,6 +9,10 @@ from nc_models import makejarkustransect, makejarkusoverview
 from lizard_kml import helpers 
 import numpy as np
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 def build_kml(kml_type, kml_args_dict):
     '''builds a dynamic KML file'''
     # n.b.: kml_args_dict containts direct USER input
@@ -22,6 +26,7 @@ def build_kml(kml_type, kml_args_dict):
     if kml_type == 'lod':
         overview = makejarkusoverview()
         extra_context = build_overview_context(overview, kml_args_dict)
+        template_context.update(extra_context)
     return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
 
 def build_overview_context(overview, kml_args_dict):
@@ -31,24 +36,27 @@ def build_overview_context(overview, kml_args_dict):
     >>> build_overview_context(overview, {}) # doctest:+ELLIPSIS
     {'overview': <lizard...>, 'lines': [{'bbox': {'west': ...}, 'coordinates':...
     """
+    logger.info('Building overview context')
     result = {}
     result['overview'] = overview
     lines = []
-    for (north,
+    for (id,
+         north,
          south,
          east,
          west,
          lat0,
          lat1,
          lon0,
-         lon1) in zip(overview.north,
-                      overview.south,
-                      overview.east,
-                      overview.west,
-                      overview.lat0,
-                      overview.lat1,
-                      overview.lon0,
-                      overview.lon1):
+         lon1) in zip(overview['id'],
+                      overview['north'],
+                      overview['south'],
+                      overview['east'],
+                      overview['west'],
+                      overview['lat0'],
+                      overview['lat1'],
+                      overview['lon0'],
+                      overview['lon1'])[1:]:
         line = {}
         bbox = {
             'north': north,
@@ -59,6 +67,7 @@ def build_overview_context(overview, kml_args_dict):
         coordinates = helpers.textcoordinates(x0=lon0, y0=lat0, x1=lon1, y1=lat1)
         line['coordinates'] = coordinates
         line['bbox'] = bbox
+        line['id'] = id
         lines.append(line)
     result['lines'] = lines
     return result

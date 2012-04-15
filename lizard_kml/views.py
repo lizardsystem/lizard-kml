@@ -23,11 +23,15 @@ class KmlView(View):
     Renders a dynamic KML file.
     """
 
-    def get(self, request, kml_type):
+    def get(self, request, kml_type, id=None):
         """generate KML XML tree into a zipfile response"""
 
         try:
-            return build_kml(kml_type, request.GET)
+            args = {}
+            args.update(request.GET)
+            if id is not None:
+                args['id'] = int(id)
+            return build_kml(kml_type, args)
         except:
             if settings.DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION:
                 logger.exception('error building kml')

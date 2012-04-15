@@ -83,6 +83,7 @@ STATICFILES_FINDERS = STATICFILES_FINDERS
 # optional, download local: wget http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc
 # and override in local_testsettings.py if necessary
 NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
+NC_RESOURCE = 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc'
 DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION = False
 
 try:

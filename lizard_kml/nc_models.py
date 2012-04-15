@@ -48,17 +48,6 @@ class Transect(object):
         return z
 
 
-class TransectCollection(object):
-    def __init__(self):
-        self.id = array([])
-        self.lat0 = array([])
-        self.lat1 = array([])
-        self.lon0 = array([])
-        self.lon1 = array([])
-    def getkmlcoordinates(self):
-        pass
-
-
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
 # @cache.beaker_cache('id', expire=60)
 def makejarkustransect(id, **args):
@@ -116,25 +105,25 @@ def makejarkustransect(id, **args):
 #TODO: @cache.beaker_cache(None, expire=600)
 def makejarkusoverview():
     dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
-    id = dataset.variables['id'][:] # ? why
-    transects = TransectCollection()
+    overview = {}
     # Get the locations of the beach transect lines..
     # For some reason index 0 leads to the whole variable being send over.
     # TODO: bug in netCDF4 + 4.1.3 library opendap index 0 with nc_get_vara doesn't use index....
+    id = dataset.variables['id'][:] 
     lon0 = dataset.variables['lon'][:,1] 
     lat0 = dataset.variables['lat'][:,1]
     lon1 = dataset.variables['lon'][:,-1]
     lat1 = dataset.variables['lat'][:,-1]
-    transects.lon0 = lon0
-    transects.lon1 = lon1
-    transects.lat0 = lat0
-    transects.lat1 = lat1
-    transects.north = np.maximum(lat0, lat1)
-    transects.south = np.minimum(lat0, lat1)
+    overview['lon0'] = lon0
+    overview['lon1'] = lon1
+    overview['lat0'] = lat0
+    overview['lat1'] = lat1
+    overview['north'] = np.maximum(lat0, lat1)
+    overview['south'] = np.minimum(lat0, lat1)
     # not circle safe...
-    transects.east = np.maximum(lon0, lon1)
-    transects.west = np.minimum(lon0, lon1)
-
+    overview['east'] = np.maximum(lon0, lon1)
+    overview['west'] = np.minimum(lon0, lon1)
+    overview['id'] = id
     dataset.close()
     # return dict to conform to the "rendering context"
-    return transects
+    return overview

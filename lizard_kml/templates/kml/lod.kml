@@ -26,29 +26,36 @@
       </Link>
     </NetworkLink>
     <Folder>
-      {% for transect in transects %}
+      {% for line in lines %}
       <NetworkLink>
-	<name>Transect {{ transect.id }} </name>
+	<name>Transect {{ line.id }} </name>
 	<Region>
 	  <LatLonAltBox>
-	    <north>{{ transect.north }} </north>
-	    <south>{{ transect.south }} </south>
-	    <east>{{ transect.east }}</east>
-	    <west>{{ transect.west }}</west>
-	    <minAltitude>-50</minAltitude>
+	    <north>{{ line.bbox.north }} </north>
+	    <south>{{ line.bbox.south }} </south>
+	    <east>{{ line.bbox.east }}</east>
+	    <west>{{ line.bbox.west }}</west>
+	    <minAltitude>0</minAltitude>
 	    <maxAltitude>50</maxAltitude>
 	    <altitudeMode>absolute</altitudeMode>
 	  </LatLonAltBox>
 	  <Lod>
 	    <minLodPixels>128</minLodPixels>
-	    <maxLodPixels>1024</maxLodPixels>
 	  </Lod>
 	</Region>
 	<Link>
-	  <href>//kml/kml/transect/{{ transect.id }}</href>
+	  <href>http://localhost:8000/kml/kml/transect/{{ line.id }}</href>
 	  <viewRefreshMode>onRegion</viewRefreshMode>
 	</Link>
       </NetworkLink>
+      <Placemark>
+	<name>Transect {{ line.id }} </name>
+	<LineString>
+	  <coordinates>
+	    {{ line.coordinates }}
+	  </coordinates>
+	</LineString>
+      </Placemark>
       {% endfor %}
     </Folder>
 

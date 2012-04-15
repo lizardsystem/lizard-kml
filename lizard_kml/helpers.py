@@ -73,7 +73,7 @@ def textcoordinates(x0, y0, z0=None, x1=None, y1=None, z1=None):
         #'1,1,2 4,5,6'
         # TODO double check this regex
         coordstr = re.sub(r'(.*?,.*?,.*?),(.*)',  r'\1 \2', coordstr)
-    return coordstr
+    return coordstr.strip()
 
 def kmldate(date):
     """
