@@ -25,7 +25,7 @@ class TestModel(TestCase):
     def test_transect_from_opendap(self):
         # Test a transect data from opendap...
         # TODO: When I run the tests this is not defined otherwise...
-        settings.NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
+        # settings.NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
         # n.b.: ejnens: works for me
         transect = makejarkustransect(7003800)
         self.assertNotEqual(transect.x.shape, np.array([]).shape)
@@ -67,6 +67,6 @@ class TestView(TestCase):
         self.assertEqual(200, resp.status_code)
         
     def test_transect(self):
-        resp = self.client.get('/kml/kml/transect/?id=7003800')
+        resp = self.client.get('/kml/kml/transect/7003800')
         self.assertEqual(200, resp.status_code)
 

@@ -34,9 +34,8 @@ def build_overview_context(overview, kml_args_dict):
     Return the formatted overview as input for the kml
     >>> overview = makejarkusoverview()
     >>> build_overview_context(overview, {}) # doctest:+ELLIPSIS
-    {'overview': <lizard...>, 'lines': [{'bbox': {'west': ...}, 'coordinates':...
+    {'overview':..., 'lines': [{'bbox': {'...': ...}, 'coordinates':...
     """
-    logger.info('Building overview context')
     result = {}
     result['overview'] = overview
     lines = []
