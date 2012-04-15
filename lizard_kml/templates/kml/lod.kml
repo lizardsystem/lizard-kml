@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
-    <name>lod.kml</name>
+    <name>Transect Overview</name>
     <open>1</open>
-    <NetworkLink>
-      <name>Nederland</name>
-      <Region>
-	<LatLonAltBox>
-	  <north>55</north>
-	  <south>51</south>
-	  <east>1</east>
-	  <west>6</west>
-	  <minAltitude>-50</minAltitude>
-	  <maxAltitude>50</maxAltitude>
-	  <altitudeMode>absolute</altitudeMode>
-	</LatLonAltBox>
-	<Lod>
-	  <minLodPixels>128</minLodPixels>
-	  <maxLodPixels>1024</maxLodPixels>
-	</Lod>
-      </Region>
-      <Link>
-	<href>//kml/kml/overview</href>
-	<viewRefreshMode>onRegion</viewRefreshMode>
-      </Link>
-    </NetworkLink>
+	<Style id="thin">
+		<LineStyle>
+			<color>33ffffff</color>
+		</LineStyle>
+	</Style>
+	<Style id="thick">
+		<IconStyle>
+			<scale>5</scale>
+		</IconStyle>
+		<LineStyle>
+			<color>88ffffff</color>
+		</LineStyle>
+	</Style>
+	<StyleMap id="whiteline">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#thin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#thick</styleUrl>
+		</Pair>
+	</StyleMap>
     <Folder>
       {% for line in lines %}
       <NetworkLink>
@@ -35,12 +36,15 @@
 	    <south>{{ line.bbox.south }} </south>
 	    <east>{{ line.bbox.east }}</east>
 	    <west>{{ line.bbox.west }}</west>
-	    <minAltitude>0</minAltitude>
+	    <minAltitude>-20</minAltitude>
+	    <!-- Make 50 meters high, so you get more transects if you fly over them -->
 	    <maxAltitude>50</maxAltitude>
 	    <altitudeMode>absolute</altitudeMode>
 	  </LatLonAltBox>
 	  <Lod>
-	    <minLodPixels>128</minLodPixels>
+	    <!-- Don't show too many lines -->
+	    <!-- alternate lod, so we get different transects at different levels -->
+	    <minLodPixels>{% cycle 512 256 512 128 512 256 512 64 %}</minLodPixels>
 	  </Lod>
 	</Region>
 	<Link>
@@ -50,6 +54,7 @@
       </NetworkLink>
       <Placemark>
 	<name>Transect {{ line.id }} </name>
+	<styleUrl>#whiteline</styleUrl>
 	<LineString>
 	  <coordinates>
 	    {{ line.coordinates }}
@@ -58,6 +63,5 @@
       </Placemark>
       {% endfor %}
     </Folder>
-
   </Document>
 </kml>

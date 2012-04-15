@@ -9,7 +9,12 @@ import numpy as np
 from scipy.interpolate import interp1d
 from functools import partial
 
+import logging
+logger = logging.getLogger(__name__)
 
+if '4.1' in netCDF4.getlibversion():
+    logger.warn('There is a problem with the netCDF 4.1.3 library that causes performance issues for opendap queries, you are using netcdf version {}'.format(netCDF4.getlibversion()))
+    
 class Transect(object):
     """Transect that has coordinates and time"""
     def __init__(self, id):
@@ -109,6 +114,8 @@ def makejarkusoverview():
     # Get the locations of the beach transect lines..
     # For some reason index 0 leads to the whole variable being send over.
     # TODO: bug in netCDF4 + 4.1.3 library opendap index 0 with nc_get_vara doesn't use index....
+    # Make sure you use netcdf >=4.2
+
     id = dataset.variables['id'][:] 
     lon0 = dataset.variables['lon'][:,1] 
     lat0 = dataset.variables['lat'][:,1]

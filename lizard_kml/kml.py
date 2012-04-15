@@ -8,7 +8,8 @@ from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 from nc_models import makejarkustransect, makejarkusoverview
 from lizard_kml import helpers 
 import numpy as np
-
+import matplotlib.cm
+import matplotlib.colors
 import logging
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def build_overview_context(overview, kml_args_dict):
                       overview['lat0'],
                       overview['lat1'],
                       overview['lon0'],
-                      overview['lon1'])[1:]:
+                      overview['lon1']):
         line = {}
         bbox = {
             'north': north,
@@ -77,7 +78,7 @@ def build_transect_context(transect, kml_args_dict):
     Return a formatted transect object as input for the kml
     >>> transect = makejarkustransect(7003800)
     >>> build_transect_context(transect, {}) # doctest:+ELLIPSIS
-    {'transect': <lizard_kml...>, 'years': OrderedDict([(datetime..., {'begindate': '19...Z', 'enddate': '19...Z', 'coordinates': '...}
+    {...'transect': <lizard_kml...>, 'years': OrderedDict([(datetime..., {'begindate': '19...Z', 'enddate': '19...Z', 'coordinates': '...}
     """
     result = {}
     result['transect'] = transect
@@ -96,9 +97,14 @@ def build_transect_context(transect, kml_args_dict):
             'enddate': helpers.kmldate(transect.enddates()[i])
             }
     result['years'] = years
+    colors = []
+    # not quite accurate, fix datetime problem first.. 1970!=1970
+    for year in range(1965, 2015):
+        r,g,b, alpha = matplotlib.cm.YlGn_r(float(year-1965)/float(2015-1965))
+        color = matplotlib.colors.rgb2hex((b, g, r)).replace('#', '') # r and b reversed in the google, don't forget to add alpha
+        colors.append(color)
+    result['colors'] = colors
     return result
-            
-    
 
 def build_test_kml():
     '''build a simple KML file with a simple LineString, for testing purposes'''
