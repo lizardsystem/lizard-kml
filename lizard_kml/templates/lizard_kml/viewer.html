@@ -2,6 +2,12 @@
 {% load tools %}
 
 {% block subtitle %}Pilot 3D kustdata voor Deltares{% endblock %}
+{% block css %}
+{{ block.super }}
+<link rel="stylesheet"
+      type="text/css"
+      href="{{ STATIC_URL }}lizard_kml/viewer.css" />
+{% endblock %}
 
 {% block map-javascript %}
 <script src="https://www.google.com/jsapi?key=YOURAPIKEY"></script>
@@ -72,11 +78,24 @@
 </div>
 {% endblock %}
 
-{% block above-content %}{% endblock %}
+{% block above-content %}
+<span class="above-content-text">Hoogte compensatie:</span>
+<span id="lift-slider"></span>
+<span class="above-content-text">Overdrijving:</span>
+<span id="exaggeration-slider"></span>
+{% endblock %}
 
 {% block content %}
-<div id="map3d" style="width:100%; height:100%;"></div>
+<div id="map3d"></div>
 <script>
 kmlViewerInit('{% absurl lizard-kml-kml kml_type='lod' %}');
+$(function() {
+    $("#lift-slider").slider({
+                stop: function(event, ui) {kmlViewerSetLift(ui.value);}
+    });
+    $("#exaggeration-slider").slider({
+                stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);}
+    });
+});
 </script>
 {% endblock %}
