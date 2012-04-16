@@ -15,11 +15,18 @@ var
 sdist
 develop-eggs
 .installed.cfg
+
 # Wing workspace cache
 *.wpu
 
+# IDEA cache
+.idea
+
 # Installer logs
 pip-log.txt
+
+# Local settings
+local_testsettings.py
 
 # Unit test / coverage reports
 .coverage
