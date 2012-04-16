@@ -28,7 +28,7 @@ class KmlView(View):
 
         try:
             args = {}
-            args.update(request.GET)
+            args.update(request.GET.items())
             if id is not None:
                 args['id'] = int(id)
             return build_kml(kml_type, args)

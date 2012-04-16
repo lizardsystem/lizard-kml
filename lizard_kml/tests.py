@@ -69,4 +69,7 @@ class TestView(TestCase):
     def test_transect(self):
         resp = self.client.get('/kml/kml/transect/7003800')
         self.assertEqual(200, resp.status_code)
+    def test_transect(self):
+        resp = self.client.get('/kml/kml/transect/7003800?exaggeration=100&lift=100')
+        self.assertEqual(200, resp.status_code)
 
