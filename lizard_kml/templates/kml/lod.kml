@@ -1,4 +1,6 @@
+{% spaceless %}
 <?xml version="1.0" encoding="UTF-8"?>
+{% load tools %}
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
   <Document>
     <name>Transect Overview</name>
@@ -48,7 +50,7 @@
 	  </Lod>
 	</Region>
 	<Link>
-	  <href>http://localhost:8000/kml/kml/transect/{{ line.id }}</href>
+	  <href>{% absurl lizard-kml-kml kml_type='transect', id=line.id %}</href>
 	  <viewRefreshMode>onRegion</viewRefreshMode>
 	</Link>
       </NetworkLink>
@@ -65,3 +67,4 @@
     </Folder>
   </Document>
 </kml>
+{% endspaceless %}

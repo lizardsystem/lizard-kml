@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
 from nc_models import makejarkustransect, makejarkusoverview
-from lizard_kml import helpers 
+from lizard_kml import helpers
 import numpy as np
 import matplotlib.cm
 import matplotlib.colors
@@ -14,11 +14,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def build_kml(kml_type, kml_args_dict):
+def build_kml(view, kml_type, kml_args_dict):
     '''builds a dynamic KML file'''
     # n.b.: kml_args_dict containts direct USER input
     # This means that we should process input as unsafe in the factory methods...
-    template_context = {}
+    template_context = {'view': view}
     if kml_type == 'transect':
         id = int(kml_args_dict['id'])
         transect = makejarkustransect(id)
@@ -71,7 +71,7 @@ def build_overview_context(overview, kml_args_dict):
         lines.append(line)
     result['lines'] = lines
     return result
-        
+
 
 def build_transect_context(transect, kml_args_dict):
     """

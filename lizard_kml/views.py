@@ -31,7 +31,7 @@ class KmlView(View):
             args.update(request.GET.items())
             if id is not None:
                 args['id'] = int(id)
-            return build_kml(kml_type, args)
+            return build_kml(self, kml_type, args)
         except:
             if settings.DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION:
                 logger.exception('error building kml')
