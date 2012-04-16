@@ -60,9 +60,14 @@
       class="automatic-tree filetree pane">
     <li>
       <div class="workspace-acceptable">
-        <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='overview' %}')">Default</a>
+        <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='lod' %}')">Lod</a>
       </div>
     </li>
+      <li>
+          <div class="workspace-acceptable">
+              <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='transect',id='7002111' %}')">Transect</a>
+          </div>
+      </li>
   </ul>
 </div>
 {% endblock %}
@@ -72,6 +77,6 @@
 {% block content %}
 <div id="map3d" style="width:100%; height:100%;"></div>
 <script>
-kmlViewerInit('{% absurl lizard-kml-kml kml_type='overview' %}');
+kmlViewerInit('{% absurl lizard-kml-kml kml_type='lod' %}');
 </script>
 {% endblock %}

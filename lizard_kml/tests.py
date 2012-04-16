@@ -50,23 +50,44 @@ class TestView(TestCase):
         self.client = Client()
 
     # Create tests for all urls.
+    # Trailing slashes should be 'stable' as discussed by the following article:
+    # http://googlewebmastercentral.blogspot.com/2010/04/to-slash-or-not-to-slash.html
+    # Other Lizard components seem to prefer trailing slashes, so
+    # check for code 301 for URLs without a trailing slash,
+    # and code 200 for URLs with a trailing slash.
+
     def test_viewer(self):
+        resp = self.client.get('/kml/viewer')
+        self.assertEqual(301, resp.status_code)
+
+    def test_viewer_slash(self):
         resp = self.client.get('/kml/viewer/')
         self.assertEqual(200, resp.status_code)
+
     def test_lod(self):
         resp = self.client.get('/kml/kml/lod')
+        self.assertEqual(301, resp.status_code)
+
+    def test_lod_slash(self):
+        resp = self.client.get('/kml/kml/lod/')
         self.assertEqual(200, resp.status_code)
+
     # def test_areas(self):
     #     resp = self.client.get('/kml/kml/area/?id=1')
     #     self.assertEqual(200, resp.status_code)
-    def test_lod_finalbackslash(self):
-        resp = self.client.get('/kml/kml/lod/')
-        self.assertEqual(200, resp.status_code)
+
     def test_overview(self):
         resp = self.client.get('/kml/kml/overview')
-        self.assertEqual(200, resp.status_code)
-        
-    def test_transect(self):
-        resp = self.client.get('/kml/kml/transect/7003800')
+        self.assertEqual(301, resp.status_code)
+
+    def test_overview_slash(self):
+        resp = self.client.get('/kml/kml/overview/')
         self.assertEqual(200, resp.status_code)
 
+    def test_transect(self):
+        resp = self.client.get('/kml/kml/transect/7003800')
+        self.assertEqual(301, resp.status_code)
+
+    def test_transect_slash(self):
+        resp = self.client.get('/kml/kml/transect/7003800/')
+        self.assertEqual(200, resp.status_code)
