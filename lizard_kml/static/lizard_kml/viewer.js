@@ -2,7 +2,7 @@ google.load('earth', '1');
 var ge = null;
 var initialKmlUrl = null;
 var currentKmlUrl = null;
-var currentKmlParams = {lift:0, exaggeration:0};
+var currentKmlParams = {lift:0, exaggeration:1};
 var isInitial = true;
 
 // "API"

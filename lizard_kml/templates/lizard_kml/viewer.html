@@ -90,12 +90,19 @@
 <script>
 kmlViewerInit('{% absurl lizard-kml-kml kml_type='lod' %}');
 $(function() {
+    // Set the slider ranges to 0-500, 1-50
     $("#lift-slider").slider({
                 stop: function(event, ui) {kmlViewerSetLift(ui.value);}
+
     });
+    $("#lift-slider").slider("option", "min", 0);
+    $("#lift-slider").slider("option", "max", 500);
     $("#exaggeration-slider").slider({
                 stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);}
     });
+    $("#exaggeration-slider").slider("option", "min", 1);
+    $("#exaggeration-slider").slider("option", "max", 50);
+
 });
 </script>
 {% endblock %}

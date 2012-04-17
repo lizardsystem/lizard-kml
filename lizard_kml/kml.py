@@ -70,6 +70,9 @@ def build_overview_context(overview, kml_args_dict):
         line['id'] = id
         lines.append(line)
     result['lines'] = lines
+    result['exaggeration'] = float(kml_args_dict.get('exaggeration', 4))
+    result['lift'] = float(kml_args_dict.get('lift', 40))
+    
     return result
 
 
