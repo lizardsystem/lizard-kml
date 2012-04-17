@@ -1,0 +1,144 @@
+[
+
+
+
+
+
+{
+    "pk": 1,
+    "model": "lizard_kml.category",
+    "fields": {
+        "name": "Bathymetrie"
+    }
+},
+{
+    "pk": 2,
+    "model": "lizard_kml.category",
+    "fields": {
+        "name": "Kustlijnen"
+    }
+},
+{
+    "pk": 3,
+    "model": "lizard_kml.category",
+    "fields": {
+        "name": "Ingrepen"
+    }
+},
+
+
+
+
+
+
+
+{
+    "pk": 1,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Vaklodingen info",
+        "description": "Vaklodingen info",
+        "is_dynamic": "0",
+        "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/Vaklodingen_overview.kml",
+        "category": "1"
+    }
+},
+{
+    "pk": 2,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Vaklodingen",
+        "description": "Vaklodingen",
+        "is_dynamic": "0",
+        "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/Vaklodingen.kml",
+        "category": "1"
+    }
+},
+{
+    "pk": 3,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Jarkus",
+        "description": "Jarkus",
+        "is_dynamic": "1",
+        "kml_type": "lod",
+        "category": "1"
+    }
+},
+{
+    "pk": 4,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Lidar",
+        "description": "Lidar",
+        "is_dynamic": "0",
+        "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/kustlidar.kml",
+        "category": "1"
+    }
+},
+{
+    "pk": 5,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "AHN",
+        "description": "AHN",
+        "is_dynamic": "0",
+        "url": "http://dtvirt5.deltares.nl/kml/tno/AHN.kml",
+        "category": "1"
+    }
+},
+
+
+
+
+
+
+
+
+{
+    "pk": 6,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Hoogwater - Laagwater - Duinvoet (1965-heden)",
+        "description": "Hoogwater - Laagwater - Duinvoet (1965-heden)",
+        "is_dynamic": "0",
+        "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/Jarkus_strandlijnen.kml",
+        "category": "2"
+    }
+},
+{
+    "pk": 7,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Hoogwater - Laagwater - Duinvoet (1843-1999)",
+        "description": "Hoogwater - Laagwater - Duinvoet (1843-1999)",
+        "is_dynamic": "0",
+        "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/strandlijnen.kml",
+        "category": "2"
+    }
+},
+
+
+
+
+
+
+
+
+{
+    "pk": 8,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Suppleties",
+        "description": "Suppleties",
+        "is_dynamic": "0",
+        "url": "http://kml.deltares.nl/kml/rijkswaterstaat/suppleties/rws_suppletiedatabase.kmz",
+        "category": "3"
+    }
+}
+
+
+
+
+
+]
