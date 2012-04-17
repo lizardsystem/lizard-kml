@@ -87,7 +87,6 @@ NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/
 NC_RESOURCE = 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc'
 if os.getlogin() == 'fedorbaart':
     NC_RESOURCE = '/Users/fedorbaart/Downloads/transect.nc'
-DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION = False
 
 try:
     # Import local settings that aren't stored in svn/git.

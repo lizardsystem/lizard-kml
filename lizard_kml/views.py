@@ -10,7 +10,8 @@ from django.http import HttpResponse
 from django.conf import settings
 
 from lizard_ui.views import ViewContextMixin
-from lizard_kml.kml import build_kml, build_test_kml
+from lizard_kml.kml import build_kml
+from lizard_kml.profiling import profile
 
 import logging
 
@@ -23,21 +24,15 @@ class KmlView(View):
     Renders a dynamic KML file.
     """
 
+    #@profile('kml.pyprof')
     def get(self, request, kml_type, id=None):
         """generate KML XML tree into a zipfile response"""
 
-        try:
-            args = {}
-            args.update(request.GET.items())
-            if id is not None:
-                args['id'] = int(id)
-            return build_kml(self, kml_type, args)
-        except:
-            if settings.DEBUG_SHOW_EXAMPLE_KML_ON_EXCEPTION:
-                logger.exception('error building kml')
-                return build_test_kml()
-            else:
-                raise
+        args = {}
+        args.update(request.GET.items())
+        if id is not None:
+            args['id'] = int(id)
+        return build_kml(self, kml_type, args)
 
 
 class ViewerView(ViewContextMixin, TemplateView):
