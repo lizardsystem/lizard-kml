@@ -11,6 +11,7 @@ from django.conf import settings
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.kml import build_kml, build_test_kml
+from lizard_kml.profiling import profile
 
 import logging
 
@@ -23,6 +24,7 @@ class KmlView(View):
     Renders a dynamic KML file.
     """
 
+    #@profile('kml.pyprof')
     def get(self, request, kml_type, id=None):
         """generate KML XML tree into a zipfile response"""
 
