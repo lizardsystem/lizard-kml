@@ -1,12 +1,12 @@
 from django.contrib import admin
 
-from lizard_kml.models import KmlType, Area
+from lizard_kml.models import Category, KmlResource
 
-class KmlTypeAdmin(admin.ModelAdmin):
-    model = KmlType
+class CategoryAdmin(admin.ModelAdmin):
+    model = Category
 
-class AreaAdmin(admin.ModelAdmin):
-    model = Area
+class KmlResourceAdmin(admin.ModelAdmin):
+    model = KmlResource
 
-admin.site.register(KmlType, KmlTypeAdmin)
-admin.site.register(Area, AreaAdmin)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(KmlResource, KmlResourceAdmin)

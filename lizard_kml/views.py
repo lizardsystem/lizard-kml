@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.conf import settings
 
 from lizard_ui.views import ViewContextMixin
+from lizard_kml.models import Category, KmlResource
 from lizard_kml.kml import build_kml
 from lizard_kml.profiling import profile
 
@@ -43,39 +44,45 @@ class ViewerView(ViewContextMixin, TemplateView):
 
     template_name = 'lizard_kml/viewer.html'
 
-    def get(self, request, kml_type_id=None):
-        #disabled: don't support zooming to specific areas yet
-        #self.kml_type_id = kml_type_id
-        #
-        #if self.kml_type_id:
-        #    self._kml_type = KmlType.objects.get(id=int(self.kml_type_id))
-        #else:
-        #    self._kml_type = None
+    def get(self, request, category_id=None):
+        self.category_id = category_id
+
+        if self.category_id:
+            self._category = Category.objects.get(id=int(self.category_id))
+        else:
+            self._category = None
 
         return super(ViewerView, self).get(self, request)
 
     @property
-    def kml_type(self):
-        return self._kml_type
+    def category(self):
+        return self._category
 
-    def types_tree(self):
+    def category_tree(self):
         return [
             {
-                'name': kml_type.name,
-                'url': reverse('lizard-kml-viewer', kwargs={'kml_type_id': kml_type.id}),
-                'description': kml_type.description,
+                'name': category.name,
+                'url': reverse('lizard-kml-viewer', kwargs={'category_id': category.id}),
+                'description': category.description,
             }
-            for kml_type in KmlType.objects.all()
+            for category in Category.objects.all()
         ]
 
-    def areas_tree(self):
-        if self.kml_type:
+    def kml_resource_tree(self):
+        if self.category:
             return [
                 {
-                    'name': area.name,
-                    'kml_url': self.request.build_absolute_uri(reverse('lizard-kml-kml', kwargs={'id': area.id})),
+                    'name': kml_resource.name,
+                    'kml_url': self._mk_kml_resource_url(kml_resource),
                     #'kml_url': area.url,
-                    'description': area.description,
+                    'description': kml_resource.description,
                 }
-                for area in self.kml_type.area_set.all()
+                for kml_resource in self.category.kmlresource_set.all()
             ]
+
+    def _mk_kml_resource_url(self, kml_resource):
+        if kml_resource.is_dynamic:
+            return self.request.build_absolute_uri(
+                reverse('lizard-kml-kml', kwargs={'kml_type': kml_resource.kml_type}))
+        else:
+            return kml_resource.url

@@ -13,6 +13,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     url(r'^admin/?', include(admin.site.urls)),
+    url(r'^kml/viewer/(?P<category_id>[0-9]*)/$', ViewerView.as_view(), name='lizard-kml-viewer'),
     url(r'^kml/viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
     # final backslash optional
     url(r'^kml/kml/(?P<kml_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', KmlView.as_view(), name='lizard-kml-kml'),
