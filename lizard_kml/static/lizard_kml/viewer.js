@@ -116,3 +116,17 @@ function setDescription(event, url) {
     // $(div).load(url);
     //associate this balloon with the placemark, and then setBalloon()
 }
+
+// "overridden" from lizard.js
+function setUpTooltips() {
+    $(".legend-tooltip-kml").each(function () {
+        if (!$(this).data("popup-initialized")) {
+            $(this).data("popup-initialized", true);
+            $(this).tooltip({
+                position: 'bottom left',
+                effect: 'fade',
+                offset: [0, -10]
+            });
+        }
+    });
+}
