@@ -44,7 +44,7 @@ class InfoView(ViewContextMixin, TemplateView):
     #@profile('kml.pyprof')
     def get(self, request, id=None):
         """generate info into a response"""
-        
+
         self.id = int(id)
         return super(InfoView, self).get(self, request)
     def gettable(self):
@@ -137,6 +137,7 @@ class ViewerView(ViewContextMixin, TemplateView):
                     'name': kml_resource.name,
                     'kml_url': self._mk_kml_resource_url(kml_resource),
                     #'kml_url': area.url,
+                    'is_dynamic': kml_resource.is_dynamic,
                     'description': kml_resource.description,
                 }
                 for kml_resource in self.category.kmlresource_set.all()

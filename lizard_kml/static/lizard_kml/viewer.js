@@ -19,7 +19,7 @@ function failureCallback() {
 }
 
 // "API"
-function kmlViewerLoadKml(kmlUrl) {
+function kmlViewerLoadKml(kmlUrl, isDynamic) {
     if (ge) {
         currentKmlUrl = kmlUrl;
         updateKml(true);
@@ -130,3 +130,67 @@ function setUpTooltips() {
         }
     });
 }
+
+
+
+
+function KmlFileCollection() {
+    this.kmlFiles = [];
+    this.loadKml = function(url, isDynamic) {
+        var foundKmlFile = null;
+        for(var i = 0; i < this.kmlFiles.length; i++) {
+            var kmlFile = this.kmlFiles[i];
+            if (kmlFile.baseUrl == url) {
+                foundKmlFile = kmlFile;
+                break;
+            }
+        }
+        if (foundKmlFile == null)
+            foundKmlFile = new KmlFile(url, isDynamic);
+        foundKmlFile.updateKml();
+    };
+}
+
+function KmlFile(baseUrl, isDynamic) {
+    this.baseUrl = baseUrl;
+    this.isDynamic = isDynamic;
+    this.updateCounter = 0;
+    this.kmlObject = null;
+    this.fullUrl = function() {
+        if (this.isDynamic)
+            return this.baseUrl + '?' + jQuery.param(currentKmlParams);
+        else
+            return this.baseUrl;
+    };
+    this.updateKml = function() {
+        this.updateCounter++;
+        google.earth.fetchKml(ge, this.fullUrl(), partial(this.finishedLoading, this, this.updateCounter));
+    };
+    this.finishedLoading = function(kmlFile, currentUpdateCount, kmlObject) {
+        if (kmlFile.updateCounter <= currentUpdateCount) {
+            if (kmlObject) {
+                // remove currently loaded features
+                if (kmlFile.kmlObject != null) {
+                    ge.getFeatures().appendChild(kmlFile.kmlObject);
+                }
+                // add new features
+                kmlFile.kmlObject = kmlObject;
+                ge.getFeatures().appendChild(kmlObject);
+            }
+            else {
+                window.alert("failed to load KML data");
+            }
+        }
+    };
+}
+
+var kfc = new KmlFileCollection();
+
+// "API"
+// TODO temp disabled
+function kmlViewerLoadKml2(url, isDynamic) {
+    if (ge) {
+        kfc.loadKml(url, isDynamic);
+    }
+}
+
