@@ -1,0 +1,10 @@
+<table>
+  {% for row in view.gettable %}
+  <tr>
+    {% for field in row %}
+    <td>{{ field }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+<p><a href="{% url lizard-kml-xls id=view.id %}">xls</a></p>
