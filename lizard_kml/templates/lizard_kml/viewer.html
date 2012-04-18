@@ -53,6 +53,13 @@
       {% endif %}
     {% endif %}
   </ul>
+  <h2>
+    Workspace
+  </h2>
+  <ul id="workspace-kml">
+      <li>test</li>
+  </ul>
+  <a href="javascript:void(0)" onclick="kmlViewerUnloadAll()">Maak workspace schoon</a>
 </div>
 {% endblock %}
 
@@ -71,13 +78,15 @@ $(document).ready(function(){
     // Set the slider ranges to 0-500, 1-50
     $("#lift-slider").slider({
         stop: function(event, ui) {kmlViewerSetLift(ui.value);},
-        min: 0,
-        max: 500
+        min: 0.0,
+        max: 500.0,
+        step: 1.0
     });
     $("#exaggeration-slider").slider({
         stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);},
-        min: 1,
-        max: 50
+        min: 1.0,
+        max: 50.0,
+        step: 1.0
     });
     // load KML viewer
     kmlViewerInit();

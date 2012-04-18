@@ -1,8 +1,7 @@
 google.load('earth', '1');
 var ge = null;
-var currentKmlUrl = null;
-var currentKmlParams = {lift:0, exaggeration:1};
-var updateCounter = 0; // only load latest update
+var kfc = new KmlFileCollection();
+var currentKmlParams = {lift:0.0, exaggeration:1.0};
 
 // "API"
 function kmlViewerInit() {
@@ -12,6 +11,13 @@ function kmlViewerInit() {
 function initCallback(pluginInstance) {
     ge = pluginInstance;
     ge.getWindow().setVisibility(true);
+
+    // fly to default view once, on init
+    var lookAt = ge.createLookAt('');
+    lookAt.setLatitude(52.0938); // utrecht
+    lookAt.setLongitude(5.0867);
+    lookAt.setRange(600000.0);
+    ge.getView().setAbstractView(lookAt);
 }
 
 function failureCallback() {
@@ -19,79 +25,41 @@ function failureCallback() {
 }
 
 // "API"
-function kmlViewerLoadKml(kmlUrl, isDynamic) {
+function kmlViewerLoadKml(url, isDynamic) {
     if (ge) {
-        currentKmlUrl = kmlUrl;
-        updateKml(true);
+        kfc.loadKmlFile(url, isDynamic);
     }
 }
 
 // "API"
 function kmlViewerSetLift(lift) {
     currentKmlParams['lift'] = lift;
-    updateKml(false);
+    kfc.reloadAllDynamic();
 }
 
 // "API"
 function kmlViewerSetExaggeration(exaggeration) {
     currentKmlParams['exaggeration'] = exaggeration;
-    updateKml(false);
+    kfc.reloadAllDynamic();
 }
 
-function updateKml(doResetView) {
-    if (ge && currentKmlUrl && currentKmlParams) {
-        // remove currently loaded features
-        removeOldFeatures();
-        // have the plugin download and parse the requested KML file
-        var url  = currentKmlUrl + '?' + jQuery.param(currentKmlParams);
-        updateCounter++;
-        google.earth.fetchKml(ge, url, partial(finishedLoading, updateCounter, doResetView));
+// "API"
+function kmlViewerUnloadAll() {
+    kfc.unloadAll();
+}
+
+function addPlacemarkClickListeners(kmlObject) {
+    var placemarks = kmlObject.getElementsByType('KmlPlacemark');
+    for (var i = 0; i < placemarks.getLength(); ++i) {
+        var placemark = placemarks.item(i);
+        var url = '/kml/info/'+ placemark.getId() + '/';
+        google.earth.addEventListener(placemark, 'click', function(event) { setDescription(event, url);});
     }
 }
 
-function finishedLoading(updateCount, doResetView, kmlObject) {
-    if (updateCounter <= updateCount) {
-        if (kmlObject) {
-            // remove currently loaded features (again)
-            removeOldFeatures();
-            // add new features
-            ge.getFeatures().appendChild(kmlObject);
-	    var placemarks = ge.getElementsByType('KmlPlacemark');
-	    for (var i = 0; i < placemarks.getLength(); ++i) {
-		var placemark = placemarks.item(i);
-		var url = '/kml/info/'+ placemark.getId() + '/';
-		google.earth.addEventListener(placemark, 'click', function(event) { console.log(event); setDescription(event, url);});
-	    }
-            // fly to view
-            if (doResetView) {
-                // 'fly' to default view on initial load
-                if (kmlObject.getAbstractView()) {
-                    // the KML file defines a default view, 'fly' to it
-                    ge.getView().setAbstractView(kmlObject.getAbstractView());
-                }
-                // no default view, 'fly' to a fixed position
-                else {
-                    var lookAt = ge.createLookAt('');
-                    lookAt.setLatitude(52.0938); // utrecht
-                    lookAt.setLongitude(5.0867);
-                    lookAt.setRange(600000.0);
-                    ge.getView().setAbstractView(lookAt);
-                }
-            }
-        }
-        else {
-            window.alert("failed to load KML data");
-        }
-    }
-    // else: skip the update
-}
-
-function removeOldFeatures() {
-    // remove currently loaded features
-    var features = ge.getFeatures();
-    while (features.getFirstChild()) {
-        features.removeChild(features.getFirstChild());
-    }
+function setDescription(event, url) {
+    var placemark = event.getTarget()
+    $.get(url, {}, function(data) { placemark.setDescription(data) });
 }
 
 function partial(func /*, 0..n args */) {
@@ -100,21 +68,6 @@ function partial(func /*, 0..n args */) {
         var allArguments = args.concat(Array.prototype.slice.call(arguments));
         return func.apply(this, allArguments);
     };
-}
-
-// function setDescription(element, url) {
-//     alert(url);
-//     alert(element);
-// }
-function setDescription(event, url) {
-    //event.preventDefault();
-    var placemark = event.getTarget()
-    // var description = placemark.getDescription();
-    //create new HtmlStringBalloon (or DivBalloon) with the description as it's content
-    $.get(url, {}, function(data) { placemark.setDescription(data) });
-    // console.log(div);
-    // $(div).load(url);
-    //associate this balloon with the placemark, and then setBalloon()
 }
 
 // "overridden" from lizard.js
@@ -131,12 +84,10 @@ function setUpTooltips() {
     });
 }
 
-
-
-
 function KmlFileCollection() {
     this.kmlFiles = [];
-    this.loadKml = function(url, isDynamic) {
+    // loads new or reloads existing kml file
+    this.loadKmlFile = function(url, isDynamic) {
         var foundKmlFile = null;
         for(var i = 0; i < this.kmlFiles.length; i++) {
             var kmlFile = this.kmlFiles[i];
@@ -145,9 +96,30 @@ function KmlFileCollection() {
                 break;
             }
         }
-        if (foundKmlFile == null)
+        if (foundKmlFile == null) {
             foundKmlFile = new KmlFile(url, isDynamic);
-        foundKmlFile.updateKml();
+            this.kmlFiles.push(foundKmlFile);
+            foundKmlFile.load(true);
+        }
+        else {
+            foundKmlFile.load(false);
+        }
+    };
+    // call when params (lift, exaggeration etc) changed
+    this.reloadAllDynamic = function() {
+        for(var i = 0; i < this.kmlFiles.length; i++) {
+            var kmlFile = this.kmlFiles[i];
+            if (kmlFile.isDynamic) {
+                kmlFile.load(false);
+            }
+        }
+    };
+    this.unloadAll = function() {
+        for(var i = 0; i < this.kmlFiles.length; i++) {
+            var kmlFile = this.kmlFiles[i];
+            kmlFile.unload();
+        }
+        this.kmlFiles.length = 0; // this is no joke
     };
 }
 
@@ -162,35 +134,34 @@ function KmlFile(baseUrl, isDynamic) {
         else
             return this.baseUrl;
     };
-    this.updateKml = function() {
+    this.load = function(doResetView) {
         this.updateCounter++;
-        google.earth.fetchKml(ge, this.fullUrl(), partial(this.finishedLoading, this, this.updateCounter));
+        google.earth.fetchKml(ge, this.fullUrl(), partial(this.finishedLoading, this, this.updateCounter, doResetView));
     };
-    this.finishedLoading = function(kmlFile, currentUpdateCount, kmlObject) {
+    this.finishedLoading = function(kmlFile, currentUpdateCount, doResetView, kmlObject) {
         if (kmlFile.updateCounter <= currentUpdateCount) {
             if (kmlObject) {
-                // remove currently loaded features
-                if (kmlFile.kmlObject != null) {
-                    ge.getFeatures().appendChild(kmlFile.kmlObject);
-                }
+                // remove currently loaded features, if there are any
+                kmlFile.unload();
                 // add new features
                 kmlFile.kmlObject = kmlObject;
                 ge.getFeatures().appendChild(kmlObject);
+                // add click handlers
+                if (kmlFile.isDynamic)
+                    addPlacemarkClickListeners(kmlObject);
+                // fly to view defined by KML, if desired
+                if (doResetView && kmlObject.getAbstractView()) {
+                    ge.getView().setAbstractView(kmlObject.getAbstractView());
+                }
             }
             else {
                 window.alert("failed to load KML data");
             }
         }
     };
+    this.unload = function() {
+        if (this.kmlObject != null) {
+            ge.getFeatures().removeChild(this.kmlObject);
+        }
+    };
 }
-
-var kfc = new KmlFileCollection();
-
-// "API"
-// TODO temp disabled
-function kmlViewerLoadKml2(url, isDynamic) {
-    if (ge) {
-        kfc.loadKml(url, isDynamic);
-    }
-}
-
