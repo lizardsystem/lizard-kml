@@ -54,24 +54,6 @@
     {% endif %}
   </ul>
 </div>
-
-{# disabled: don't support zooming to specific areas yet #}
-{% comment %}
-<div class="sidebarbox sidebarbox-stretched"
-     id="accordion">
-<h2>
-Categorie
-</h2>
-<ul id="type-pane" class="automatic-tree filetree pane">
-    <li>
-    <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='lod' %}')">Lod</a>
-    </li>
-    <li>
-    <a href="javascript:void(0)" onclick="kmlViewerLoadKml('{% absurl lizard-kml-kml kml_type='transect',id='7002111' %}')">Transect</a>
-    </li>
-</ul>
-</div>
-{% endcomment %}
 {% endblock %}
 
 {% block above-content %}
@@ -84,21 +66,21 @@ Categorie
 {% block content %}
 <div id="map3d"></div>
 <script>
-kmlViewerInit();
-$(function() {
+//$(function() {
+$(document).ready(function(){
     // Set the slider ranges to 0-500, 1-50
     $("#lift-slider").slider({
-                stop: function(event, ui) {kmlViewerSetLift(ui.value);}
-
+        stop: function(event, ui) {kmlViewerSetLift(ui.value);},
+        min: 0,
+        max: 500
     });
-    $("#lift-slider").slider("option", "min", 0);
-    $("#lift-slider").slider("option", "max", 500);
     $("#exaggeration-slider").slider({
-                stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);}
+        stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);},
+        min: 1,
+        max: 50
     });
-    $("#exaggeration-slider").slider("option", "min", 1);
-    $("#exaggeration-slider").slider("option", "max", 50);
-
+    // load KML viewer
+    kmlViewerInit();
 });
 </script>
 {% endblock %}
