@@ -67,9 +67,8 @@
 	  </coordinates>
 	</LineString>
 	<description><![CDATA[
-	some text....
-	<!--  -->
-	<a href="#" onclick="setDescription(this, '{% absurl lizard-kml-kml kml_type='transect' id=line.id %}')">load</a>
+	<!-- Still use an iframe, in case someone opens this page in google earth directly -->
+	<iframe src="{% absurl lizard-kml-info id=line.id %}" width="400"/>
 
 	]]>
 	</description>
