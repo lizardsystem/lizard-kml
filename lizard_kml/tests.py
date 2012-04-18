@@ -92,6 +92,13 @@ class TestView(TestCase):
         resp = self.client.get('/kml/kml/transect/7003800/')
         self.assertEqual(200, resp.status_code)
 
+    def test_transect_info(self):
+        resp = self.client.get('/kml/info/7003800/')
+        self.assertEqual(200, resp.status_code)
+    def test_transect_xls(self):
+        resp = self.client.get('/kml/xls/7003800/')
+        self.assertEqual(200, resp.status_code)
+
     def test_transect_query_noslash(self):
         resp = self.client.get('/kml/kml/transect/7003800?exaggeration=100&lift=100')
         self.assertEqual(301, resp.status_code)

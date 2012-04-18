@@ -65,6 +65,8 @@ def makejarkustransect(id, **args):
     # Opendap is index based, so we have to do some numpy tricks to get the data over (and fast)
     # read indices for all years (only 50 or so), takes 0.17 seconds on my wireless
     years = dataset.variables['time'][:]
+    # days = dataset.variables['time']
+    # TODO: dates = netcdftime.num2date(days, days.units)
     # read all indices (this would be nice to cache)... takes 0.24 seconds on my wireless
     id = dataset.variables['id'][:] 
     alongshoreindex = nonzero(id == tr.id)

@@ -12,10 +12,11 @@ from django.conf import settings
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.models import Category, KmlResource
 from lizard_kml.kml import build_kml
+from lizard_kml.nc_models import makejarkustransect
 from lizard_kml.profiling import profile
 
 import logging
-
+import xlwt
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,45 @@ class KmlView(View):
             args['id'] = int(id)
         return build_kml(self, kml_type, args)
 
+class InfoView(ViewContextMixin, TemplateView):
+    """
+    Renders a dynamic KML file.
+    """
+    template_name = "lizard_kml/info.html"
+    #@profile('kml.pyprof')
+    def get(self, request, id=None):
+        """generate info into a response"""
+        
+        self.id = int(id)
+        return super(InfoView, self).get(self, request)
+    def gettable(self):
+        return gettable(self.id)
+def gettable(id):
+    tr = makejarkustransect(id)
+    return zip(tr.x, tr.y, tr.cross_shore, tr.z[-1])
+class XlsView(View):
+    """
+    Renders a dynamic KML file.
+    """
+
+    #@profile('kml.pyprof')
+    def get(self, request, id=None):
+        """generate info into a response"""
+
+        self.id = int(id)
+        import cStringIO
+        import xlwt
+        stream = cStringIO.StringIO()
+        wb = xlwt.Workbook()
+        sheet = wb.add_sheet('Transect {}'.format(self.id))
+        for i, row in enumerate(gettable(self.id)):
+            for j, value in enumerate(row):
+                sheet.write(i,j,value)
+        wb.save(stream)
+        txt = stream.getvalue()
+        response = HttpResponse(txt, mimetype="application/vnd.ms-excel")
+        response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
+        return response
 
 class ViewerView(ViewContextMixin, TemplateView):
     """

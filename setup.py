@@ -19,6 +19,7 @@ install_requires = [
     'matplotlib',
     'numpy',
     'netCDF4',
+    'xlwt'
     ],
 
 tests_require = [

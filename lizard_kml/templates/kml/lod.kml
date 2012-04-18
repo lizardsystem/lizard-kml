@@ -66,6 +66,12 @@
 	    {{ line.coordinates }}
 	  </coordinates>
 	</LineString>
+	<description><![CDATA[
+	some text....
+	<!--  -->
+	<iframe src="{% url lizard-kml-info id=line.id %}" width="300"/>
+	]]>
+	</description>
       </Placemark>
       {% endfor %}
     </Folder>
