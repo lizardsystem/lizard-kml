@@ -81,7 +81,7 @@ def build_transect_context(transect, kml_args_dict):
     Return a formatted transect object as input for the kml
     >>> transect = makejarkustransect(7003800)
     >>> build_transect_context(transect, {}) # doctest:+ELLIPSIS
-    {...'transect': <lizard_kml...>, 'years': OrderedDict([(datetime..., {'begindate': '19...Z', 'enddate': '19...Z', 'coordinates': '...}
+    {...'transect': <lizard_kml...>,...'years': OrderedDict([(datetime...
     """
     result = {}
     result['transect'] = transect
@@ -97,15 +97,21 @@ def build_transect_context(transect, kml_args_dict):
         years[year] = {
             'coordinates': coords,
             'begindate': helpers.kmldate(transect.begindates()[i]),
-            'enddate': helpers.kmldate(transect.enddates()[i])
+            'enddate': helpers.kmldate(transect.enddates()[i]),
+            'style': 'year{}'.format(transect.begindates()[i].year)
             }
     result['years'] = years
-    colors = []
     # not quite accurate, fix datetime problem first.. 1970!=1970
-    for year in range(1965, 2015):
-        r,g,b, alpha = matplotlib.cm.YlGn_r(float(year-1965)/float(2015-1965))
+    # Get a colormap based on the ?colormap parameter
+    colormap = matplotlib.cm.cmap_d.get(kml_args_dict.get('colormap', 'YlGn_r'), matplotlib.cm.YlGn_r)
+    
+    colors = {}
+    # HACK: This can be done a bit nicer and the styles can be references to an external file (through styleurl)
+    for year in range(1964, 2015):
+        # call with float 0..1 (or int 0 .. 255)
+        r,g,b, alpha = colormap(float(year-1964)/float(2015-1964))
         color = matplotlib.colors.rgb2hex((b, g, r)).replace('#', '') # r and b reversed in the google, don't forget to add alpha
-        colors.append(color)
+        colors['year{}'.format(year)] = color
     result['colors'] = colors
     return result
 

@@ -14,7 +14,7 @@ from lizard_kml.models import Category, KmlResource
 from lizard_kml.kml import build_kml
 from lizard_kml.nc_models import makejarkustransect
 from lizard_kml.profiling import profile
-
+from lizard_kml.plots import eeg, jarkustimeseries
 import logging
 import xlwt
 
@@ -54,7 +54,7 @@ def gettable(id):
     return zip(tr.x, tr.y, tr.cross_shore, tr.z[-1])
 class XlsView(View):
     """
-    Renders a dynamic KML file.
+    Renders a dynamic XLS file.
     """
 
     #@profile('kml.pyprof')
@@ -71,9 +71,31 @@ class XlsView(View):
             for j, value in enumerate(row):
                 sheet.write(i,j,value)
         wb.save(stream)
-        txt = stream.getvalue()
-        response = HttpResponse(txt, mimetype="application/vnd.ms-excel")
+        bytes = stream.getvalue()
+        response = HttpResponse(bytes, mimetype="application/vnd.ms-excel")
         response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
+        return response
+
+
+class ChartView(View):
+    """
+    Renders a dynamic Chart file.
+    """
+
+    def get(self, request, chart_type, id=None):
+        """generate info into a response"""
+
+        self.id = int(id)
+        import cStringIO
+        transect = makejarkustransect(id)
+        # TODO, sanitize the GET.... (format=png/pdf,size?)
+        if chart_type == 'eeg':
+            bytes = eeg(transect, {'format':'png'})
+        elif chart_type == 'jarkustimeseries':
+            bytes = jarkustimeseries(transect, {'format':'png' })
+        response = HttpResponse(bytes, mimetype="image/png")
+        # TODO for pdf:
+        # response['Content-Disposition'] = 'attachment; filename=transect{}.{}'.format(self.id, format=format)
         return response
 
 class ViewerView(ViewContextMixin, TemplateView):

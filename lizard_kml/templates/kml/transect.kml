@@ -5,8 +5,8 @@
     <name>{{ transect.id }}</name>
 
     <!-- this the style for the upper line -->
-    {% for color in colors %}
-    <Style id="year{{ forloop.counter }}">
+    {% for key, color in colors.items %}
+    <Style id="{{ key }}">
       <LineStyle>
 	<color>ff{{ color }}</color>
 	<width>2</width>
@@ -20,7 +20,7 @@
     {% for year, val in years.items %}
     <Placemark>
       <name>{{ year }}</name>
-      <styleUrl>#year{{ forloop.counter }}</styleUrl>
+      <styleUrl>#{{ val.style }}</styleUrl>
       ## first one without extrude
       <LineString>
 	<extrude>1</extrude>
