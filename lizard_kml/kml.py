@@ -40,6 +40,7 @@ def build_overview_context(overview, kml_args_dict):
     result = {}
     result['overview'] = overview
     lines = []
+    # TODO: clean this up a bit...
     for (id,
          north,
          south,

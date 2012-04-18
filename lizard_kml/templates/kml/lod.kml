@@ -29,7 +29,7 @@
       </Pair>
     </StyleMap>
     <Folder>
-      {% for line in lines %}
+      {% for line in lines reversed %}
       <NetworkLink>
 	<name>Transect {{ line.id }} </name>
 	<Region>
@@ -46,7 +46,7 @@
 	  <Lod>
 	    <!-- Don't show too many lines -->
 	    <!-- alternate lod, so we get different transects at different levels -->
-	    <minLodPixels>{% cycle 512 256 512 128 512 256 512 64 %}</minLodPixels>
+	    <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
 	  </Lod>
 	</Region>
 	<Link>
@@ -67,12 +67,37 @@
 	  </coordinates>
 	</LineString>
 	<description><![CDATA[
+	{% comment %}
 	<!-- Still use an iframe, in case someone opens this page in google earth directly -->
 	<iframe src="{% absurl lizard-kml-info id=line.id %}" width="400"/>
-
+	{% endcomment %}
+	<p><img src="{% url lizard-kml-chart chart_type="eeg" id=line.id %}" /></p>
+	<p><img src="{% url lizard-kml-chart chart_type="jarkustimeseries" id=line.id %}" /></p>
+	<p>Download data as: <a href="{% url lizard-kml-xls id=line.id %}">xls</a></p>
 	]]>
 	</description>
       </Placemark>
+      {% comment %}
+      <!-- for debugging lod -->
+      <Placemark>
+	<styleUrl>#whiteline</styleUrl>
+	<Polygon>
+	  <extrude>1</extrude>
+	  <altitudeMode>absolute</altitudeMode>
+	  <outerBoundaryIs>
+	    <LinearRing>
+	  <coordinates>
+	    {{ line.bbox.east }},{{ line.bbox.south }},40
+	    {{ line.bbox.west }},{{ line.bbox.south }},40
+	    {{ line.bbox.west }},{{ line.bbox.north }},40
+	    {{ line.bbox.east }},{{ line.bbox.north }},40
+	    {{ line.bbox.east }},{{ line.bbox.south }},40
+	  </coordinates>
+	    </LinearRing>
+	  </outerBoundaryIs>
+	</Polygon>
+      </Placemark>
+      {% endcomment %}
       {% endfor %}
     </Folder>
   </Document>

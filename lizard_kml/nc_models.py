@@ -119,7 +119,7 @@ def makejarkusoverview():
     # Make sure you use netcdf >=4.2
 
     id = dataset.variables['id'][:] 
-    lon0 = dataset.variables['lon'][:,1] 
+    lon0 = dataset.variables['lon'][:,0] 
     lat0 = dataset.variables['lat'][:,1]
     lon1 = dataset.variables['lon'][:,-1]
     lat1 = dataset.variables['lat'][:,-1]
@@ -127,11 +127,16 @@ def makejarkusoverview():
     overview['lon1'] = lon1
     overview['lat0'] = lat0
     overview['lat1'] = lat1
-    overview['north'] = np.maximum(lat0, lat1)
-    overview['south'] = np.minimum(lat0, lat1)
-    # not circle safe...
-    overview['east'] = np.maximum(lon0, lon1)
-    overview['west'] = np.minimum(lon0, lon1)
+    rsp_lon = dataset.variables['rsp_lon'][:] 
+    rsp_lat = dataset.variables['rsp_lat'][:]
+
+    # few 
+    overview['north'] = rsp_lat + 0.002
+    overview['south'] = rsp_lat - 0.002
+
+    # HACK: not circle safe...
+    overview['east'] = rsp_lon + .0025
+    overview['west'] = rsp_lon - .0025
     overview['id'] = id
     dataset.close()
     # return dict to conform to the "rendering context"
