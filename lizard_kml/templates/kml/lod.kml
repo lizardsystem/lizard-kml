@@ -58,8 +58,7 @@
 	  <viewRefreshMode>onRegion</viewRefreshMode>
 	</Link>
       </NetworkLink>
-      <Placemark>
-	<id>{{ line.id }}</id>
+      <Placemark id="{{ line.id }}">
 	<name>Transect {{ line.id }} </name>
 	<styleUrl>#whiteline</styleUrl>
 	<LineString>
