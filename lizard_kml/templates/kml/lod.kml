@@ -59,6 +59,7 @@
 	</Link>
       </NetworkLink>
       <Placemark>
+	<id>{{ line.id }}</id>
 	<name>Transect {{ line.id }} </name>
 	<styleUrl>#whiteline</styleUrl>
 	<LineString>
@@ -69,7 +70,8 @@
 	<description><![CDATA[
 	some text....
 	<!--  -->
-	<iframe src="{% url lizard-kml-info id=line.id %}" width="300"/>
+	<a href="#" onclick="setDescription(this, '{% absurl lizard-kml-kml kml_type='transect' id=line.id %}')">load</a>
+
 	]]>
 	</description>
       </Placemark>

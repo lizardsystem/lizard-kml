@@ -56,6 +56,12 @@ function finishedLoading(updateCount, doResetView, kmlObject) {
             removeOldFeatures();
             // add new features
             ge.getFeatures().appendChild(kmlObject);
+	    var placemarks = ge.getElementsByType('KmlPlacemark');
+	    for (var i = 0; i < placemarks.getLength(); ++i) {
+		var placemark = placemarks.item(i);
+		var url = '/kml/info/'+ placemark.getId() + '/';
+		google.earth.addEventListener(placemark, 'click', function(event) { console.log(event); setDescription(event, url);});
+	    }
             // fly to view
             if (doResetView) {
                 // 'fly' to default view on initial load
@@ -94,4 +100,19 @@ function partial(func /*, 0..n args */) {
         var allArguments = args.concat(Array.prototype.slice.call(arguments));
         return func.apply(this, allArguments);
     };
+}
+
+// function setDescription(element, url) {
+//     alert(url);
+//     alert(element);
+// }
+function setDescription(event, url) {
+    //event.preventDefault();
+    var placemark = event.getTarget()
+    // var description = placemark.getDescription();
+    //create new HtmlStringBalloon (or DivBalloon) with the description as it's content
+    $.get(url, {}, function(data) { placemark.setDescription(data) });
+    // console.log(div);
+    // $(div).load(url);
+    //associate this balloon with the placemark, and then setBalloon()
 }
