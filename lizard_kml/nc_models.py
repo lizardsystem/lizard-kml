@@ -12,7 +12,7 @@ from functools import partial
 import logging
 logger = logging.getLogger(__name__)
 
-if '4.1' in netCDF4.getlibversion():
+if '4.1.3' in netCDF4.getlibversion():
     logger.warn('There is a problem with the netCDF 4.1.3 library that causes performance issues for opendap queries, you are using netcdf version {}'.format(netCDF4.getlibversion()))
     
 class Transect(object):
