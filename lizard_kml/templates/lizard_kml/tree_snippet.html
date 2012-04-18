@@ -4,7 +4,7 @@
 {% for child in tree_items %}
 <li>
     <div class="workspace-acceptable">
-    {% if child.kml_url %}<a href="javascript:void(0)" onclick="kmlViewerLoadKml('{{ child.kml_url }}')">{% endif %}
+    {% if child.kml_url %}<a href="javascript:void(0)" onclick="kmlViewerLoadKml('{{ child.kml_url }}', {{ child.is_dynamic|yesno:"true,false" }})">{% endif %}
     {{ child.name }}
     {% if child.kml_url %}</a>{% endif %}
       {% if child.description %}{# show info button if description available #}
