@@ -68,10 +68,12 @@
 <span id="lift-slider"></span>
 <span class="above-content-text">Opschaling:</span>
 <span id="exaggeration-slider"></span>
+<a class="above-content-text" href="javascript:void(0)" onclick="$('#colormaps').dialog('open')">Selecteer kleurenmap</a>
 {% endblock %}
 
 {% block content %}
 <div id="map3d"></div>
+{% include "lizard_kml/colormap.html" %}
 <script>
 //$(function() {
 $(document).ready(function(){
@@ -88,6 +90,7 @@ $(document).ready(function(){
         max: 50.0,
         step: 1.0
     });
+    $("#colormaps").dialog({ autoOpen: false, height:300, width: 500 });
     // load KML viewer
     kmlViewerInit();
 });

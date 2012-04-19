@@ -53,8 +53,8 @@
 	  {% comment %}
 	  Replace these query parameters in the url tag... (or extend url to match these parameters)
 	  Don't forget to escape &
-	  {% endcomment %}.	
-	  <href>{% absurl lizard-kml-kml kml_type='transect' id=line.id %}?exaggeration={{ exaggeration }}&amp;lift={{ lift }}</href>
+	  {% endcomment %}.
+	  <href>{% absurl lizard-kml-kml kml_type='transect' id=line.id %}?exaggeration={{ exaggeration }}&amp;lift={{ lift }}&amp;colormap={{ colormap }}</href>
 	  <viewRefreshMode>onRegion</viewRefreshMode>
 	</Link>
       </NetworkLink>

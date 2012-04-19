@@ -73,7 +73,8 @@ def build_overview_context(overview, kml_args_dict):
     result['lines'] = lines
     result['exaggeration'] = float(kml_args_dict.get('exaggeration', 4))
     result['lift'] = float(kml_args_dict.get('lift', 40))
-    
+    result['colormap'] = kml_args_dict.get('colormap', '')
+
     return result
 
 
@@ -105,7 +106,7 @@ def build_transect_context(transect, kml_args_dict):
     # not quite accurate, fix datetime problem first.. 1970!=1970
     # Get a colormap based on the ?colormap parameter
     colormap = matplotlib.cm.cmap_d.get(kml_args_dict.get('colormap', 'YlGn_r'), matplotlib.cm.YlGn_r)
-    
+
     colors = {}
     # HACK: This can be done a bit nicer and the styles can be references to an external file (through styleurl)
     for year in range(1964, 2015):

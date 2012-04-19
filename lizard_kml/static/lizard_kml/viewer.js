@@ -1,7 +1,7 @@
 google.load('earth', '1');
 var ge = null;
 var kfc = new KmlFileCollection();
-var currentKmlParams = {lift:0.0, exaggeration:1.0};
+var currentKmlParams = {lift:0.0, exaggeration:1.0, colormap:''};
 
 // "API"
 function kmlViewerInit() {
@@ -40,6 +40,13 @@ function kmlViewerSetLift(lift) {
 // "API"
 function kmlViewerSetExaggeration(exaggeration) {
     currentKmlParams['exaggeration'] = exaggeration;
+    kfc.reloadAllDynamic();
+}
+
+// "API"
+function kmlViewerSetColormap(colormap) {
+    currentKmlParams['colormap'] = colormap;
+    $('#colormaps').dialog('close');
     kfc.reloadAllDynamic();
 }
 
