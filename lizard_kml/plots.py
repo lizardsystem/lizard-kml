@@ -32,7 +32,7 @@ def jarkustimeseries(transect, plotproperties=None):
     if plotproperties is None:
         plotproperties = {}
     f = cStringIO.StringIO()
-    
+
     # interpolation function
     z = transect.interpolate_z()
     # create the plot
@@ -58,10 +58,12 @@ def jarkustimeseries(transect, plotproperties=None):
         for o in fig.colorbar[1].findobj(text.Text):
             o.set_size('xx-small')
         p.savefig(f, **plotproperties)
+    except:
+        raise
     finally:
         pylablock.release()
     f.seek(0)
-    return f
+    return f.getvalue()
 
 def eeg(transect, plotproperties=None):
     """plot eeg like plot of transects"""
@@ -105,13 +107,15 @@ def eeg(transect, plotproperties=None):
         datelocator = matplotlib.dates.AutoDateLocator()
         dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
         ax.axes.yaxis.set_major_formatter(dateformatter)
-        f = cStringIO.StringIO()
+        buf = cStringIO.StringIO()
 
-        p.savefig(f, **plotproperties)
+        p.savefig(buf, **plotproperties)
+    except:
+        raise
     finally:
         pylablock.release()
-    f.seek(0)
+    buf.seek(0)
     #cleanup
     #p.clf()
-    return f
-    
+    return buf.getvalue()
+
