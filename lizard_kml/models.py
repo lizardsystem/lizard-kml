@@ -26,7 +26,7 @@ class KmlResource(models.Model):
     A KmlResource belongs to one Category.
     """
 
-    name = models.CharField(_('name'), max_length=40)
+    name = models.CharField(_('name'), max_length=80)
     description = models.TextField(_('description'), null=True, blank=True)
     # is_dynamic indicates whether to use kml_type or url ...
     # not quite BCNF but that's not really relevant with such a tiny domain model
