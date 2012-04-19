@@ -1,7 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
 if __name__ == '__main__':
+    import numpy as np
+    import matplotlib.pyplot as plt
+
     a = np.linspace(0, 1, 256).reshape(1,-1)
     a = np.vstack((a,a))
 
