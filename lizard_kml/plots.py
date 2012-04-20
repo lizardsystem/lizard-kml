@@ -58,8 +58,6 @@ def jarkustimeseries(transect, plotproperties=None):
         for o in fig.colorbar[1].findobj(text.Text):
             o.set_size('xx-small')
         p.savefig(f, **plotproperties)
-    except:
-        raise
     finally:
         pylablock.release()
     f.seek(0)
@@ -110,8 +108,6 @@ def eeg(transect, plotproperties=None):
         buf = cStringIO.StringIO()
 
         p.savefig(buf, **plotproperties)
-    except:
-        raise
     finally:
         pylablock.release()
     buf.seek(0)
