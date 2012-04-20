@@ -90,10 +90,15 @@ def build_transect_context(transect, kml_args_dict):
     years = collections.OrderedDict()
     exaggeration = float(kml_args_dict.get('exaggeration', 4))
     lift = float(kml_args_dict.get('lift', 40))
+    result['extrude'] = int(kml_args_dict.get('extrude',0))
+    result['polyalpha'] =  '%2X' % (float(kml_args_dict.get('polyalpha',0)) * 255,)
+    result['outline'] = int(kml_args_dict.get('outline',0))
+    move = float(kml_args_dict.get('move', 0.1))
     for i, year in enumerate(transect.t):
+        lon, lat = transect.move_by(i*move)
         coords = helpers.textcoordinates(
-            transect.lon,
-            transect.lat,
+            lon,
+            lat,
             transect.z[i,:] * exaggeration + lift
             )
         years[year] = {

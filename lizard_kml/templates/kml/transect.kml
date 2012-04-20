@@ -12,8 +12,8 @@
 	<width>2</width>
       </LineStyle>
       <PolyStyle>
-      	<color>00{{ color }} </color>
-      	<outline>1</outline>
+      	<color>{{ polyalpha }}{{ color }} </color>
+      	<outline>{{ outline }}</outline>
       </PolyStyle>
     </Style>
     {% endfor %}
@@ -23,7 +23,7 @@
       <styleUrl>#{{ val.style }}</styleUrl>
       ## first one without extrude
       <LineString>
-	<extrude>1</extrude>
+	<extrude>{{ extrude }}</extrude>
 	<altitudeMode>absolute</altitudeMode>
 	<coordinates>
 	  {{ val.coordinates }}

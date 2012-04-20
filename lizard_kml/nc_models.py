@@ -9,12 +9,15 @@ import numpy as np
 from scipy.interpolate import interp1d
 from functools import partial
 
+import pyproj
 import logging
 logger = logging.getLogger(__name__)
 
 if '4.1.3' in netCDF4.getlibversion():
     logger.warn('There is a problem with the netCDF 4.1.3 library that causes performance issues for opendap queries, you are using netcdf version {}'.format(netCDF4.getlibversion()))
-    
+
+proj = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs')
+
 class Transect(object):
     """Transect that has coordinates and time"""
     def __init__(self, id):
@@ -51,6 +54,31 @@ class Transect(object):
         # mask missings
         z = ma.masked_array(z, mask=isnan(z))
         return z
+    
+    def move_by(self, distance):
+        """
+        Move the x,y coordinates by distance, perpendicular, assuming that they are lat,lon and that we can move in EPSG:28992
+        
+        >>> t = Transect(0) 
+        >>> t.x = array([4.0])
+        >>> t.y = array([51.0])
+        >>> x,y = t.move_by(1000)
+        >>> x, y  # doctest:+ELLIPSIS
+        (array([ 3.999...]), array([ 51.0089...]))
+        """
+        # project from wgs84 to rd, assuming x,y are lon, lat
+        # compute the angle from the transect coordinates
+        
+        x,y = proj(self.x, self.y)
+        
+        dx = self.x[-1] - self.x[0]
+        dy = self.y[-1] - self.y[0]
+        angle = np.arctan2(dy,dx) + np.pi*0.5 # rotate by 90 degrees
+        
+        x += distance * np.cos(angle);
+        y += distance * np.sin(angle);
+        lon, lat = proj(x,y,inverse=True)
+        return lon, lat
 
 
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
@@ -107,6 +135,9 @@ def makejarkustransect(id, **args):
 
     dataset.close()
     # return dict to conform to the "rendering context"
+
+    
+    tr.lon, tr.lat
     return tr
 
 #TODO: @cache.beaker_cache(None, expire=600)
