@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.3 (unreleased)
+0.3 (2012-04-22)
 ----------------
 
 - Nothing changed yet.
