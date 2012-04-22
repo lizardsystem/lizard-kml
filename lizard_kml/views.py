@@ -1,5 +1,4 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
-
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.loader import render_to_string
@@ -19,7 +18,6 @@ import logging
 import xlwt
 
 logger = logging.getLogger(__name__)
-
 
 class KmlView(View):
     """
@@ -41,17 +39,21 @@ class InfoView(ViewContextMixin, TemplateView):
     Renders a dynamic KML file.
     """
     template_name = "lizard_kml/info.html"
+
     #@profile('kml.pyprof')
     def get(self, request, id=None):
         """generate info into a response"""
 
         self.id = int(id)
         return super(InfoView, self).get(self, request)
+
     def gettable(self):
         return gettable(self.id)
+
 def gettable(id):
     tr = makejarkustransect(id)
     return zip(tr.x, tr.y, tr.cross_shore, tr.z[-1])
+
 class XlsView(View):
     """
     Renders a dynamic XLS file.
@@ -75,7 +77,6 @@ class XlsView(View):
         response = HttpResponse(bytes, mimetype="application/vnd.ms-excel")
         response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
         return response
-
 
 class ChartView(View):
     """
@@ -136,7 +137,6 @@ class ViewerView(ViewContextMixin, TemplateView):
                 {
                     'name': kml_resource.name,
                     'kml_url': self._mk_kml_resource_url(kml_resource),
-                    #'kml_url': area.url,
                     'is_dynamic': kml_resource.is_dynamic,
                     'description': kml_resource.description,
                 }

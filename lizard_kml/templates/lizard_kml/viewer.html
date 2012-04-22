@@ -31,11 +31,11 @@
         {% endwith %}
       {% endwith %}
     {% else %}
-      <li>Geen categori&euml;n beschikbaar.</li>
+      <li>Geen categorie&euml;n beschikbaar.</li>
     {% endif %}
   </ul>
   <h2>
-  Gegevens bronnen
+  Gegevensbronnen
   </h2>
   <ul id="kml-resource-pane"
       class="automatic-tree filetree pane">
@@ -64,32 +64,68 @@
 
 {% block above-content %}
 <span class="above-content-text">Ophoging:</span>
-<span id="lift-slider"></span>
+<span id="lift-slider" class="above-slider"></span>
 <span class="above-content-text">Opschaling:</span>
-<span id="exaggeration-slider"></span>
-<a class="above-content-text" href="javascript:void(0)" onclick="$('#colormaps').dialog('open')">Selecteer kleurenmap</a>
+<span id="exaggeration-slider" class="above-slider"></span>
+<button id="colormaps-button">Kleurenmap</button>
+<button id="extrude-button">Uitvullen</button>
+<span class="above-content-text">Transparantie:</span>
+<span id="polyalpha-slider" class="above-slider"></span>
+<span class="above-content-text">Verschuiving:</span>
+<span id="move-slider" class="above-slider"></span>
 {% endblock %}
 
 {% block content %}
 <div id="map3d"></div>
 {% include "lizard_kml/colormap.html" %}
 <script>
-//$(function() {
 $(document).ready(function(){
     // Set the slider ranges to 0-500, 1-50
     $("#lift-slider").slider({
-        stop: function(event, ui) {kmlViewerSetLift(ui.value);},
+        stop: function(event, ui) {kmlViewerSetParam('lift', ui.value);},
         min: 0.0,
         max: 500.0,
-        step: 1.0
+        step: 1.0,
+        value: 40.0
     });
     $("#exaggeration-slider").slider({
-        stop: function(event, ui) {kmlViewerSetExaggeration(ui.value);},
+        stop: function(event, ui) {kmlViewerSetParam('exaggeration', ui.value);},
         min: 1.0,
         max: 50.0,
-        step: 1.0
+        step: 1.0,
+        value: 4.0
     });
-    $("#colormaps").dialog({ autoOpen: false, height:300, width: 500 });
+    $("#colormaps-button").button();
+    $("#colormaps-button").click(function(event, ui) {$("#colormaps").dialog("open");});
+    $("#colormaps").dialog({
+        autoOpen: false,
+        height:300,
+        width: 500
+    });
+    var extrude = false;
+    $("#extrude-button").button();
+    $("#extrude-button").click(function(event, ui) {
+        extrude = !extrude;
+        if (extrude)
+            $(this).addClass('extrude-active');
+        else
+            $(this).removeClass('extrude-active');
+        kmlViewerSetParam('extrude', extrude ? 1 : 0);
+    });
+    $("#polyalpha-slider").slider({
+        stop: function(event, ui) {kmlViewerSetParam('polyalpha', ui.value);},
+        min: 0.0,
+        max: 1.0,
+        step: 0.05,
+        value: 0.8
+    });
+    $("#move-slider").slider({
+        stop: function(event, ui) {kmlViewerSetParam('move', ui.value);},
+        min: 0.0,
+        max: 2.0,
+        step: 0.1,
+        value: 0.1
+    });
     // load KML viewer
     kmlViewerInit();
 });

@@ -1,6 +1,7 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
 import os
 import collections
+import urllib
 
 from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
@@ -73,8 +74,7 @@ def build_overview_context(overview, kml_args_dict):
     result['lines'] = lines
     result['exaggeration'] = float(kml_args_dict.get('exaggeration', 4))
     result['lift'] = float(kml_args_dict.get('lift', 40))
-    result['colormap'] = kml_args_dict.get('colormap', '')
-
+    result['transect_url_params'] = urllib.urlencode(kml_args_dict)
     return result
 
 

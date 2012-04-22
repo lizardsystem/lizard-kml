@@ -1,7 +1,14 @@
 google.load('earth', '1');
 var ge = null;
 var kfc = new KmlFileCollection();
-var currentKmlParams = {lift:0.0, exaggeration:1.0, colormap:''};
+var currentKmlParams = {
+    lift:40.0,
+    exaggeration:4.0,
+    extrude:0,
+    polyalpha:0.8,
+    outline:0,
+    move:0.1
+};
 
 // "API"
 function kmlViewerInit() {
@@ -21,7 +28,7 @@ function initCallback(pluginInstance) {
 }
 
 function failureCallback() {
-    window.alert("failed to create Google Earth plugin instance");
+    //window.alert("failed to create Google Earth plugin instance");
 }
 
 // "API"
@@ -32,14 +39,9 @@ function kmlViewerLoadKml(url, isDynamic) {
 }
 
 // "API"
-function kmlViewerSetLift(lift) {
-    currentKmlParams['lift'] = lift;
-    kfc.reloadAllDynamic();
-}
-
-// "API"
-function kmlViewerSetExaggeration(exaggeration) {
-    currentKmlParams['exaggeration'] = exaggeration;
+function kmlViewerSetParam(k, v) {
+    //alert(k + ':' + v);
+    currentKmlParams[k] = v;
     kfc.reloadAllDynamic();
 }
 
@@ -143,13 +145,13 @@ function KmlFile(baseUrl, isDynamic) {
     };
     this.load = function(doResetView) {
         this.updateCounter++;
+        // remove currently loaded features, if there are any
+        this.unload();
         google.earth.fetchKml(ge, this.fullUrl(), partial(this.finishedLoading, this, this.updateCounter, doResetView));
     };
     this.finishedLoading = function(kmlFile, currentUpdateCount, doResetView, kmlObject) {
         if (kmlFile.updateCounter <= currentUpdateCount) {
             if (kmlObject) {
-                // remove currently loaded features, if there are any
-                kmlFile.unload();
                 // add new features
                 kmlFile.kmlObject = kmlObject;
                 ge.getFeatures().appendChild(kmlObject);
@@ -169,6 +171,7 @@ function KmlFile(baseUrl, isDynamic) {
     this.unload = function() {
         if (this.kmlObject != null) {
             ge.getFeatures().removeChild(this.kmlObject);
+            this.kmlObject = null;
         }
     };
 }

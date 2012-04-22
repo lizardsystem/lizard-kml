@@ -5,8 +5,16 @@
     margin-left:10px;
     margin-right:10px;
 }
-#lift-slider,
-#exaggeration-slider
+#above-content button,
+#above-content label
+{
+    margin:0;
+    margin-left:10px;
+    padding:0;
+    float:left;
+    line-height:0;
+}
+.above-slider
 {
     display:block;
     float:left;
@@ -21,4 +29,15 @@
 .tooltip
 {
     width:200px;
+}
+#above-content button.extrude-active
+{
+    background:none;
+    background-color:#bda;
+}
+#above-content .ui-button-text
+{
+    font-family:'Helvetica','sans-serif';
+    font-size:12px;
+    padding:1px 3px 1px 3px;
 }
