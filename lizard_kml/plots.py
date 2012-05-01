@@ -1,4 +1,5 @@
-# Code copied from openearthtools
+# (c) Nelen & Schuurmans & Deltares.  GPL licensed, see LICENSE.rst.
+# Code copied from openearth
 import itertools
 import cStringIO
 import functools

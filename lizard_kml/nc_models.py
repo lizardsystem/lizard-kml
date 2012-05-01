@@ -1,3 +1,5 @@
+# (c) Nelen & Schuurmans & Deltares.  GPL licensed, see LICENSE.rst
+# Code copied from openearth
 from django.conf import settings
 import netCDF4
 import datetime

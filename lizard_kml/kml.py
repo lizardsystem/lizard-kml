@@ -1,4 +1,5 @@
-# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
+# (c) Nelen & Schuurmans & Deltares.  GPL licensed, see LICENSE.rst
+# Code copied from openearth
 import os
 import collections
 import urllib
