@@ -1,10 +1,10 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
 from django.conf import settings
 from django.test.client import Client
-import nose.tools as nt
 from django.test import TestCase
+import nose.tools as nt
 
-from lizard_kml.nc_models import Transect, makejarkustransect
+from lizard_kml.jarkus.nc_models import Transect, makejarkustransect
 
 import numpy as np
 import logging
