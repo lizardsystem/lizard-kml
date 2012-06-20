@@ -40,7 +40,9 @@ var minimalPluginVersion = '6.2.2';
 var ge = null;
 var kvu = new KmlViewerUi();
 var kfc = new KmlFileCollection();
-/*
+
+
+// TEMP
 var currentKmlParams = {
     lift:40.0,
     exaggeration:4.0,
@@ -49,7 +51,7 @@ var currentKmlParams = {
     outline:0,
     move:0.1
 };
-*/
+
 /*
 // "API"
 function kmlViewerLoadKml(url, isDynamic) {
@@ -63,24 +65,27 @@ function kmlViewerLoadKml(url, isDynamic) {
 function kmlViewerUnloadAll() {
     kfc.unloadAll();
 }
-
-// "API"
-function kmlViewerSetParam(k, v) {
-    currentKmlParams[k] = v;
-    kfc.reloadAllDynamic();
-}
 */
 
+// TEMP
+function kmlViewerSetParam(k, v) {
+    currentKmlParams[k] = v;
+}
+
+// TEMP
+function kmlViewerCommitParams() {
+    kfc.reloadAllDynamic();
+}
+
 // "API"
-/*
 function kmlViewerSetColormap(colormap) {
     currentKmlParams['colormap'] = colormap;
     $('#colormaps').dialog('close');
-    kfc.reloadAllDynamic();
 }
-*/
 
 /*
+*/
+// TEMP
 function addPlacemarkClickListeners(kmlObject) {
     var placemarks = kmlObject.getElementsByType('KmlPlacemark');
     for (var i = 0; i < placemarks.getLength(); ++i) {
@@ -90,10 +95,12 @@ function addPlacemarkClickListeners(kmlObject) {
     }
 }
 
+// TEMP
 function setDescription(event, url) {
     var placemark = event.getTarget()
     $.get(url, {}, function(data) { placemark.setDescription(data) });
 }
+/*
 */
 
 /* ************************************************************************ */
@@ -248,7 +255,7 @@ KmlViewerUi.prototype.initControls = function() {
     // build a model for tree nodes containing some extra kml data
     Ext.define('KmlResourceNode', {
         extend: 'Ext.data.Model',
-        fields: ['text', 'description', 'kml_url', 'slug']
+        fields: ['kml_id', 'text', 'description', 'kml_url', 'slug']
     });
     Ext.data.NodeInterface.decorate(KmlResourceNode);
 
@@ -265,6 +272,7 @@ KmlViewerUi.prototype.initControls = function() {
                     });
                     category.kml_resources.forEach(function(k) {
                         var krn = new KmlResourceNode({
+                            kml_id: k.id,
                             text: k.name,
                             description: k.description,
                             leaf: true,
@@ -308,17 +316,23 @@ KmlViewerUi.prototype.initControls = function() {
                     }
                 }
                 else {
-                    //var checked = !(node.get('checked'));
-                    //thisView.suspendEvents();
-                    //node.set('checked', checked);
-                    //thisView.resumeEvents();
+                    var checked = !(node.get('checked'));
+                    thisView.suspendEvents();
+                    node.set('checked', checked);
+                    thisView.resumeEvents();
                     //thisView.fireEvent('checkchange', node, checked);
-                    kfc.loadKmlFile(node.get('kml_url'), node.get('slug'));
+                    if (checked) {
+                        kvu.setControlsDisabled(true);
+                        kfc.loadKmlFile(node.get('kml_id'), node.get('kml_url'), node.get('slug'));
+                    }
+                    else {
+                        kfc.unloadKmlFile(node.get('kml_id'));
+                    }
                 }
             },
             checkchange: function (node, checked, eOpts) {
                 //console.log('x=' + node.get('kml_url'));
-                kvu.setControlsDisabled(true);
+                //kvu.setControlsDisabled(true);
             }
         }
     });
@@ -341,7 +355,7 @@ KmlViewerUi.prototype.initControls = function() {
             this.treePanel,
             {
                 title: 'Jarkus',
-                html: 'slider<br/>'
+                html: '<br/>'
             }
         ],
         renderTo: Ext.get('extaccor')
@@ -563,17 +577,17 @@ function KmlFileCollection() {
 /**
  * Loads a new, or reloads an existing kml file.
  */
-KmlFileCollection.prototype.loadKmlFile = function(url, slug) {
+KmlFileCollection.prototype.loadKmlFile = function(id, url, slug) {
     var foundKmlFile = null;
     for (var i = 0; i < this.kmlFiles.length; i++) {
         var kmlFile = this.kmlFiles[i];
-        if (kmlFile.baseUrl == url) {
+        if (kmlFile.id == id) {
             foundKmlFile = kmlFile;
             break;
         }
     }
     if (foundKmlFile == null) {
-        foundKmlFile = new KmlFile(url, slug);
+        foundKmlFile = new KmlFile(id, url, slug);
         this.kmlFiles.push(foundKmlFile);
         foundKmlFile.load(true);
     }
@@ -588,7 +602,7 @@ KmlFileCollection.prototype.loadKmlFile = function(url, slug) {
 KmlFileCollection.prototype.reloadAllDynamic = function() {
     for (var i = 0; i < this.kmlFiles.length; i++) {
         var kmlFile = this.kmlFiles[i];
-        if (kmlFile.slug === "jarkus") {
+        if (kmlFile.slug === "jarkus" && kmlFile.kmlObject != null) {
             kmlFile.load(false);
         }
     }
@@ -604,6 +618,22 @@ KmlFileCollection.prototype.unloadAll = function() {
     this.kmlFiles.length = 0; // clear a JavaScript list (this is no joke)
 };
 
+/**
+ */
+KmlFileCollection.prototype.unloadKmlFile = function(id) {
+    var foundKmlFile = null;
+    for (var i = 0; i < this.kmlFiles.length; i++) {
+        var kmlFile = this.kmlFiles[i];
+        if (kmlFile.id == id) {
+            foundKmlFile = kmlFile;
+            break;
+        }
+    }
+    if (foundKmlFile != null) {
+        foundKmlFile.unload();
+    }
+};
+
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -616,10 +646,11 @@ KmlFileCollection.prototype.unloadAll = function() {
 /**
  * A KML resource which can add and remove itself from the Google Earth plugin.
  */
-function KmlFile(baseUrl, slug) {
+function KmlFile(id, baseUrl, slug) {
     /**
      * Attributes
      */
+    this.id = id;
     this.baseUrl = baseUrl;
     this.slug = slug;
     this.updateCounter = 0;
