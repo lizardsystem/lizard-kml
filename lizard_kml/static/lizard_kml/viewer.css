@@ -1,37 +1,38 @@
 /* above content */
-#above-content .above-content-text
+#tmp-controls .above-content-text
 {
     color:#000;
-    float:left;
     margin-left:10px;
     margin-right:10px;
+    display:inline-block;
+    width:100px;
 }
-#above-content button,
-#above-content label
+#tmp-controls button,
+#tmp-controls label
 {
     margin:0;
+    margin-top:0.5em;
     margin-left:10px;
     padding:0;
-    float:left;
-    line-height:0;
 }
-#above-content .above-slider
+#tmp-controls .above-slider
 {
-    display:block;
-    float:left;
+    display:inline-block;
     margin-top:0.5em;
     width:90px;
 }
-#above-content button.extrude-active
+#tmp-controls button.extrude-active
 {
     background:none;
     background-color:#bda;
 }
-#above-content .ui-button-text
+#tmp-controls .ui-button-text
 {
     font-family:Helvetica,sans-serif;
     font-size:12px;
     padding:1px 3px 1px 3px;
+}
+.tmp-controls-row {
 }
 
 /* main content */
@@ -42,6 +43,7 @@
 }
 
 /* sidebar */
+/*
 #edit-workspace li.workspace-item label {
     font-weight:normal !important;
     display:block;
@@ -58,6 +60,7 @@ li.kml-resource-link {
 li.kml-resource-link:hover {
     background-color:#ccc;
 }
+*/
 #kml-preview {
     display:none;
     margin-top:10px;
@@ -91,6 +94,7 @@ li.kml-resource-link:hover {
     margin-left:-100px;
 }
 
+/* Error message */
 #map3d-error-message {
     border:1px solid;
     margin:100px auto 0 auto;
@@ -103,7 +107,6 @@ li.kml-resource-link:hover {
     background-color:#FFBABA;
     background-image:url('error.png');
 }
-
 hr {
     border:none !important;
     background-color:#000 !important;
