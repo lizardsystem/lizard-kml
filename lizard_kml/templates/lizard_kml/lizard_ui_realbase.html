@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+{% load utility i18n %}
+{% load compress %}
+<html>
+  <head>
+    <title>
+      {% block title %}
+      {% endblock title %}
+    </title>
+    {% compress css %}
+    {% block css %}
+    {# Blueprint css framework. #}
+    {# Blueprint IE stylesheet is included separately later on #}
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}blueprint/screen.css"
+          type="text/css"
+          media="screen, projection" />
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}blueprint/print.css"
+          type="text/css"
+          media="print" />
+    {# Sprites: all icons (print, info, etc) in one cacheable image. #}
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}sprites/sprite.css"
+          type="text/css"
+          media="screen, projection" />
+    {# CSS for jquery-treeview #}
+    {% comment %}
+    <link type="text/css"
+          href="{{ STATIC_URL }}jquery-treeview/jquery.treeview.css"
+          rel="stylesheet"
+          media="screen, projection" />
+    {% endcomment %}
+    {# Our own css comes last #}
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.css"
+          type="text/css"
+          media="screen, projection" />
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}lizard_ui/print.css"
+          type="text/css"
+          media="print" />
+    {% endblock css %}
+    {% endcompress %}
+
+    <!--[if IE]>
+    {% compress css %}
+    <link rel="stylesheet"
+          href="{{ STATIC_URL }}blueprint/ie.css"
+          type="text/css"
+          media="screen, projection" />
+    {% endcompress %}
+    <![endif]-->
+
+    {% compress js %}
+    {% block javascript %}
+    {# Jquery #}
+    <script type="text/javascript"
+            src="{{ STATIC_URL }}jquery/jquery.js"></script>
+    {% comment %}
+    <script type="text/javascript"
+            src="{{ STATIC_URL }}jquery-treeview/jquery.treeview.js"></script>
+    {% endcomment %}
+    <script type="text/javascript"
+            src="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.js"></script>
+    {% endblock javascript %}
+    {% endcompress %}
+
+    {% block map-javascript %}
+    {% endblock map-javascript %}
+
+    {% block head-extras %}
+    {# Your own totally-unmanaged per-template extra css/javascript/links #}
+    {% endblock head-extras %}
+
+    <link rel="icon" href="{{ STATIC_URL }}lizard_ui/favicon.ico" type="images/x-icon" />
+    <link rel="SHORTCUT ICON" href="{{ STATIC_URL }}lizard_ui/favicon.ico" />
+  </head>
+  <body>
+    {% block page %}
+    <div id="page"
+         class="sidebar-open">
+      <div class="container">
+        {% block header %}
+        <div id="header"
+             class="clearfix">
+          <div id="logo">
+            {% block logo %}
+            {# Watch out: keep the tags next to each other without spaces #}
+            <a href="/" id="logo-img" title="{% trans "Back to homepage" %}"><img
+            src="{{ STATIC_URL }}lizard_ui/logo.png"
+            alt="Lizard" /></a>
+            {% endblock logo %}
+          </div>
+          <div id="portal-actions">
+            {% block portal-actions %}
+            &nbsp;
+            {% endblock portal-actions %}
+          </div>
+          <div id="portal-tabs">
+            {% block portal-tabs %}
+            &nbsp;
+            {% endblock portal-tabs %}
+          </div>
+          <div id="breadcrumbs">
+            &raquo; <a href="/" title="{% trans "Back to homepage" %}">Home</a>
+            &rarr; <a href="{% url lizard-kml-viewer %}" >Kustviewer</a>
+          </div>
+        </div>
+        {% endblock header %}
+        {# End of header #}
+
+        {% block main_area %}
+        <div id="main_area"
+             class="clear">
+          <div id="sidebar">
+            {% block sidebar %}
+            {% if application_screen_slug %}
+            {% application_icons application_screen_slug %}
+            {% endif %}
+            {% endblock sidebar %}
+          </div>
+          {# End of sidebar #}
+
+          <div id="collapser"></div>
+
+          <div id="main">
+            <div id="menubar">
+              <div id="object-actions">
+                {% block object-actions %}
+                &nbsp;
+                {% endblock object-actions %}
+              </div>
+              <div id="above-content">
+                {% block above-content %}
+                {% endblock above-content %}
+                &nbsp;
+              </div>
+            </div>
+            {# End of menubar #}
+
+            <div id="content">
+              {% block content %}
+              {% endblock content %}
+            </div>
+            {# End of content #}
+
+          </div>
+          {# End of main #}
+        </div>
+        {# End of main_area #}
+        {% endblock main_area %}
+      </div>
+      {# End of container #}
+    </div>
+    {# End of page #}
+    {% endblock page %}
+  </body>
+  {% if google_tracking_code %}
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', '{{ google_tracking_code }}']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  {% endif %}
+
+{# Ajax calls need a CSRF token cookie, and this line sends one as a side effect #}
+<!-- {{ csrf_token }} -->
+</html>
