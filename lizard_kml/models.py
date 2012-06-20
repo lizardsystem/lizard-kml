@@ -34,7 +34,7 @@ class KmlResource(models.Model):
     kml_type = models.CharField(_('kml_type'), max_length=40, blank=True, null=True)
     url = models.CharField(_('url'), max_length=200, blank=True, null=True)
     category = models.ForeignKey('Category', null=True, blank=True)
-    #slug = models.SlugField(null=True, blank=True)
+    slug = models.SlugField(null=True, blank=True)
     preview_image = models.FileField(upload_to='preview_images', max_length=500)
 
     def __unicode__(self):
