@@ -7,96 +7,71 @@ from django.views.generic import TemplateView, View
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.conf import settings
+from django.utils.translation import ugettext as _
+from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.models import Category, KmlResource
-from lizard_kml.kml import build_kml
-from lizard_kml.nc_models import makejarkustransect
-from lizard_kml.profiling import profile
-from lizard_kml.plots import eeg, jarkustimeseries
+from lizard_kml.utils import cache_result
+from lizard_kml.jarkus.kml import build_kml
+
+from pprint import pprint
 import logging
-import xlwt
+import urllib2
+import contextlib
+import datetime
+import calendar
 
 logger = logging.getLogger(__name__)
 
-class KmlView(View):
-    """
-    Renders a dynamic KML file.
-    """
+KML_MIRROR_CACHE_DURATION = 60 * 60 * 24 # in seconds: 24 hour
+KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
+KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
+MIME_KML = 'application/vnd.google-earth.kml+xml'
+MIME_KMZ = 'application/vnd.google-earth.kmz'
+KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ]
 
-    #@profile('kml.pyprof')
-    def get(self, request, kml_type, id=None):
-        """generate KML XML tree into a zipfile response"""
+class HeadRequest(urllib2.Request):
+    def get_method(self):
+        return "HEAD"
 
-        args = {}
-        args.update(request.GET.items())
-        if id is not None:
-            args['id'] = int(id)
-        return build_kml(self, kml_type, args)
+def urlopen(request):
+    return contextlib.closing(urllib2.urlopen(request, timeout=KML_MIRROR_FETCH_TIMEOUT))
 
-class InfoView(ViewContextMixin, TemplateView):
-    """
-    Renders a dynamic KML file.
-    """
-    template_name = "lizard_kml/info.html"
+@cache_result(KML_MIRROR_CACHE_DURATION, ignore_cache=False)
+def get_mirrored_kml(url):
+    logger.info("Downloading %s.", url)
+    with urlopen(urllib2.Request(url)) as response:
+        headers = response.info()
+        last_modified = headers.getdate('Last-Modified')
 
-    #@profile('kml.pyprof')
-    def get(self, request, id=None):
-        """generate info into a response"""
+        # check the content type
+        content_type = headers['Content-Type'].strip()
+        if content_type not in KML_MIRROR_TYPES:
+            raise Exception('Unsupported Content-Type')
 
-        self.id = int(id)
-        return super(InfoView, self).get(self, request)
+        # prevent humongous downloads
+        content_length = int(headers['Content-Length'].strip())
+        if content_length >= KML_MIRROR_MAX_CONTENT_LENGTH:
+            raise Exception('KML_MIRROR_MAX_CONTENT_LENGTH exceeded')
 
-    def gettable(self):
-        return gettable(self.id)
+        # perform the download
+        content = response.read(KML_MIRROR_MAX_CONTENT_LENGTH)
 
-def gettable(id):
-    tr = makejarkustransect(id)
-    return zip(tr.x, tr.y, tr.cross_shore, tr.z[-1])
+        # recompress KML to KMZ
+        if content_type == MIME_KML:
+            logger.info("Compressing %s to KMZ.", url)
+            content = compress_kml(content)
+            content_type = MIME_KMZ
+        return content, content_type
 
-class XlsView(View):
-    """
-    Renders a dynamic XLS file.
-    """
-
-    #@profile('kml.pyprof')
-    def get(self, request, id=None):
-        """generate info into a response"""
-
-        self.id = int(id)
-        import cStringIO
-        import xlwt
-        stream = cStringIO.StringIO()
-        wb = xlwt.Workbook()
-        sheet = wb.add_sheet('Transect {}'.format(self.id))
-        for i, row in enumerate(gettable(self.id)):
-            for j, value in enumerate(row):
-                sheet.write(i,j,value)
-        wb.save(stream)
-        bytes = stream.getvalue()
-        response = HttpResponse(bytes, mimetype="application/vnd.ms-excel")
-        response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
-        return response
-
-class ChartView(View):
-    """
-    Renders a dynamic Chart file.
-    """
-
-    def get(self, request, chart_type, id=None):
-        """generate info into a response"""
-
-        self.id = int(id)
-        import cStringIO
-        transect = makejarkustransect(id)
-        # TODO, sanitize the GET.... (format=png/pdf,size?)
-        if chart_type == 'eeg':
-            bytes = eeg(transect, {'format':'png'})
-        elif chart_type == 'jarkustimeseries':
-            bytes = jarkustimeseries(transect, {'format':'png' })
-        response = HttpResponse(bytes, mimetype="image/png")
-        # TODO for pdf:
-        # response['Content-Disposition'] = 'attachment; filename=transect{}.{}'.format(self.id, format=format)
+class KmlResourceView(View):
+    def get(self, request, kml_resource_id):
+        kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
+        if not kml_resource.is_dynamic:
+            content, content_type = get_mirrored_kml(kml_resource.url)
+        response = HttpResponse(content, content_type=content_type)
+        response['Content-Disposition'] = 'attachment; filename=kml_resource{}.kmz'.format(kml_resource.pk)
         return response
 
 class ViewerView(ViewContextMixin, TemplateView):
@@ -107,51 +82,48 @@ class ViewerView(ViewContextMixin, TemplateView):
 
     template_name = 'lizard_kml/viewer.html'
 
-    def get(self, request, category_id=None):
-        self.category_id = category_id
-
-        if self.category_id:
-            self._category = Category.objects.get(id=int(self.category_id))
-        else:
-            self._category = None
-
+    def get(self, request):
         return super(ViewerView, self).get(self, request)
 
-    @property
-    def category(self):
-        return self._category
-
     def category_tree(self):
-        return [
-            {
-                'name': category.name,
-                'url': reverse('lizard-kml-viewer', kwargs={'category_id': category.id}),
-                'description': category.description,
-            }
-            for category in Category.objects.all()
-        ]
-
-    def kml_resource_tree(self):
-        if self.category:
+        try:
             return [
                 {
-                    'name': kml_resource.name,
-                    'kml_url': self._mk_kml_resource_url(kml_resource),
-                    'is_dynamic': kml_resource.is_dynamic,
-                    'description': kml_resource.description,
+                    'name': category.name,
+                    'description': category.description,
+                    'children': self._kml_resource_tree(category),
                 }
-                for kml_resource in self.category.kmlresource_set.all()
+                for category in Category.objects.all()
             ]
+        except Exception as ex:
+            # wrap exception here to ensure
+            # exception doesn't have silent_variable_failure set
+            raise Exception(ex)
+
+    def _kml_resource_tree(self, category):
+        return [
+            {
+                'id': kml_resource.pk,
+                'name': kml_resource.name,
+                'url': self._mk_kml_resource_url(kml_resource),
+                'is_dynamic': kml_resource.is_dynamic,
+                'description': kml_resource.description,
+                'preview_image_url': kml_resource.preview_image.url
+            }
+            for kml_resource in category.kmlresource_set.all()
+        ]
 
     def _mk_kml_resource_url(self, kml_resource):
         if kml_resource.is_dynamic:
-            return self.request.build_absolute_uri(
-                reverse('lizard-kml-kml', kwargs={'kml_type': kml_resource.kml_type}))
+            rela = reverse('lizard-jarkus-kml', kwargs={'kml_type': 'lod'})
         else:
-            return kml_resource.url
+            rela = reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk})
+        now = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+        return self.request.build_absolute_uri(rela) + '?timestamp=' + str(now)
 
     def color_maps(self):
         return COLOR_MAPS
+
 
 COLOR_MAPS = [
     ('Accent', (0, 1)),
