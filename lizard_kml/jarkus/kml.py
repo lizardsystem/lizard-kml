@@ -69,6 +69,7 @@ def build_overview_context(overview, kml_args_dict):
             }
         coordinates = helpers.textcoordinates(x0=lon0, y0=lat0, x1=lon1, y1=lat1)
         line['coordinates'] = coordinates
+        line['point_coordinates'] = helpers.textcoordinates(x0=lon0, y0=lat0)
         line['bbox'] = bbox
         line['id'] = id
         lines.append(line)

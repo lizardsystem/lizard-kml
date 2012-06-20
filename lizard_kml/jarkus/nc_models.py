@@ -151,8 +151,8 @@ def makejarkusoverview():
     # TODO: bug in netCDF4 + 4.1.3 library opendap index 0 with nc_get_vara doesn't use index....
     # Make sure you use netcdf >=4.2
 
-    id = dataset.variables['id'][:] 
-    lon0 = dataset.variables['lon'][:,0] 
+    id = dataset.variables['id'][:]
+    lon0 = dataset.variables['lon'][:,0]
     lat0 = dataset.variables['lat'][:,1]
     lon1 = dataset.variables['lon'][:,-1]
     lat1 = dataset.variables['lat'][:,-1]
