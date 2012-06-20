@@ -63,8 +63,9 @@
         "name": "Jarkus",
         "description": "Jarkus",
         "is_dynamic": "1",
-        "kml_type": "",
-        "url": "http://192.168.56.101:8000/kml/jarkuskml/lod/",
+        "kml_type": "lod",
+        "url": "",
+        "slug": "jarkus",
         "category": "1",
         "preview_image": "../static_media/lizard_kml/figures/3.png"
     }
@@ -105,7 +106,7 @@
     "pk": 6,
     "model": "lizard_kml.kmlresource",
     "fields": {
-        "name": "Hoogwater - Laagwater - Duinvoet<br/>(1965-heden)",
+        "name": "1965-heden",
         "description": "Hoogwater - Laagwater - Duinvoet (1965-heden)",
         "is_dynamic": "0",
         "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/Jarkus_strandlijnen.kml",
@@ -117,7 +118,7 @@
     "pk": 7,
     "model": "lizard_kml.kmlresource",
     "fields": {
-        "name": "Hoogwater - Laagwater - Duinvoet<br/>(1843-1999)",
+        "name": "1843-1999",
         "description": "Hoogwater - Laagwater - Duinvoet (1843-1999)",
         "is_dynamic": "0",
         "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/strandlijnen.kml",
