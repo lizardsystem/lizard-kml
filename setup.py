@@ -18,8 +18,10 @@ install_requires = [
     'PIL',
     'matplotlib',
     'numpy',
-    'netCDF4',
-    'xlwt'
+    'netCDF4 == 0.9.9',
+    'xlwt == 0.7.4',
+    'django-tastypie == 0.9.11',
+    'djangorestframework == 0.3.3'
     ],
 
 tests_require = [
@@ -27,16 +29,16 @@ tests_require = [
 
 setup(name='lizard-kml',
       version=version,
-      description="TODO",
+      description="Keyhole Markup Language support for Lizard using the Google Earth plugin.",
       long_description=long_description,
       # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=['Programming Language :: Python',
                    'Framework :: Django',
                    ],
       keywords=[],
-      author='TODO',
-      author_email='TODO@nelen-schuurmans.nl',
-      url='',
+      author='Fedor Baart; Erik-Jan Vos',
+      author_email='erikjan.vos@nelen-schuurmans.nl',
+      url='http://nelen-schuurmans.nl/',
       license='GPL',
       packages=['lizard_kml'],
       include_package_data=True,
