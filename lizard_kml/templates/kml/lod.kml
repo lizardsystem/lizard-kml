@@ -2,104 +2,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
 {% load tools %}
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
-  <Document>
-    <name>Transect Overview</name>
-    <open>1</open>
-    <Style id="thin">
-      <LineStyle>
-	<color>33ffffff</color>
-      </LineStyle>
-    </Style>
-    <Style id="thick">
-      <IconStyle>
-	<scale>5</scale>
-      </IconStyle>
-      <LineStyle>
-	<color>88ffffff</color>
-      </LineStyle>
-    </Style>
-    <StyleMap id="whiteline">
-      <Pair>
-	<key>normal</key>
-	<styleUrl>#thin</styleUrl>
-      </Pair>
-      <Pair>
-	<key>highlight</key>
-	<styleUrl>#thick</styleUrl>
-      </Pair>
-    </StyleMap>
-    <Folder>
-      {% for line in lines reversed %}
-      <NetworkLink>
-	<name>Transect {{ line.id }} </name>
-	<Region>
-	  <LatLonAltBox>
-	    <north>{{ line.bbox.north }} </north>
-	    <south>{{ line.bbox.south }} </south>
-	    <east>{{ line.bbox.east }}</east>
-	    <west>{{ line.bbox.west }}</west>
-	    <minAltitude>-20</minAltitude>
-	    <!-- Make 50 meters high, so you get more transects if you fly over them -->
-	    <maxAltitude>50</maxAltitude>
-	    <altitudeMode>absolute</altitudeMode>
-	  </LatLonAltBox>
-	  <Lod>
-	    <!-- Don't show too many lines -->
-	    <!-- alternate lod, so we get different transects at different levels -->
-	    <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
-	  </Lod>
-	</Region>
-	<Link>
-	  {% comment %}
-	  Replace these query parameters in the url tag... (or extend url to match these parameters)
-	  Don't forget to escape &
-	  {% endcomment %}.
-	  <href>{% absurl lizard-kml-kml kml_type='transect' id=line.id %}?{{ transect_url_params }}</href>
-	  <viewRefreshMode>onRegion</viewRefreshMode>
-	</Link>
-      </NetworkLink>
-      <Placemark id="{{ line.id }}">
-	<name>Transect {{ line.id }} </name>
-	<styleUrl>#whiteline</styleUrl>
-	<LineString>
-	  <coordinates>
-	    {{ line.coordinates }}
-	  </coordinates>
-	</LineString>
-	<description><![CDATA[
-	{% comment %}
-	<!-- Still use an iframe, in case someone opens this page in google earth directly -->
-	<iframe src="{% absurl lizard-kml-info id=line.id %}" width="400"/>
-	{% endcomment %}
-	<p><img src="{% url lizard-kml-chart chart_type="eeg" id=line.id %}" /></p>
-	<p><img src="{% url lizard-kml-chart chart_type="jarkustimeseries" id=line.id %}" /></p>
-	<p>Download data as: <a href="{% url lizard-kml-xls id=line.id %}">xls</a></p>
-	]]>
-	</description>
-      </Placemark>
-      {% comment %}
-      <!-- for debugging lod -->
-      <Placemark>
-	<styleUrl>#whiteline</styleUrl>
-	<Polygon>
-	  <extrude>1</extrude>
-	  <altitudeMode>absolute</altitudeMode>
-	  <outerBoundaryIs>
-	    <LinearRing>
-	  <coordinates>
-	    {{ line.bbox.east }},{{ line.bbox.south }},40
-	    {{ line.bbox.west }},{{ line.bbox.south }},40
-	    {{ line.bbox.west }},{{ line.bbox.north }},40
-	    {{ line.bbox.east }},{{ line.bbox.north }},40
-	    {{ line.bbox.east }},{{ line.bbox.south }},40
-	  </coordinates>
-	    </LinearRing>
-	  </outerBoundaryIs>
-	</Polygon>
-      </Placemark>
-      {% endcomment %}
-      {% endfor %}
-    </Folder>
-  </Document>
+    <Document>
+        <name>Transect Overview</name>
+        <open>1</open>
+        <Style id="thin">
+            <LineStyle>
+                <color>33ffffff</color>
+            </LineStyle>
+        </Style>
+        <Style id="thick">
+            <IconStyle>
+                <scale>5</scale>
+            </IconStyle>
+            <LineStyle>
+                <color>88ffffff</color>
+            </LineStyle>
+        </Style>
+        <StyleMap id="whiteline">
+            <Pair>
+                <key>normal</key>
+                <styleUrl>#thin</styleUrl>
+            </Pair>
+            <Pair>
+                <key>highlight</key>
+                <styleUrl>#thick</styleUrl>
+            </Pair>
+        </StyleMap>
+        <Folder>
+            {% for line in lines reversed %}
+            <NetworkLink>
+                <name>Transect {{ line.id }}</name>
+                <Region>
+                    <LatLonAltBox>
+                        <north>{{ line.bbox.north }}</north>
+                        <south>{{ line.bbox.south }}</south>
+                        <east>{{ line.bbox.east }}</east>
+                        <west>{{ line.bbox.west }}</west>
+                        <minAltitude>-20</minAltitude>
+                        <!-- Make 50 meters high, so you get more transects if you fly over them -->
+                        <maxAltitude>50</maxAltitude>
+                        <altitudeMode>absolute</altitudeMode>
+                    </LatLonAltBox>
+                    <Lod>
+                        <!-- Don't show too many lines -->
+                        <!-- alternate lod, so we get different transects at different levels -->
+                        <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
+                    </Lod>
+                </Region>
+                <Link>
+                    {% comment %}
+                    Replace these query parameters in the url tag... (or extend url to match these parameters)
+                    Don't forget to escape &
+                    {% endcomment %}.
+                    <href>{% absurl lizard-jarkus-kml kml_type='transect' id=line.id %}?{{ transect_url_params }}</href>
+                    <viewRefreshMode>onRegion</viewRefreshMode>
+                </Link>
+            </NetworkLink>
+            <Placemark id="{{ line.id }}">
+                <name>Transect {{ line.id }}</name>
+                <styleUrl>#whiteline</styleUrl>
+                <LineString>
+                    <coordinates>{{ line.coordinates }}</coordinates>
+                </LineString>
+                <description>
+                    <![CDATA[
+                    {% comment %}
+                    <!-- Still use an iframe, in case someone opens this page in google earth directly -->
+                    <iframe src="{% absurl lizard-kml-info id=line.id %}" width="400"/>
+                    {% endcomment %}
+                    <p><img src="{% url lizard-kml-chart chart_type="eeg" id=line.id %}" /></p>
+                    <p><img src="{% url lizard-kml-chart chart_type="jarkustimeseries" id=line.id %}" /></p>
+                    <p>Download data as: <a href="{% url lizard-kml-xls id=line.id %}">xls</a></p>
+                    ]]>
+                </description>
+            </Placemark>
+            <Placemark id="{{ line.id }}-pm">
+                <Point>
+                    <coordinates>{{ line.point_coordinates }}</coordinates>
+                </Point>
+                <Lod>
+                    <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
+                </Lod>
+            </Placemark>
+            {% comment %}
+            {# for debugging lod #}
+            <Placemark>
+                <styleUrl>#whiteline</styleUrl>
+                <Polygon>
+                    <extrude>1</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing>
+                            <coordinates>
+                                {{ line.bbox.east }},{{ line.bbox.south }},40
+                                {{ line.bbox.west }},{{ line.bbox.south }},40
+                                {{ line.bbox.west }},{{ line.bbox.north }},40
+                                {{ line.bbox.east }},{{ line.bbox.north }},40
+                                {{ line.bbox.east }},{{ line.bbox.south }},40
+                            </coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            {% endcomment %}
+            {% endfor %}
+        </Folder>
+    </Document>
 </kml>
 {% endspaceless %}
