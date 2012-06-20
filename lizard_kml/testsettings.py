@@ -1,4 +1,5 @@
 import os
+import logging
 
 from lizard_ui.settingshelper import setup_logging
 from lizard_ui.settingshelper import STATICFILES_FINDERS
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'staticfiles',
     'compressor',
     'south',
+    'djangorestframework',
     'django_nose',
     'django_extensions',
     'django.contrib.admin',
@@ -67,12 +69,14 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages"
     )
 
+CACHE_BACKEND = 'file://%s' % os.path.join(BUILDOUT_DIR, 'var', 'cache')
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-doctest', '--verbosity=3']
 SOUTH_TESTS_MIGRATE = False # To disable migrations and use syncdb instead
 SKIP_SOUTH_TESTS = True # To disable South's own unit tests
 
-# Used for django-staticfiles (and for media files
+# Used for django-staticfiles (and for media files)
 STATIC_URL = '/static_media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 MEDIA_URL = '/media/'
@@ -80,12 +84,19 @@ STATIC_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'static')
 MEDIA_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'media')
 STATICFILES_FINDERS = STATICFILES_FINDERS
 
-# optional, download local: wget http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc
-# and override in local_testsettings.py if necessary
-NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
-# Use this if we break the deltares server....
-NC_RESOURCE = 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc'
+# NetCDF database containing the transect (coastal) data.
+# A local copy is highly recommended:
+# wget http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc
+# Also available over the internet:
+# NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
+# Use this if we break the deltares server:
+# NC_RESOURCE = 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc'
+NC_RESOURCE = os.path.join(BUILDOUT_DIR, 'transect.nc')
+
+# other local testsettings
+# TODO should move these to local test settings, and send Fedor an email about it :)
 if os.getlogin() == 'fedorbaart':
+    # fedors mac
     NC_RESOURCE = '/Users/fedorbaart/Downloads/transect.nc'
 
 try:
@@ -93,3 +104,7 @@ try:
     from lizard_kml.local_testsettings import *
 except ImportError:
     pass
+
+# ensure NC_RESOURCE points to an existing file to avoid developer confusion
+if not (NC_RESOURCE and os.path.isfile(NC_RESOURCE)):
+    logging.warn('Be sure to set NC_RESOURCE in your local_testsettings.py, and point it to the transect.nc database file.')
