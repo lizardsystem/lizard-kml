@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
+from django.views.decorators.cache import never_cache
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.models import Category, KmlResource
@@ -66,10 +67,17 @@ def get_mirrored_kml(url):
         return content, content_type
 
 class KmlResourceView(View):
+    @never_cache
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
         if not kml_resource.is_dynamic:
             content, content_type = get_mirrored_kml(kml_resource.url)
+        else:
+            # TODO HACK REMOVE ME
+            args = {}
+            args.update(request.GET.items())
+            content = build_kml(self, 'lod', args)
+            content_type = MIME_KMZ
         response = HttpResponse(content, content_type=content_type)
         response['Content-Disposition'] = 'attachment; filename=kml_resource{}.kmz'.format(kml_resource.pk)
         return response
