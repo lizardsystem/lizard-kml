@@ -1,68 +1,71 @@
-{% extends "lizard_ui/lizardbase.html" %}
-{% load tools %}
+{% extends "lizard_kml/lizard_ui_realbase.html" %}
+{# extends "lizard_ui/realbase.html" #}
 
-{% block subtitle %}Pilot 3D kustdata voor Deltares{% endblock %}
+{% block title %}Kustviewer - Lizard{% endblock %}
+
 {% block css %}
 {{ block.super }}
 <link rel="stylesheet"
       type="text/css"
+      href="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/resources/css/ext-all-scoped.css" />
+<link rel="stylesheet"
+      type="text/css"
       href="{{ STATIC_URL }}lizard_kml/viewer.css" />
-{% endblock %}
+{% endblock css %}
 
 {% block map-javascript %}
-<script src="https://www.google.com/jsapi"></script>
-<script src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
+{% comment %}
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/ext.js"></script>
+{% endcomment %}
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/ext-all-debug.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
 {% endblock map-javascript %}
 
 {% block sidebar %}
-<div class="sidebarbox sidebarbox-stretched"
-     id="accordion">
-  <h2>
-  Categorie{% if view.category %} ({{ view.category }}){% endif %}
-  </h2>
-  <ul id="category-pane"
-      class="automatic-tree filetree pane accordion-load-next"
-      data-next-pane-id="#kml-resource-pane"
-      data-title-id="#category-pane-title">
-    {% if view.category_tree %}
-      {% with "lizard_ui/tree_snippet.html" as tree_template %}
-        {% with view.category_tree as tree_items %}
-          {% include tree_template %}
-        {% endwith %}
-      {% endwith %}
-    {% else %}
-      <li>Geen categorie&euml;n beschikbaar.</li>
-    {% endif %}
-  </ul>
-  <h2>
-  Gegevensbronnen
-  </h2>
-  <ul id="kml-resource-pane"
-      class="automatic-tree filetree pane">
-    {% if view.kml_resource_tree %}
-      {% with "lizard_kml/tree_snippet.html" as tree_template %}
-        {% with view.kml_resource_tree as tree_items %}
-          {% include tree_template %}
-        {% endwith %}
-      {% endwith %}
-    {% else %}
-      {% if view.category %}
-        <li>Geen bronnen beschikbaar voor "{{ view.category }}".</li>
-      {% else %}
-        <li>Kies een categorie.</li>
-      {% endif %}
-    {% endif %}
-  </ul>
-  <h2>
-    Workspace
-  </h2>
-  <ul id="workspace-kml">
-  </ul>
-  <a href="javascript:void(0)" onclick="kmlViewerUnloadAll()">Maak workspace schoon</a>
+<div id="accordion" class="sidebarbox sidebarbox-stretched">
+  <div id="extaccor"></div>
 </div>
+{% comment %}
+<div id="accordion" class="sidebarbox sidebarbox-stretched">
+  <h2>Beschikbare kaartlagen</h2>
+  <ul class="automatic-tree filetree treeview kmltree">
+    {% for category in view.category_tree %}
+    <li>
+      {# category node #}
+      <span class="folder">{{ category.name|safe }}</span>
+      <ul>
+        {% for child in category.children %}
+        <li class="kml-resource-link"
+            data-kml-resource-id="{{ child.id }}"
+            data-kml-resource-url="{{ child.url }}"
+            data-preview-image-url="{{ child.preview_image_url }}">
+            {{ child.name|safe }}
+        </li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
+  </ul>
+  <h2>Context</h2>
+  <img id="kml-preview" src="data:null" alt="preview" width="200" height="150" />
+  <div id="extslider"></div>
+  <h2>Jarkus</h2>
+</div>
+<div id="context-workspace" class="sidebarbox workspace">
+</div>
+<div id="edit-workspace" class="sidebarbox workspace">
+</div>
+{% endcomment %}
 {% endblock %}
 
 {% block above-content %}
+<a href="javascript:void(0)" onclick="kvu.tsc.rewind()">rewind</a>
+<a href="javascript:void(0)" onclick="kvu.tsc.togglePlayPause()">play/pause</a>
+<a href="javascript:void(0)" onclick="kvu.setDefaultView()">setDefaultView</a>
+<a href="javascript:void(0)" onclick="kfc.unloadAll()">unloadAll</a>
+<a href="javascript:void(0)" onclick="kvu.replaceMapWithErrorMessage('test')">mkerror</a>
+{% comment %}
 <span class="above-content-text">Ophoging:</span>
 <span id="lift-slider" class="above-slider"></span>
 <span class="above-content-text">Opschaling:</span>
@@ -73,15 +76,24 @@
 <span id="polyalpha-slider" class="above-slider"></span>
 <span class="above-content-text">Verschuiving:</span>
 <span id="move-slider" class="above-slider"></span>
+{% endcomment %}
 {% endblock %}
+
+{% block page %}
+{{ block.super }}
+<div id="loader">
+  <div id="loader-inner"></div>
+  <div id="loader-text"><noscript>Om deze site te bezoeken, is een browser met ondersteuning voor Javascript nodig.</noscript></div>
+</div>
+{% endblock page %}
 
 {% block content %}
 <div id="map3d"></div>
-{% include "lizard_kml/colormap.html" %}
+{# include "lizard_kml/colormap.html" #}
 <script>
-$(document).ready(function(){
+//$(document).ready(function(){
     // Set the slider ranges to 0-500, 1-50
-    $("#lift-slider").slider({
+    /*$("#lift-slider").slider({
         stop: function(event, ui) {kmlViewerSetParam('lift', ui.value);},
         min: 0.0,
         max: 500.0,
@@ -125,9 +137,9 @@ $(document).ready(function(){
         max: 2.0,
         step: 0.1,
         value: 0.1
-    });
+    });*/
     // load KML viewer
-    kmlViewerInit();
-});
+    //initializeComponents();
+//});
 </script>
 {% endblock %}
