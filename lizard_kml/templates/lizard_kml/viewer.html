@@ -17,7 +17,7 @@
 {% comment %}
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/ext.js"></script>
 {% endcomment %}
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/ext-all-debug.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1-rc2/ext-all.js"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
 {% endblock map-javascript %}
@@ -25,6 +25,31 @@
 {% block sidebar %}
 <div id="accordion" class="sidebarbox sidebarbox-stretched">
   <div id="extaccor"></div>
+  <div id="tmp-controls">
+    <div class="tmp-controls-row">
+      <span class="above-content-text">Ophoging:</span>
+      <span id="lift-slider" class="above-slider"></span>
+    </div>
+    <div class="tmp-controls-row">
+      <span class="above-content-text">Opschaling:</span>
+      <span id="exaggeration-slider" class="above-slider"></span>
+    </div>
+    <div class="tmp-controls-row">
+      <button id="colormaps-button">Kleurenmap</button>
+      <button id="extrude-button">Uitvullen</button>
+    </div>
+    <div class="tmp-controls-row">
+      <span class="above-content-text">Transparantie:</span>
+      <span id="polyalpha-slider" class="above-slider"></span>
+    </div>
+    <div class="tmp-controls-row">
+      <span class="above-content-text">Verschuiving:</span>
+      <span id="move-slider" class="above-slider"></span>
+    </div>
+    <div class="tmp-controls-row">
+      <button id="commit-button">Verander weergave</button>
+    </div>
+  </div>
 </div>
 {% comment %}
 <div id="accordion" class="sidebarbox sidebarbox-stretched">
@@ -62,38 +87,28 @@
 {% block above-content %}
 <a href="javascript:void(0)" onclick="kvu.tsc.rewind()">rewind</a>
 <a href="javascript:void(0)" onclick="kvu.tsc.togglePlayPause()">play/pause</a>
-<a href="javascript:void(0)" onclick="kvu.setDefaultView()">setDefaultView</a>
+<a href="javascript:void(0)" onclick="kvu.setDefaultView()">default view</a>
+{% comment %}
 <a href="javascript:void(0)" onclick="kfc.unloadAll()">unloadAll</a>
 <a href="javascript:void(0)" onclick="kvu.replaceMapWithErrorMessage('test')">mkerror</a>
-{% comment %}
-<span class="above-content-text">Ophoging:</span>
-<span id="lift-slider" class="above-slider"></span>
-<span class="above-content-text">Opschaling:</span>
-<span id="exaggeration-slider" class="above-slider"></span>
-<button id="colormaps-button">Kleurenmap</button>
-<button id="extrude-button">Uitvullen</button>
-<span class="above-content-text">Transparantie:</span>
-<span id="polyalpha-slider" class="above-slider"></span>
-<span class="above-content-text">Verschuiving:</span>
-<span id="move-slider" class="above-slider"></span>
 {% endcomment %}
 {% endblock %}
 
+{% block content %}
+<div id="map3d"></div>
+{% endblock %}
+
 {% block page %}
+{% include "lizard_kml/colormap.html" %}
 {{ block.super }}
 <div id="loader">
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Om deze site te bezoeken, is een browser met ondersteuning voor Javascript nodig.</noscript></div>
 </div>
-{% endblock page %}
-
-{% block content %}
-<div id="map3d"></div>
-{# include "lizard_kml/colormap.html" #}
-<script>
-//$(document).ready(function(){
+<script type="text/javascript">
+$(document).ready(function(){
     // Set the slider ranges to 0-500, 1-50
-    /*$("#lift-slider").slider({
+    $("#lift-slider").slider({
         stop: function(event, ui) {kmlViewerSetParam('lift', ui.value);},
         min: 0.0,
         max: 500.0,
@@ -111,8 +126,9 @@
     $("#colormaps-button").click(function(event, ui) {$("#colormaps").dialog("open");});
     $("#colormaps").dialog({
         autoOpen: false,
-        height:300,
-        width: 500
+        height: 300,
+        width: 500,
+        position: [0, 0]
     });
     var extrude = false;
     $("#extrude-button").button();
@@ -137,9 +153,11 @@
         max: 2.0,
         step: 0.1,
         value: 0.1
-    });*/
+    });
+    $("#commit-button").button();
+    $("#commit-button").click(function(event, ui) {kmlViewerCommitParams();});
     // load KML viewer
     //initializeComponents();
-//});
+});
 </script>
-{% endblock %}
+{% endblock page %}
