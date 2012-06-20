@@ -1,6 +1,8 @@
 import hotshot
 import os
 import time
+import hotshot.stats
+import sys
 
 
 PROFILE_LOG_BASE = "/tmp"
@@ -40,3 +42,15 @@ def profile(log_file):
 
         return _inner
     return _outer
+
+
+if __name__ == '__main__':
+    argv = sys.argv[1:]
+    if argv:
+        stats = hotshot.stats.load(argv[0])
+        #stats.strip_dirs()
+        stats.sort_stats('time', 'calls')
+        stats.print_stats(20)
+    else:
+        print 'Supply a .pyprof file as the first argument, like this:'
+        print '#', sys.argv[0], '/tmp/testrun.pyprof'
