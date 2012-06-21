@@ -10,6 +10,8 @@ function refreshLoadedModules() {
 }
 
 // Google Earth plugin
+google.load('earth', '1');
+// keep it in this order!
 google.setOnLoadCallback(
     function () {
         console.log('GEAPI ready');
@@ -17,7 +19,6 @@ google.setOnLoadCallback(
         refreshLoadedModules();
     }
 );
-google.load('earth', '1');
 
 // Ext JS
 Ext.BLANK_IMAGE_URL = '/static_media/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
