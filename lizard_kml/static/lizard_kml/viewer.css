@@ -66,6 +66,11 @@ li.kml-resource-link:hover {
     margin-top:10px;
 }
 
+/* Ext.js overrides */
+.x-form-item-label {
+    font-size:11px;
+}
+
 /* loader */
 #loader {
 	padding:0;
