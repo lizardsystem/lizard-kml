@@ -91,14 +91,18 @@ function addPlacemarkClickListeners(kmlObject) {
     for (var i = 0; i < placemarks.getLength(); ++i) {
         var placemark = placemarks.item(i);
         var url = '/kml/info/'+ placemark.getId() + '/';
-        google.earth.addEventListener(placemark, 'click', function(event) { setDescription(event, url);});
+        google.earth.addEventListener(placemark, 'click', function (event) {
+            setDescription(event, url);
+        });
     }
 }
 
 // TEMP
 function setDescription(event, url) {
-    var placemark = event.getTarget()
-    $.get(url, {}, function(data) { placemark.setDescription(data) });
+    var placemark = event.getTarget();
+    $.get(url, {}, function (data) {
+        placemark.setDescription(data)
+    });
 }
 /*
 */
@@ -144,7 +148,7 @@ if (!Function.prototype.bind) {
  */
 function partial(func /*, 0..n args */) {
     var args = Array.prototype.slice.call(arguments, 1);
-    return function() {
+    return function () {
         var allArguments = args.concat(Array.prototype.slice.call(arguments));
         return func.apply(this, allArguments);
     };
@@ -165,7 +169,7 @@ function parseUrl(url) {
  * Does what it says.
  */
 function parseVersionString(str) {
-    if (typeof(str) != 'string') { return false; }
+    if (typeof(str) !== 'string') { return false; }
     var v = str.split('.');
     return {
         major: parseInt(v[0]) || 0,
@@ -180,13 +184,13 @@ function parseVersionString(str) {
 function minVersionMet(vmin, vcurrent) {
     minimum = parseVersionString(vmin);
     running = parseVersionString(vcurrent);
-    if (running.major != minimum.major)
+    if (running.major !== minimum.major)
         return (running.major > minimum.major);
     else {
-        if (running.minor != minimum.minor)
+        if (running.minor !== minimum.minor)
             return (running.minor > minimum.minor);
         else {
-            if (running.patch != minimum.patch)
+            if (running.patch !== minimum.patch)
                 return (running.patch > minimum.patch);
             else
                 return true;
@@ -208,9 +212,10 @@ function minVersionMet(vmin, vcurrent) {
  */
 function KmlViewerUi() {
     /**
-     * Attributes
+     * Object for controlling the Google Earth time slider.
      */
     this.tsc = new GETimeSliderControl();
+    this.treeStore = null;
     this.treePanel = null;
     this.accordion = null;
 }
@@ -218,16 +223,20 @@ function KmlViewerUi() {
 /**
  * This method assumes the DOM is ready.
  */
-KmlViewerUi.prototype.init = function() {
+KmlViewerUi.prototype.init = function () {
     // (lizard-ui) resize the ui
     setupLizardUi();
+    // build the Ext.js controls
     this.initControls();
+    // remove loading overlay
+    // don't initialize Google Earth until after this is done 
     this.removeLoadingOverlay(this.initGoogleEarth.bind(this));
 };
 
 /**
+ * Initialize the main Google Earth plugin instance.
  */
-KmlViewerUi.prototype.initGoogleEarth = function() {
+KmlViewerUi.prototype.initGoogleEarth = function () {
     if (!google.earth.isSupported()) {
         this.replaceMapWithErrorMessage(
             'De Google Earth plugin wordt helaas niet ondersteund door uw systeem. ' +
@@ -251,7 +260,7 @@ KmlViewerUi.prototype.initGoogleEarth = function() {
 
 /**
  */
-KmlViewerUi.prototype.initControls = function() {
+KmlViewerUi.prototype.initControls = function () {
     // build a model for tree nodes containing some extra kml data
     Ext.define('KmlResourceNode', {
         extend: 'Ext.data.Model',
@@ -260,17 +269,17 @@ KmlViewerUi.prototype.initControls = function() {
     Ext.data.NodeInterface.decorate(KmlResourceNode);
 
     // create a store for adapting the json output
-    var store = Ext.create('Ext.data.TreeStore', {
+    this.treeStore = Ext.create('Ext.data.TreeStore', {
         listeners: {
-            load: function(thisStore, rootNode, records, successful, eOpts){
+            load: function (thisStore, rootNode, records, successful, eOpts){
                 var categories = thisStore.proxy.reader.rawData.categories;
-                categories.forEach(function(category) {
+                categories.forEach(function (category) {
                     var categoryNode = rootNode.appendChild({
                         text: category.name,
                         expanded: true,
                         leaf: false
                     });
-                    category.kml_resources.forEach(function(k) {
+                    category.kml_resources.forEach(function (k) {
                         var krn = new KmlResourceNode({
                             kml_id: k.id,
                             text: k.name,
@@ -298,7 +307,7 @@ KmlViewerUi.prototype.initControls = function() {
     // create the tree panel (and view)
     this.treePanel = Ext.create('Ext.tree.Panel', {
         title: 'Kaartlagen',
-        store: store,
+        store: this.treeStore,
         rootVisible: false,
         plain: false,
         multiSelect: false,
@@ -310,31 +319,23 @@ KmlViewerUi.prototype.initControls = function() {
         listeners: {
             itemclick: function (thisView, node, item, index, event, eOpts) {
                 if (!node.isLeaf()) {
+                    // user clicked on a category, collapse / expand it
                     if (node.isExpanded()) {
                         node.collapse();
-                    } else {
+                    }
+                    else {
                         node.expand();
                     }
                 }
                 else {
+                    // user clicked on a 'leaf' node, set the checkbox
                     var checked = !(node.get('checked'));
-                    thisView.suspendEvents();
                     node.set('checked', checked);
-                    thisView.resumeEvents();
-                    //thisView.fireEvent('checkchange', node, checked);
-                    if (checked) {
-                        kvu.setControlsDisabled(true);
-                        kfc.loadKmlFile(node.get('kml_id'), node.get('kml_url'), node.get('slug'));
-                    }
-                    else {
-                        kfc.unloadKmlFile(node.get('kml_id'));
-                    }
+                    kfc.fireUpdate();
                 }
             },
-            checkchange: function (node, checked, eOpts) {
-                //console.log('x=' + node.get('kml_url'));
-                //kvu.setControlsDisabled(true);
-            },
+            // checkchange: function (node, checked, eOpts) {
+            // },
             itemmouseenter: function (thisView, node, item, index, event, eOpts) {
                 $('#kml-preview').attr('src', node.get('preview_image_url'));
                 $('#kml-preview').show();
@@ -370,11 +371,48 @@ KmlViewerUi.prototype.initControls = function() {
     });
 };
 
-KmlViewerUi.prototype.setControlsDisabled = function(disabled) {
-    this.accordion.setDisabled(disabled);
-}
+/**
+ * Get an associative array of some data in the treenodes which are checked.
+ */
+KmlViewerUi.prototype.getChecked = function () {
+    var checked = {};
+    this.treePanel.getChecked().forEach(function (node) {
+        var kml_id = node.get('kml_id');
+        checked[kml_id] = {
+            id: kml_id,
+            url: node.get('kml_url'),
+            slug: node.get('slug')
+        };
+    });
+    return checked;
+};
 
-KmlViewerUi.prototype.removeLoadingOverlay = function(callback) {
+/**
+ * Test the treenode belonging to an kml_id is checked.
+ */
+KmlViewerUi.prototype.isChecked = function (id) {
+    var found = false;
+    this.treePanel.getChecked().forEach(function (node) {
+        var kml_id = node.get('kml_id');
+        if (id === kml_id) {
+            found = true;
+            return false; // NOTE: this exits the forEach loop
+        }
+    });
+    return found;
+};
+
+/**
+ * Disable (make gray') all UI controls.
+ */
+KmlViewerUi.prototype.setControlsDisabled = function (disabled) {
+    this.accordion.setDisabled(disabled);
+};
+
+/**
+ * Fade out the overlay. Passed callback is called when the fade is finished.
+ */
+KmlViewerUi.prototype.removeLoadingOverlay = function (callback) {
     var loader = Ext.get('loader');
     loader.fadeOut({
         delay: 500,
@@ -384,6 +422,9 @@ KmlViewerUi.prototype.removeLoadingOverlay = function(callback) {
     });
 };
 
+/**
+ * Called by the Google Earth plugin 
+ */
 KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     // determine version
     // if version detection fails, continue by default
@@ -448,7 +489,7 @@ KmlViewerUi.prototype.setDefaultView = function () {
 KmlViewerUi.prototype.replaceMapWithErrorMessage = function (html) {
     var $el;
     $el = $('#map3d-error-message');
-    if ($el.length != 0) {
+    if ($el.length !== 0) {
         // already a message on screen
         $el.append('<hr style="margin:0;"/>' + html);
     }
@@ -480,19 +521,19 @@ function GETimeSliderControl() {
     this.rateStep = 60 * 60 * 24 * 365; // amount of seconds in a year
     this.isPlaying = false; // keep our own playing / stopped state
     this.animationStopInterval = null;
-};
+}
 
-GETimeSliderControl.prototype.startControl = function() {
+GETimeSliderControl.prototype.startControl = function () {
     this.animationStopInterval = window.setInterval(this.animationStopTick.bind(this), 300);
 };
 
-GETimeSliderControl.prototype.stopControl = function() {
+GETimeSliderControl.prototype.stopControl = function () {
     if (this.animationStopInterval) {
         window.clearInterval(this.animationStopInterval);
     }
 };
 
-GETimeSliderControl.prototype.togglePlayPause = function() {
+GETimeSliderControl.prototype.togglePlayPause = function () {
     // true if an animation is playing without us having
     // initiated it
     var isPlayingExternal = ge.getTime().getRate() > 0;
@@ -511,17 +552,17 @@ GETimeSliderControl.prototype.togglePlayPause = function() {
     }
 };
 
-GETimeSliderControl.prototype.rewind = function() {
+GETimeSliderControl.prototype.rewind = function () {
     this.pause();
     this.setCurrentTime(this.getExtentBegin());
 };
 
-GETimeSliderControl.prototype.pause = function() {
+GETimeSliderControl.prototype.pause = function () {
     ge.getTime().setRate(0);
     this.isPlaying = false;
 };
 
-GETimeSliderControl.prototype.animationStopTick = function() {
+GETimeSliderControl.prototype.animationStopTick = function () {
     if (this.isPlaying) {
         if (this.isPastEnd()) {
             // we are past the extents, pause the animation
@@ -532,24 +573,24 @@ GETimeSliderControl.prototype.animationStopTick = function() {
     }
 };
 
-GETimeSliderControl.prototype.getExtentBegin = function() {
+GETimeSliderControl.prototype.getExtentBegin = function () {
     var extents = ge.getTime().getControl().getExtents();
     return extents.getBegin().get();
 };
 
-GETimeSliderControl.prototype.getExtentEnd = function() {
+GETimeSliderControl.prototype.getExtentEnd = function () {
     var extents = ge.getTime().getControl().getExtents();
     return extents.getEnd().get();
 };
 
-GETimeSliderControl.prototype.isPastEnd = function() {
+GETimeSliderControl.prototype.isPastEnd = function () {
     return this.getCurrentTimeEnd() >= this.getExtentEnd();
 };
 
-GETimeSliderControl.prototype.getCurrentTimeEnd = function() {
+GETimeSliderControl.prototype.getCurrentTimeEnd = function () {
     var currentTime = ge.getTime().getTimePrimitive();
     var currentTimeEnd;
-    if (currentTime.getType() == 'KmlTimeSpan') {
+    if (currentTime.getType() === 'KmlTimeSpan') {
         currentTimeEnd = currentTime.getEnd().get();
     } else {
         currentTimeEnd = currentTime.getWhen().get();
@@ -557,7 +598,7 @@ GETimeSliderControl.prototype.getCurrentTimeEnd = function() {
     return currentTimeEnd;
 };
 
-GETimeSliderControl.prototype.setCurrentTime = function(time) {
+GETimeSliderControl.prototype.setCurrentTime = function (time) {
     var timeStamp = ge.createTimeStamp('');
     timeStamp.getWhen().set(time);
     ge.getTime().setTimePrimitive(timeStamp);
@@ -577,69 +618,98 @@ GETimeSliderControl.prototype.setCurrentTime = function(time) {
  */
 function KmlFileCollection() {
     /**
-     * List of KmlFile objects.
+     * Array of KmlFile objects, maps id to object.
      */
-    this.kmlFiles = [];
+    this.kmlFiles = {};
+    /**
+     * True while an update is happening.
+     */
+    this.isUpdating = false;
+    this.updateTimeout = null;
 }
 
 /**
- * Loads a new, or reloads an existing kml file.
+ * Ensure that an update of the loaded KML files happens somewhere in the near future.
  */
-KmlFileCollection.prototype.loadKmlFile = function(id, url, slug) {
-    var foundKmlFile = null;
-    for (var i = 0; i < this.kmlFiles.length; i++) {
-        var kmlFile = this.kmlFiles[i];
-        if (kmlFile.id == id) {
-            foundKmlFile = kmlFile;
-            break;
+KmlFileCollection.prototype.fireUpdate = function () {
+    // clear old timeout
+    if (this.updateTimeout !== null) {
+        clearTimeout(this.updateTimeout);
+    }
+    // set a new one
+    this.updateTimeout = setTimeout(this.update.bind(this), 300);
+};
+
+/**
+ * Refreshes the loaded Kml files based on the state of the checkboxes in the
+ * checkbox tree.
+ */
+KmlFileCollection.prototype.update = function () {
+    // immediately stop if we're already updating
+    if (!this.isUpdating) {
+        // "lock" this function
+        this.isUpdating = true;
+
+        // reset the timeout
+        this.updateTimeout = null;
+
+        // get a assoc. array of checked items
+        var checked = kvu.getChecked();
+
+        // unload nonchecked kml files
+        for (var i in this.kmlFiles) {
+            var kmlFile = this.kmlFiles[i];
+            if (!(kmlFile.id in checked)) {
+                kmlFile.unload();
+                delete this.kmlFiles[kmlFile.id];
+            }
         }
+
+        // load all checked kml files
+        for (var i in checked) {
+            var item = checked[i];
+            if (!(item.id in this.kmlFiles)) {
+                this.startLoadingKmlFile(item.id, item.url, item.slug);
+            }
+        }
+
+        // "unlock" this function
+        this.isUpdating = false;
     }
-    if (foundKmlFile == null) {
-        foundKmlFile = new KmlFile(id, url, slug);
-        this.kmlFiles.push(foundKmlFile);
-        foundKmlFile.load(true);
-    }
-    else {
-        foundKmlFile.load(false);
-    }
+};
+
+/**
+ * Create a new KmlFile entry and try loading it in the Google Earth plugin.
+ */
+KmlFileCollection.prototype.startLoadingKmlFile = function (id, url, slug) {
+    var k = new KmlFile(id, url, slug);
+    this.kmlFiles[id] = k;
+    k.load(function () {
+        return kvu.isChecked(id);
+    });
 };
 
 /**
  * Call this when params (lift, exaggeration etc) change.
  */
-KmlFileCollection.prototype.reloadAllDynamic = function() {
+KmlFileCollection.prototype.reloadAllDynamic = function () {
     for (var i = 0; i < this.kmlFiles.length; i++) {
         var kmlFile = this.kmlFiles[i];
-        if (kmlFile.slug === "jarkus" && kmlFile.kmlObject != null) {
-            kmlFile.load(false);
+        if (kmlFile.slug === "jarkus" && kmlFile.kmlObject !== null) {
+            kmlFile.load();
         }
     }
 };
 
 /**
+ * Remove all loaded KML files.
  */
-KmlFileCollection.prototype.unloadAll = function() {
+KmlFileCollection.prototype.unloadAll = function () {
     for (var i = 0; i < this.kmlFiles.length; i++) {
         var kmlFile = this.kmlFiles[i];
         kmlFile.unload();
     }
     this.kmlFiles.length = 0; // clear a JavaScript list (this is no joke)
-};
-
-/**
- */
-KmlFileCollection.prototype.unloadKmlFile = function(id) {
-    var foundKmlFile = null;
-    for (var i = 0; i < this.kmlFiles.length; i++) {
-        var kmlFile = this.kmlFiles[i];
-        if (kmlFile.id == id) {
-            foundKmlFile = kmlFile;
-            break;
-        }
-    }
-    if (foundKmlFile != null) {
-        foundKmlFile.unload();
-    }
 };
 
 /* ************************************************************************ */
@@ -655,19 +725,16 @@ KmlFileCollection.prototype.unloadKmlFile = function(id) {
  * A KML resource which can add and remove itself from the Google Earth plugin.
  */
 function KmlFile(id, baseUrl, slug) {
-    /**
-     * Attributes
-     */
     this.id = id;
     this.baseUrl = baseUrl;
     this.slug = slug;
-    this.updateCounter = 0;
     this.kmlObject = null;
 }
 
 /**
+ * Get the url for this KML file.
  */
-KmlFile.prototype.fullUrl = function() {
+KmlFile.prototype.fullUrl = function () {
     if (this.slug === "jarkus")
         return this.baseUrl + '?' + jQuery.param(currentKmlParams);
     else
@@ -675,22 +742,32 @@ KmlFile.prototype.fullUrl = function() {
 };
 
 /**
+ * Ask Google Earth to fetch the KML and convert it to an object.
+ * Ensures beforeAddCallback is called before actually adding the object,
+ * based on its return value.
  */
-KmlFile.prototype.load = function(doResetView) {
-    // remove currently loaded features, if there are any
-    this.unload();
-    var kmlFile = this;
-    var currentUpdateCount = ++this.updateCounter;
-    google.earth.fetchKml(ge, this.fullUrl(), function(kmlObject) {
-        kmlFile.finishedLoading(kmlObject, currentUpdateCount, doResetView);
+KmlFile.prototype.load = function (beforeAddCallback) {
+    var self = this;
+    console.log("loading " + this);
+    google.earth.fetchKml(ge, this.fullUrl(), function (kmlObject) {
+        self.finishedLoading(kmlObject, beforeAddCallback);
     });
 };
 
 /**
+ * Add a object to the Google Earth features.
+ * Ensures beforeAddCallback is called before actually adding the object,
+ * based on its return value.
  */
-KmlFile.prototype.finishedLoading = function(kmlObject, currentUpdateCount, doResetView) {
-    //if (this.updateCounter <= currentUpdateCount) {
-        if (kmlObject) {
+KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
+    if (kmlObject) {
+        console.log("loaded " + this);
+        // check if the KML is still needed
+        var doContinue = true;
+        if (beforeAddCallback !== undefined) {
+            doContinue = beforeAddCallback();
+        }
+        if (doContinue) { 
             // add new features
             this.kmlObject = kmlObject;
             ge.getFeatures().appendChild(kmlObject);
@@ -698,34 +775,40 @@ KmlFile.prototype.finishedLoading = function(kmlObject, currentUpdateCount, doRe
             if (this.slug === "jarkus") {
                 addPlacemarkClickListeners(kmlObject);
             }
-            // fly to view defined by KML, if desired
-            if (doResetView && kmlObject.getAbstractView()) {
-                ge.getView().setAbstractView(kmlObject.getAbstractView());
-            }
         }
         else {
-            console.log("failed to load KML data");
+            console.log("load canceled");
         }
-    //}
-
-    // re-enable controls anyway
-    kvu.setControlsDisabled(false);
+    }
+    else {
+        console.log("failed to load " + this);
+    }
 };
 
 /**
  * Remove the KML data from the Google Earth plugin.
  */
-KmlFile.prototype.unload = function() {
-    if (this.kmlObject != null) {
+KmlFile.prototype.unload = function () {
+    if (this.kmlObject !== null) {
         ge.getFeatures().removeChild(this.kmlObject);
         this.kmlObject = null;
     }
 };
 
 /**
+ * Zoom to extent if KML file has one defined.
+ */
+KmlFile.prototype.zoomToExtent = function () {
+    var view = this.kmlObject.getAbstractView();
+    if (view) {
+        ge.getView().setAbstractView(view);
+    }
+};
+
+/**
  * Return a string representing this object.
  */
-KmlFile.prototype.toString = function() {
+KmlFile.prototype.toString = function () {
     return 'KmlFile @ ' + this.fullUrl();
 };
 
