@@ -21,14 +21,14 @@ google.load('earth', '1');
 
 // Ext JS
 Ext.BLANK_IMAGE_URL = '/static_media/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
-Ext.scopeResetCSS = true;
+// Ext.scopeResetCSS = true;
 Ext.onReady(function () {
     console.log('Ext JS ready');
     isExtJsLoaded = true;
     refreshLoadedModules();
 });
 // Ext.Loader.setConfig({
-   // enabled : true
+//     enabled : true
 // });
 // Ext.require('Ext.fx.Anim');
 // Ext.require('Ext.data.Tree');
@@ -40,9 +40,6 @@ var minimalPluginVersion = '6.2.0';
 var ge = null;
 var kvu = new KmlViewerUi();
 var kfc = new KmlFileCollection();
-
-
-// TEMP
 var currentKmlParams = {
     lift:40.0,
     exaggeration:4.0,
@@ -52,39 +49,11 @@ var currentKmlParams = {
     move:0.1
 };
 
-/*
-// "API"
-function kmlViewerLoadKml(url, isDynamic) {
-    if (ge) {
-        kfc.loadKmlFile(url, isDynamic);
-    }
-}
-*/
-/*
-// "API"
-function kmlViewerUnloadAll() {
-    kfc.unloadAll();
-}
-*/
-
 // TEMP
-function kmlViewerSetParam(k, v) {
-    currentKmlParams[k] = v;
-}
-
-// TEMP
-function kmlViewerCommitParams() {
-    kfc.reloadAllDynamic();
-}
-
-// "API"
 function kmlViewerSetColormap(colormap) {
     currentKmlParams['colormap'] = colormap;
     $('#colormaps').dialog('close');
 }
-
-/*
-*/
 // TEMP
 function addPlacemarkClickListeners(kmlObject) {
     var placemarks = kmlObject.getElementsByType('KmlPlacemark');
@@ -96,7 +65,6 @@ function addPlacemarkClickListeners(kmlObject) {
         });
     }
 }
-
 // TEMP
 function setDescription(event, url) {
     var placemark = event.getTarget();
@@ -104,8 +72,6 @@ function setDescription(event, url) {
         placemark.setDescription(data)
     });
 }
-/*
-*/
 
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -115,7 +81,6 @@ function setDescription(event, url) {
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
-
 
 /**
  * Shim for browsers not supporting:
@@ -141,28 +106,6 @@ if (!Function.prototype.bind) {
         fBound.prototype = new fNOP();
         return fBound;
     };
-}
-
-/**
- * Currying utility function.
- */
-function partial(func /*, 0..n args */) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    return function () {
-        var allArguments = args.concat(Array.prototype.slice.call(arguments));
-        return func.apply(this, allArguments);
-    };
-}
-
-/**
- * Abuse the Location object:
- * https://developer.mozilla.org/en/window.location
- * Works cross-browser.
- */
-function parseUrl(url) {
-    var a = document.createElement('a');
-    a.href = url;
-    return a;
 }
 
 /**
@@ -217,6 +160,7 @@ function KmlViewerUi() {
     this.tsc = new GETimeSliderControl();
     this.treeStore = null;
     this.treePanel = null;
+    this.jarkusPanel = null;
     this.accordion = null;
 }
 
@@ -259,6 +203,7 @@ KmlViewerUi.prototype.initGoogleEarth = function () {
 };
 
 /**
+ * Build the ExtJS controls.
  */
 KmlViewerUi.prototype.initControls = function () {
     // build a model for tree nodes containing some extra kml data
@@ -271,6 +216,7 @@ KmlViewerUi.prototype.initControls = function () {
     // create a store for adapting the json output
     this.treeStore = Ext.create('Ext.data.TreeStore', {
         listeners: {
+            single: true,
             load: function (thisStore, rootNode, records, successful, eOpts){
                 var categories = thisStore.proxy.reader.rawData.categories;
                 categories.forEach(function (category) {
@@ -331,6 +277,10 @@ KmlViewerUi.prototype.initControls = function () {
                     // user clicked on a 'leaf' node, set the checkbox
                     var checked = !(node.get('checked'));
                     node.set('checked', checked);
+                    // enable jarkus panel if use activated that
+                    if (node.get('slug') === 'jarkus') {
+                        kvu.setJarkusPanelEnabled(checked);
+                    }
                     kfc.fireUpdate();
                 }
             },
@@ -345,6 +295,9 @@ KmlViewerUi.prototype.initControls = function () {
             }
         }
     });
+
+    // create the Jarkus controls
+    this.initJarkusPanel();
 
     // create the left accordion
     this.accordion = Ext.create('Ext.container.Container', {
@@ -362,13 +315,159 @@ KmlViewerUi.prototype.initControls = function () {
         },
         items: [
             this.treePanel,
-            {
-                title: 'Jarkus',
-                html: '<br/>'
-            }
+            this.jarkusPanel
         ],
         renderTo: Ext.get('extaccor')
     });
+};
+
+/**
+ */
+KmlViewerUi.prototype.initJarkusPanel = function () {
+    var buildSlider = function (args) {
+        var defaultArgs = {
+            animate: false,
+            checkChangeBuffer: 500,
+            checkChangeEvents: ['change'],
+            listeners: {
+                render: function (c) {
+                    c.getEl().on('mousedown', function () {
+                        this.fireEvent('mousedown', c);
+                    }, c);
+                    c.getEl().on('mouseenter', function () {
+                        this.fireEvent('mouseenter', c);
+                    }, c);
+                    c.getEl().on('mouseleave', function () {
+                        this.fireEvent('mouseleave', c);
+                    }, c);
+                },
+                mousedown: function (slider) {
+                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+                },
+                mouseenter: function (slider) {
+                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+                },
+                mouseleave: function (slider) {
+                    slider.plugins[0].hide();
+                },
+                change: function (slider, newValue, thumb, eOpts) {
+                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+                }
+            }
+        };
+
+        return Ext.create('Ext.slider.Single', Ext.merge(defaultArgs, args));
+    };
+
+    // build colormaps dialog
+    $("#colormaps").dialog({
+        autoOpen: false,
+        height: 300,
+        width: 500,
+        position: [0, 0]
+    });
+
+    var lift = buildSlider({
+        fieldLabel: 'Ophoging',
+        value: 40.0,
+        increment: 10.0,
+        minValue: 0.0,
+        maxValue: 500.0,
+        decimalPrecision: 1,
+        tipText: function (thumb) {
+            return Ext.String.format('{0} meter', thumb.value);
+        }
+    });
+
+    var exaggeration = buildSlider({
+        fieldLabel: 'Opschaling',
+        value: 4.0,
+        increment: 1.0,
+        minValue: 1.0,
+        maxValue: 50.0,
+        decimalPrecision: 1,
+        tipText: function (thumb) {
+            return Ext.String.format('{0} meter', thumb.value);
+        }
+    });
+
+    var extrude = Ext.create('Ext.form.field.Checkbox', {
+        fieldLabel: 'Uitvullen',
+        boxLabel: 'Ja'
+    });
+
+    var colormaps = Ext.create('Ext.button.Button', {
+        text: 'Kleurenmap',
+        handler: function() {
+            $("#colormaps").dialog("open");
+        }
+    });
+
+    var polyalpha = buildSlider({
+        fieldLabel: 'Transparantie',
+        value: 0.8,
+        increment: 0.05,
+        minValue: 0.0,
+        maxValue: 1.0,
+        decimalPrecision: 2,
+        tipText: function (thumb) {
+            return Ext.String.format('{0}%', thumb.value);
+        }
+    });
+
+    var move = buildSlider({
+        fieldLabel: 'Verschuiving',
+        value: 0.1,
+        increment: 0.1,
+        minValue: 0.0,
+        maxValue: 2.0,
+        decimalPrecision: 1,
+        tipText: function (thumb) {
+            return Ext.String.format('{0}m', thumb.value);
+        },
+    });
+
+    var confirm = Ext.create('Ext.button.Button', {
+        text: 'Wijzig weergave',
+        handler: function() {
+            currentKmlParams['lift'] = lift.getValue();
+            currentKmlParams['exaggeration'] = exaggeration.getValue();
+            currentKmlParams['extrude'] = extrude.getValue() ? 1 : 0;
+            currentKmlParams['polyalpha'] = polyalpha.getValue();
+            currentKmlParams['move'] = move.getValue();
+            kfc.reloadAllDynamic();
+        }
+    });
+
+    this.jarkusPanel = Ext.create('Ext.panel.Panel', {
+        title: 'Jarkus',
+        collapsed: true,
+        disabled: true,
+        layout: {
+            type: 'vbox',
+            align: 'stretch'
+            //padding: 5
+        },
+        items: [
+            lift,
+            exaggeration,
+            extrude,
+            colormaps,
+            polyalpha,
+            move,
+            confirm
+        ]
+    });
+};
+
+/**
+ */
+KmlViewerUi.prototype.setJarkusPanelEnabled = function (enabled) {
+    this.jarkusPanel.setDisabled(!enabled);
+    if (enabled)
+        this.jarkusPanel.expand();
+    else
+        this.jarkusPanel.collapse();
 };
 
 /**
@@ -693,9 +792,10 @@ KmlFileCollection.prototype.startLoadingKmlFile = function (id, url, slug) {
  * Call this when params (lift, exaggeration etc) change.
  */
 KmlFileCollection.prototype.reloadAllDynamic = function () {
-    for (var i = 0; i < this.kmlFiles.length; i++) {
+    for (var i in this.kmlFiles) {
         var kmlFile = this.kmlFiles[i];
         if (kmlFile.slug === "jarkus" && kmlFile.kmlObject !== null) {
+            kmlFile.unload();
             kmlFile.load();
         }
     }
@@ -705,7 +805,7 @@ KmlFileCollection.prototype.reloadAllDynamic = function () {
  * Remove all loaded KML files.
  */
 KmlFileCollection.prototype.unloadAll = function () {
-    for (var i = 0; i < this.kmlFiles.length; i++) {
+    for (var i in this.kmlFiles) {
         var kmlFile = this.kmlFiles[i];
         kmlFile.unload();
     }
@@ -773,7 +873,7 @@ KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
             ge.getFeatures().appendChild(kmlObject);
             // add click handlers
             if (this.slug === "jarkus") {
-                addPlacemarkClickListeners(kmlObject);
+                //addPlacemarkClickListeners(kmlObject);
             }
         }
         else {
