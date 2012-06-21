@@ -36,7 +36,7 @@ Ext.onReady(function () {
 
 // global access these due to common usage
 var geDownloadUrl = 'http://www.google.com/earth/explore/products/plugin.html';
-var minimalPluginVersion = '6.2.2';
+var minimalPluginVersion = '6.2.0';
 var ge = null;
 var kvu = new KmlViewerUi();
 var kfc = new KmlFileCollection();
