@@ -1,40 +1,3 @@
-/* above content */
-#tmp-controls .above-content-text
-{
-    color:#000;
-    margin-left:10px;
-    margin-right:10px;
-    display:inline-block;
-    width:100px;
-}
-#tmp-controls button,
-#tmp-controls label
-{
-    margin:0;
-    margin-top:0.5em;
-    margin-left:10px;
-    padding:0;
-}
-#tmp-controls .above-slider
-{
-    display:inline-block;
-    margin-top:0.5em;
-    width:90px;
-}
-#tmp-controls button.extrude-active
-{
-    background:none;
-    background-color:#bda;
-}
-#tmp-controls .ui-button-text
-{
-    font-family:Helvetica,sans-serif;
-    font-size:12px;
-    padding:1px 3px 1px 3px;
-}
-.tmp-controls-row {
-}
-
 /* main content */
 #map3d
 {
@@ -42,31 +5,18 @@
     height:100%;
 }
 
-/* sidebar */
-/*
-#edit-workspace li.workspace-item label {
-    font-weight:normal !important;
-    display:block;
-}
-#edit-workspace li.workspace-item span.workspace-item-name {
-    vertical-align:middle;
-}
-#context-workspace {
-    height:200px;
-}
-li.kml-resource-link {
-    cursor:pointer;
-}
-li.kml-resource-link:hover {
-    background-color:#ccc;
-}
-*/
-#kml-preview {
+/* preview image */
+#kml-preview-container {
+    width:100%;
     display:none;
-    margin-top:10px;
 }
 
-/* Ext.js overrides */
+#kml-preview {
+    display:block;
+    margin:0 auto;
+}
+
+/* extjs overrides */
 .x-form-item-label {
     font-size:11px;
 }
@@ -83,6 +33,7 @@ li.kml-resource-link:hover {
 	z-index:999;
 	vertical-align:middle;
 }
+
 #loader-inner {
 	position:absolute;
 	top:50%; left:50%;
@@ -92,6 +43,7 @@ li.kml-resource-link:hover {
 	background-image:url('/static_media/lizard_kml/loader2.gif');
 	background-repeat:no-repeat;
 }
+
 #loader-text {
     position:absolute;
     top:60px; left:50%;
@@ -99,7 +51,7 @@ li.kml-resource-link:hover {
     margin-left:-100px;
 }
 
-/* Error message */
+/* error message */
 #map3d-error-message {
     border:1px solid;
     margin:100px auto 0 auto;
@@ -112,6 +64,7 @@ li.kml-resource-link:hover {
     background-color:#FFBABA;
     background-image:url('error.png');
 }
+
 hr {
     border:none !important;
     background-color:#000 !important;

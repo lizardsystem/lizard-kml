@@ -289,10 +289,10 @@ KmlViewerUi.prototype.initControls = function () {
             // },
             itemmouseenter: function (thisView, node, item, index, event, eOpts) {
                 $('#kml-preview').attr('src', node.get('preview_image_url'));
-                $('#kml-preview').show();
+                $('#kml-preview-container').show();
             },
             itemmouseleave: function (thisView, node, item, index, event, eOpts) {
-                $('#kml-preview').hide();
+                $('#kml-preview-container').hide();
             }
         }
     });
@@ -316,6 +316,11 @@ KmlViewerUi.prototype.initControls = function () {
         },
         items: [
             this.treePanel,
+            {
+                title: 'Voorbeeld',
+                height: 190,
+                html: '<div id="kml-preview-container"><img id="kml-preview" src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D" alt="preview" width="200" height="150" /></div>'
+            },
             this.jarkusPanel
         ],
         renderTo: Ext.get('extaccor')
