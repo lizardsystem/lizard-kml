@@ -9,16 +9,6 @@
     </title>
     {% compress css %}
     {% block css %}
-    {# Blueprint css framework. #}
-    {# Blueprint IE stylesheet is included separately later on #}
-    <link rel="stylesheet"
-          href="{{ STATIC_URL }}blueprint/screen.css"
-          type="text/css"
-          media="screen, projection" />
-    <link rel="stylesheet"
-          href="{{ STATIC_URL }}blueprint/print.css"
-          type="text/css"
-          media="print" />
     {# Sprites: all icons (print, info, etc) in one cacheable image. #}
     <link rel="stylesheet"
           href="{{ STATIC_URL }}sprites/sprite.css"
@@ -31,13 +21,6 @@
           href="{{ STATIC_URL }}jqueryui/smoothness/jquery-ui-1.8.11.custom.css"
           rel="stylesheet"
           media="screen, projection" />
-    {# CSS for jquery-treeview #}
-    {% comment %}
-    <link type="text/css"
-          href="{{ STATIC_URL }}jquery-treeview/jquery.treeview.css"
-          rel="stylesheet"
-          media="screen, projection" />
-    {% endcomment %}
     {# Our own css comes last #}
     <link rel="stylesheet"
           href="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.css"
