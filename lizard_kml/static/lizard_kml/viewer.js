@@ -255,7 +255,7 @@ KmlViewerUi.prototype.initControls = function() {
     // build a model for tree nodes containing some extra kml data
     Ext.define('KmlResourceNode', {
         extend: 'Ext.data.Model',
-        fields: ['kml_id', 'text', 'description', 'kml_url', 'slug']
+        fields: ['kml_id', 'text', 'description', 'kml_url', 'slug', 'preview_image_url']
     });
     Ext.data.NodeInterface.decorate(KmlResourceNode);
 
@@ -278,7 +278,8 @@ KmlViewerUi.prototype.initControls = function() {
                             leaf: true,
                             checked: false,
                             kml_url: k.kml_url,
-                            slug: k.slug
+                            slug: k.slug,
+                            preview_image_url: k.preview_image_url
                         });
                         categoryNode.appendChild(krn);
                     });
@@ -307,7 +308,7 @@ KmlViewerUi.prototype.initControls = function() {
         stateful: false,
         border: false,
         listeners: {
-            itemclick: function (thisView, node, item, index, event) {
+            itemclick: function (thisView, node, item, index, event, eOpts) {
                 if (!node.isLeaf()) {
                     if (node.isExpanded()) {
                         node.collapse();
@@ -333,6 +334,13 @@ KmlViewerUi.prototype.initControls = function() {
             checkchange: function (node, checked, eOpts) {
                 //console.log('x=' + node.get('kml_url'));
                 //kvu.setControlsDisabled(true);
+            },
+            itemmouseenter: function (thisView, node, item, index, event, eOpts) {
+                $('#kml-preview').attr('src', node.get('preview_image_url'));
+                $('#kml-preview').show();
+            },
+            itemmouseleave: function (thisView, node, item, index, event, eOpts) {
+                $('#kml-preview').hide();
             }
         }
     });

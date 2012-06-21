@@ -28,7 +28,8 @@ class CategoryTreeView(View):
                 'description': k.description,
                 'is_dynamic': k.is_dynamic,
                 'kml_url': self._mk_kml_resource_url(k),
-                'slug': k.slug
+                'slug': k.slug,
+                'preview_image_url': k.preview_image.url
             }
             for k in category.kmlresource_set.all()
         ]
