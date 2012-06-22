@@ -33,15 +33,6 @@
     {% endblock css %}
     {% endcompress %}
 
-    <!--[if IE]>
-    {% compress css %}
-    <link rel="stylesheet"
-          href="{{ STATIC_URL }}blueprint/ie.css"
-          type="text/css"
-          media="screen, projection" />
-    {% endcompress %}
-    <![endif]-->
-
     {% compress js %}
     {% block javascript %}
     {# Jquery #}
