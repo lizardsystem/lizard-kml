@@ -351,18 +351,6 @@ function restretchExistingElements() {
 }
 
 
-/*
-Fill the screen (again) when we open the page and when the window is resized.
-*/
-$(window).resize(function () {
-    // Don't re-calculate 50 times while resizing, only when finished.
-    if (resizeTimer) {
-        clearTimeout(resizeTimer);
-    }
-    resizeTimer = setTimeout(restretchExistingElements, 300);
-});
-
-
 function setupLizardUi() {
     calculateScrollbarWidth();
     calculateHiddenStuffHeight();
@@ -370,7 +358,15 @@ function setupLizardUi() {
     divideVerticalSpaceEqually();
     setUpCollapsibleSidebarBoxes();
     setUpCollapsibleSidebar();
-    //setUpTree();
     stretchOneSidebarBox();
     setUpPrintButton();
+
+    // Fill the screen (again) when we open the page and when the window is resized.
+    $(window).resize(function () {
+        // Don't re-calculate 50 times while resizing, only when finished.
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
+        resizeTimer = setTimeout(restretchExistingElements, 300);
+    });
 }
