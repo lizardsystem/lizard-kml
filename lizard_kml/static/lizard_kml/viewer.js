@@ -1,39 +1,25 @@
-// Some plumbing to get all dependencies (Ext, Google Earth API) loaded properly.
-var isGoogleEarthApiLoaded = false;
-var isExtJsLoaded = false;
-
-function refreshLoadedModules() {
-    if (isExtJsLoaded && isGoogleEarthApiLoaded) {
-        console.log('All ready');
-        kvu.init();
-    }
-}
-
-// Google Earth plugin
+// Load Google Earth plugin
 google.load('earth', '1');
-// keep it in this order!
-google.setOnLoadCallback(
-    function () {
-        console.log('GEAPI ready');
-        isGoogleEarthApiLoaded = true;
-        refreshLoadedModules();
-    }
-);
 
-// Ext JS
+// Load Ext JS
 Ext.BLANK_IMAGE_URL = '/static_media/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
 // Ext.scopeResetCSS = true;
-Ext.onReady(function () {
-    console.log('Ext JS ready');
-    isExtJsLoaded = true;
-    refreshLoadedModules();
-});
 // Ext.Loader.setConfig({
 //     enabled : true
 // });
 // Ext.require('Ext.fx.Anim');
 // Ext.require('Ext.data.Tree');
 // Ext.require('Ext.tree.Panel');
+
+function refreshLoadedModules() {
+    if (document.readyState === 'complete' && Ext && google.earth) {
+        console.log('All ready');
+        clearInterval(loadInterval);
+        kvu.init();
+    }
+}
+
+var loadInterval = setInterval(refreshLoadedModules, 200);
 
 // global access these due to common usage
 var geDownloadUrl = 'http://www.google.com/earth/explore/products/plugin.html';
@@ -173,9 +159,25 @@ KmlViewerUi.prototype.init = function () {
     setupLizardUi();
     // build the Ext.js controls
     this.initControls();
+    // bind above-content links etc.
+    this.bindUiEvents();
     // remove loading overlay
     // don't initialize Google Earth until after this is done 
     this.removeLoadingOverlay(this.initGoogleEarth.bind(this));
+};
+
+/**
+ */
+KmlViewerUi.prototype.bindUiEvents = function () {
+    $('.kml-action-defaultview').click(function () {
+        kvu.setDefaultView();
+    });
+    $('.kml-action-rewind').click(function () {
+        kvu.tsc.rewind();
+    });
+    $('.kml-action-playpause').click(function () {
+        kvu.tsc.togglePlayPause();
+    });
 };
 
 /**
@@ -203,10 +205,48 @@ KmlViewerUi.prototype.initGoogleEarth = function () {
     }
 };
 
+function buildSlider (args) {
+    var defaultArgs = {
+        animate: false,
+        checkChangeBuffer: 50,
+        checkChangeEvents: ['change'],
+        listeners: {
+            render: function (c) {
+                c.getEl().on('mousedown', function () { this.fireEvent('mousedown', c); }, c);
+                c.getEl().on('mouseenter', function () { this.fireEvent('mouseenter', c); }, c);
+                c.getEl().on('mouseleave', function () { this.fireEvent('mouseleave', c); }, c);
+            },
+            mousedown: function (slider) {
+                slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+            },
+            mouseenter: function (slider) {
+                slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+            },
+            mouseleave: function (slider) {
+                slider.plugins[0].hide();
+            },
+            change: function (slider, newValue, thumb, eOpts) {
+                slider.plugins[0].onSlide(slider, undefined, thumb);
+            }
+        }
+    };
+    return Ext.create('Ext.slider.Single', Ext.merge(defaultArgs, args));
+}
+
 /**
  * Build the ExtJS controls.
  */
 KmlViewerUi.prototype.initControls = function () {
+    // create a panel containing the preview and other
+    // context-sensitive items
+    var previewPanel = Ext.create('Ext.panel.Panel', {
+        id: 'previewpanel',
+        title: 'Voorbeeld',
+        collapsed: true,
+        height: 190,
+        html: '<div id="kml-preview-container"><img id="kml-preview" src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D" alt="preview" width="200" height="150" /></div>'
+    });
+
     // build a model for tree nodes containing some extra kml data
     Ext.define('KmlResourceNode', {
         extend: 'Ext.data.Model',
@@ -288,11 +328,27 @@ KmlViewerUi.prototype.initControls = function () {
             // checkchange: function (node, checked, eOpts) {
             // },
             itemmouseenter: function (thisView, node, item, index, event, eOpts) {
-                $('#kml-preview').attr('src', node.get('preview_image_url'));
-                $('#kml-preview-container').show();
+                if (node.isLeaf()) {
+                    $('#kml-preview').attr('src', node.get('preview_image_url'));
+                    $('#kml-preview-container').show();
+                }
             },
             itemmouseleave: function (thisView, node, item, index, event, eOpts) {
-                $('#kml-preview-container').hide();
+                if (node.isLeaf()) {
+                    $('#kml-preview-container').hide();
+                }
+            },
+            mouseenter: {
+                element: 'el',
+                fn: function (thisView, event, eOpts) {
+                    previewPanel.expand();
+                }
+            },
+            mouseleave: {
+                element: 'el',
+                fn: function (thisView, event, eOpts) {
+                    previewPanel.collapse();
+                }
             }
         }
     });
@@ -316,55 +372,37 @@ KmlViewerUi.prototype.initControls = function () {
         },
         items: [
             this.treePanel,
-            {
-                title: 'Voorbeeld',
-                height: 190,
-                html: '<div id="kml-preview-container"><img id="kml-preview" src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D" alt="preview" width="200" height="150" /></div>'
-            },
-            this.jarkusPanel
+            this.jarkusPanel,
+            previewPanel
         ],
-        renderTo: Ext.get('extaccor')
+        renderTo: Ext.get('ext-left-controls')
+    });
+
+    // create a slider for controlling the play speed
+    buildSlider({
+        fieldLabel: 'Afspeelsnelheid',
+        width: 300,
+        value: 5.0,
+        increment: 0.1,
+        minValue: 0.5,
+        maxValue: 10.0,
+        decimalPrecision: 1,
+        tipText: function (thumb) {
+            return Ext.String.format('{0} jaar per seconde', thumb.value);
+        },
+        listeners: {
+            change: function (slider, newValue, thumb, eOpts) {
+                slider.plugins[0].onSlide(slider, undefined, thumb);
+                kvu.tsc.setRate(newValue);
+            }
+        },
+        renderTo: Ext.get('ext-play-rate-slider')
     });
 };
 
 /**
  */
 KmlViewerUi.prototype.initJarkusPanel = function () {
-    var buildSlider = function (args) {
-        var defaultArgs = {
-            animate: false,
-            checkChangeBuffer: 500,
-            checkChangeEvents: ['change'],
-            listeners: {
-                render: function (c) {
-                    c.getEl().on('mousedown', function () {
-                        this.fireEvent('mousedown', c);
-                    }, c);
-                    c.getEl().on('mouseenter', function () {
-                        this.fireEvent('mouseenter', c);
-                    }, c);
-                    c.getEl().on('mouseleave', function () {
-                        this.fireEvent('mouseleave', c);
-                    }, c);
-                },
-                mousedown: function (slider) {
-                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
-                },
-                mouseenter: function (slider) {
-                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
-                },
-                mouseleave: function (slider) {
-                    slider.plugins[0].hide();
-                },
-                change: function (slider, newValue, thumb, eOpts) {
-                    slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
-                }
-            }
-        };
-
-        return Ext.create('Ext.slider.Single', Ext.merge(defaultArgs, args));
-    };
-
     // build colormaps dialog
     $("#colormaps").dialog({
         autoOpen: false,
@@ -607,6 +645,17 @@ KmlViewerUi.prototype.replaceMapWithErrorMessage = function (html) {
     }
 };
 
+KmlViewerUi.prototype.setPlaying = function (playing) {
+    if (playing) {
+        $(".kml-action-playpause").addClass("icon-pause");
+        $(".kml-action-playpause").removeClass("icon-play");
+    }
+    else {
+        $(".kml-action-playpause").removeClass("icon-pause");
+        $(".kml-action-playpause").addClass("icon-play");
+    }
+};
+
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -623,7 +672,8 @@ function GETimeSliderControl() {
     /**
      * Attributes
      */
-    this.rateStep = 60 * 60 * 24 * 365; // amount of seconds in a year
+    this.secondsInYear = 60 * 60 * 24 * 365; // amount of seconds in a year
+    this.realSecondsPerDataYear = 5.0;
     this.isPlaying = false; // keep our own playing / stopped state
     this.animationStopInterval = null;
 }
@@ -647,13 +697,12 @@ GETimeSliderControl.prototype.togglePlayPause = function () {
         this.pause();
     }
     else {
-        // 1 real second = 5 timeslider years
+        // play
         if (this.isPastEnd()) {
             // at end, so rewind first
             this.rewind();
         }
-        this.isPlaying = true;
-        ge.getTime().setRate(this.rateStep * 5);
+        this.play();
     }
 };
 
@@ -662,9 +711,24 @@ GETimeSliderControl.prototype.rewind = function () {
     this.setCurrentTime(this.getExtentBegin());
 };
 
+GETimeSliderControl.prototype.setRate = function (rate) {
+    this.realSecondsPerDataYear = rate;
+    if (this.isPlaying) {
+        // 'live' update the speed when playing
+        ge.getTime().setRate(this.secondsInYear * this.realSecondsPerDataYear);
+    }
+};
+
+GETimeSliderControl.prototype.play = function () {
+    this.isPlaying = true;
+    ge.getTime().setRate(this.secondsInYear * this.realSecondsPerDataYear);
+    kvu.setPlaying(true);
+};
+
 GETimeSliderControl.prototype.pause = function () {
     ge.getTime().setRate(0);
     this.isPlaying = false;
+    kvu.setPlaying(false);
 };
 
 GETimeSliderControl.prototype.animationStopTick = function () {
@@ -741,6 +805,7 @@ KmlFileCollection.prototype.fireUpdate = function () {
     if (this.updateTimeout !== null) {
         clearTimeout(this.updateTimeout);
     }
+
     // set a new one
     this.updateTimeout = setTimeout(this.update.bind(this), 300);
 };
