@@ -19,6 +19,11 @@
 /* extjs overrides */
 .x-form-item-label {
     font-size:11px;
+    padding-top:0;
+}
+
+.x-field-label-cell {
+    vertical-align:middle;
 }
 
 /* loader */
@@ -70,4 +75,41 @@ hr {
     background-color:#000 !important;
     color:#000 !important;
     height:1px !important;
+}
+
+/* above-content */
+#above-content {
+}
+
+[class^="icon-"], [class*=" icon-"] {
+    background-image:url("glyphicons-halflings.png");
+    background-position:14px 14px;
+    background-repeat:no-repeat;
+    display:inline-block;
+    height:14px;
+    line-height:14px;
+    vertical-align:middle;
+    width:14px;
+}
+
+.icon-backward   { background-position:-240px -72px; }
+.icon-play       { background-position:-264px -72px; }
+.icon-pause      { background-position:-288px -72px; }
+.icon-fullscreen { background-position:-456px -144px; }
+
+[class^="kml-action-"],
+[class*="kml-action-"] {
+    cursor:pointer;
+    margin-left:10px;
+}
+
+[class^="kml-action-"]:hover,
+[class*="kml-action-"]:hover {
+    background-color:#af6;
+}
+
+#ext-play-rate-slider {
+    margin-left:10px;
+    vertical-align:middle;
+    display:inline-block;
 }
