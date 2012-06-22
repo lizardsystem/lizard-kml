@@ -128,6 +128,24 @@ function minVersionMet(vmin, vcurrent) {
     }
 }
 
+/**
+ */
+function buildLogScaleFunc(min, max) {
+    // position will be between 0 and 100
+    var minp = 0;
+    var maxp = 100;
+    // the result should be between min and max
+    var minv = Math.log(min);
+    var maxv = Math.log(max);
+    // calculate adjustment factor
+    var scale = (maxv - minv) / (maxp - minp);
+    // build function
+    var func = function(pos) {
+        return Math.exp(minv + scale * (pos - minp));
+    };
+    return func;
+}
+
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -208,16 +226,12 @@ KmlViewerUi.prototype.initGoogleEarth = function () {
 function buildSlider (args) {
     var defaultArgs = {
         animate: false,
-        checkChangeBuffer: 50,
+        checkChangeBuffer: 100,
         checkChangeEvents: ['change'],
         listeners: {
             render: function (c) {
-                c.getEl().on('mousedown', function () { this.fireEvent('mousedown', c); }, c);
                 c.getEl().on('mouseenter', function () { this.fireEvent('mouseenter', c); }, c);
                 c.getEl().on('mouseleave', function () { this.fireEvent('mouseleave', c); }, c);
-            },
-            mousedown: function (slider) {
-                slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
             },
             mouseenter: function (slider) {
                 slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
@@ -226,11 +240,64 @@ function buildSlider (args) {
                 slider.plugins[0].hide();
             },
             change: function (slider, newValue, thumb, eOpts) {
-                slider.plugins[0].onSlide(slider, undefined, thumb);
+                slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
             }
         }
     };
-    return Ext.create('Ext.slider.Single', Ext.merge(defaultArgs, args));
+
+    args = Ext.merge(defaultArgs, args);
+
+    var logarithmic = args['logarithmic'];
+    if (logarithmic) {
+        // delete our custom signaling flag
+        delete args['logarithmic'];
+
+        // build a function which can be used to calculate the logarithmic scale
+        var min = args['minValue'];
+        var max = args['maxValue'];
+        var logFunc = buildLogScaleFunc(min, max);
+        delete args['minValue']; // so this defaults to 0
+        delete args['maxValue']; // so this defaults to 100
+
+        // ensure snapping is disabled
+        delete args['increment'];
+
+        // set initial value, but be sure to reverse it
+        // min 0.5
+        // max 10
+        // value 2.3
+        // expect result 50
+        //args['value'] = min + args['value']
+
+        // set logarithmicValue on change
+        args['listeners']['beforechange'] = function (slider, newValue, oldValue, eOpts) {
+            console.log(newValue);
+            slider.logarithmicValue = Ext.util.Format.round(logFunc(newValue), slider.decimalPrecision);
+        };
+
+        // replace tipText so it uses the logarithmicValue
+        var oldTipText = args['tipText'];
+        args['tipText'] = function (thumb) {
+            return oldTipText({value: thumb.slider.logarithmicValue});
+        };
+
+        // see if a logarithmicOnChange event is defined
+        var logarithmicOnChange = args['logarithmicOnChange'];
+        if (logarithmicOnChange) {
+            args['listeners']['change'] = function (slider, newValue, thumb, eOpts) {
+                slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+                logarithmicOnChange(slider.logarithmicValue);
+            };
+            delete args['logarithmicOnChange'];
+        }
+    }
+
+    var slider = Ext.create('Ext.slider.Single', args);
+    if (logarithmic) {
+        // calculate initial value
+        slider.logarithmicValue = Ext.util.Format.round(logFunc(slider.getValue()), slider.decimalPrecision);
+    }
+    return slider;
 }
 
 /**
@@ -382,19 +449,16 @@ KmlViewerUi.prototype.initControls = function () {
     buildSlider({
         fieldLabel: 'Afspeelsnelheid',
         width: 300,
-        value: 5.0,
-        increment: 0.1,
         minValue: 0.5,
         maxValue: 10.0,
+        value: 1.0,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0} jaar per seconde', thumb.value);
         },
-        listeners: {
-            change: function (slider, newValue, thumb, eOpts) {
-                slider.plugins[0].onSlide(slider, undefined, thumb);
-                kvu.tsc.setRate(newValue);
-            }
+        logarithmic: true,
+        logarithmicOnChange: function (newValue) {
+            kvu.tsc.setRate(newValue);
         },
         renderTo: Ext.get('ext-play-rate-slider')
     });
