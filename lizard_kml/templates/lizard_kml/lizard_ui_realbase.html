@@ -15,8 +15,6 @@
           type="text/css"
           media="screen, projection" />
     {# CSS for jqueryui: "smoothness" theme #}
-    {% comment %}
-    {% endcomment %}
     <link type="text/css"
           href="{{ STATIC_URL }}jqueryui/smoothness/jquery-ui-1.8.11.custom.css"
           rel="stylesheet"
@@ -40,10 +38,6 @@
             src="{{ STATIC_URL }}jquery/jquery.js"></script>
     <script type="text/javascript"
             src="{{ STATIC_URL }}jqueryui/jqueryui.min.js"></script>
-    {% comment %}
-    <script type="text/javascript"
-            src="{{ STATIC_URL }}jquery-treeview/jquery.treeview.js"></script>
-    {% endcomment %}
     <script type="text/javascript"
             src="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.js"></script>
     {% endblock javascript %}
@@ -61,18 +55,17 @@
   </head>
   <body>
     {% block page %}
-    <div id="page"
-         class="sidebar-open">
+    <div id="page" class="sidebar-open">
       <div class="container">
         {% block header %}
-        <div id="header"
-             class="clearfix">
+        <div id="header" class="clearfix">
           <div id="logo">
             {% block logo %}
-            {# Watch out: keep the tags next to each other without spaces #}
-            <a href="/" id="logo-img" title="{% trans "Back to homepage" %}"><img
-            src="{{ STATIC_URL }}lizard_ui/logo.png"
-            alt="Lizard" /></a>
+            {% spaceless %}
+            <a href="/" id="logo-img" title="{% trans "Back to homepage" %}">
+                <img src="{{ STATIC_URL }}lizard_ui/logo.png" alt="Lizard" />
+            </a>
+            {% endspaceless %}
             {% endblock logo %}
           </div>
           <div id="portal-actions">
@@ -87,15 +80,14 @@
           </div>
           <div id="breadcrumbs">
             &raquo; <a href="/" title="{% trans "Back to homepage" %}">Home</a>
-            &rarr; <a href="{% url lizard-kml-viewer %}" >Kustviewer</a>
+            &rarr; <a href="{% url lizard-kml-viewer %}">Kustviewer</a>
           </div>
         </div>
         {% endblock header %}
         {# End of header #}
 
         {% block main_area %}
-        <div id="main_area"
-             class="clear">
+        <div id="main_area" class="clear">
           <div id="sidebar">
             {% block sidebar %}
             {% if application_screen_slug %}
@@ -139,22 +131,19 @@
     {# End of page #}
     {% endblock page %}
   </body>
+
   {% if google_tracking_code %}
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', '{{ google_tracking_code }}']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', '{{ google_tracking_code }}']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
   {% endif %}
-
-{# Ajax calls need a CSRF token cookie, and this line sends one as a side effect #}
-<!-- {{ csrf_token }} -->
+  {# Ajax calls need a CSRF token cookie, and this line sends one as a side effect #}
+  <!-- {{ csrf_token }} -->
 </html>

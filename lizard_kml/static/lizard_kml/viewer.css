@@ -26,6 +26,10 @@
     vertical-align:middle;
 }
 
+.x-menu-item-icon.icon-zoom-in {
+    margin-top:3px;
+}
+
 /* loader */
 #loader {
 	padding:0;
@@ -96,6 +100,7 @@ hr {
 .icon-play       { background-position:-264px -72px; }
 .icon-pause      { background-position:-288px -72px; }
 .icon-fullscreen { background-position:-456px -144px; }
+.icon-zoom-in    { background-position:-336px 0; }
 
 [class^="kml-action-"],
 [class*="kml-action-"] {
