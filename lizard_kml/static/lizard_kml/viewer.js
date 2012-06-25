@@ -751,6 +751,18 @@ KmlViewerUi.prototype.setPlaying = function (playing) {
     }
 };
 
+KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
+    this.treePanel.getRootNode().cascadeBy(function (node) {
+        var kml_id = node.get('kml_id');
+        if (id === kml_id) {
+            node.set('loading', loading);
+            return false; // NOTE: this exits the forEach loop
+        }
+    });
+    //return found;
+    //row.rowCls = (row.rowCls || '') + ' ' + Ext.tree.View.loadingCls;
+};
+
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -1023,6 +1035,7 @@ KmlFile.prototype.fullUrl = function () {
 KmlFile.prototype.load = function (beforeAddCallback) {
     var self = this;
     console.log("loading " + this);
+    kvu.setNodeLoading(this.id, true);
     google.earth.fetchKml(ge, this.fullUrl(), function (kmlObject) {
         self.finishedLoading(kmlObject, beforeAddCallback);
     });
@@ -1057,6 +1070,7 @@ KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
     else {
         console.log("failed to load " + this);
     }
+    kvu.setNodeLoading(this.id, false);
 };
 
 /**
