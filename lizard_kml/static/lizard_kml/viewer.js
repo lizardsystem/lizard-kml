@@ -499,16 +499,17 @@ KmlViewerUi.prototype.initControls = function () {
 KmlViewerUi.prototype.initJarkusPanel = function () {
     // build colormaps dialog
     $("#colormaps").dialog({
+        title: 'Selecteer kleurenmap',
         autoOpen: false,
-        height: 300,
-        width: 500,
-        position: [0, 0]
+        height: 362,
+        width: 216,
+        position: 'left middle'
     });
 
     var lift = buildSlider({
         fieldLabel: 'Ophoging',
         minValue: 0.0,
-        maxValue: 500.0,
+        maxValue: 200.0,
         value: 40.0,
         decimalPrecision: 1,
         tipText: function (thumb) {

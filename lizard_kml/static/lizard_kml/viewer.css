@@ -5,6 +5,11 @@
     height:100%;
 }
 
+/* colormaps popup */
+.ui-dialog .ui-dialog-content {
+    padding:2px;
+}
+
 /* preview image */
 #kml-preview-container {
     width:100%;
