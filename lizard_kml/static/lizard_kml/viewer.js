@@ -144,7 +144,7 @@ function minVersionMet(vmin, vcurrent) {
  */
 function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
     // the result should be between min and max
-    var minv = Math.log(tmin);
+    var minv = tmin == 0 ? 0 : Math.log(tmin);
     var maxv = Math.log(tmax);
     // calculate adjustment factor
     var scale = (maxv - minv) / (fmax - fmin);
@@ -894,7 +894,6 @@ function KmlFileCollection() {
     /**
      * True while an update is happening.
      */
-    this.isUpdating = false;
     this.updateTimeout = null;
 }
 
@@ -902,7 +901,7 @@ function KmlFileCollection() {
  * Ensure that an update of the loaded KML files happens somewhere in the near future.
  */
 KmlFileCollection.prototype.fireUpdate = function () {
-    // clear old timeout
+    // stop the old timeout
     if (this.updateTimeout !== null) {
         clearTimeout(this.updateTimeout);
     }
@@ -916,36 +915,27 @@ KmlFileCollection.prototype.fireUpdate = function () {
  * checkbox tree.
  */
 KmlFileCollection.prototype.update = function () {
-    // immediately stop if we're already updating
-    if (!this.isUpdating) {
-        // "lock" this function
-        this.isUpdating = true;
+    // reset the timeout
+    this.updateTimeout = null;
 
-        // reset the timeout
-        this.updateTimeout = null;
+    // get a assoc. array of checked items
+    var checked = kvu.getChecked();
 
-        // get a assoc. array of checked items
-        var checked = kvu.getChecked();
-
-        // unload nonchecked kml files
-        for (var i in this.kmlFiles) {
-            var kmlFile = this.kmlFiles[i];
-            if (!(kmlFile.id in checked)) {
-                kmlFile.unload();
-                delete this.kmlFiles[kmlFile.id];
-            }
+    // unload nonchecked kml files
+    for (var i in this.kmlFiles) {
+        var kmlFile = this.kmlFiles[i];
+        if (!(kmlFile.id in checked)) {
+            kmlFile.unload();
+            delete this.kmlFiles[kmlFile.id];
         }
+    }
 
-        // load all checked kml files
-        for (var i in checked) {
-            var item = checked[i];
-            if (!(item.id in this.kmlFiles)) {
-                this.startLoadingKmlFile(item.id, item.url, item.slug);
-            }
+    // load all checked kml files
+    for (var i in checked) {
+        var item = checked[i];
+        if (!(item.id in this.kmlFiles)) {
+            this.startLoadingKmlFile(item.id, item.url, item.slug);
         }
-
-        // "unlock" this function
-        this.isUpdating = false;
     }
 };
 
