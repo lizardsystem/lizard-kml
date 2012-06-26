@@ -481,7 +481,7 @@ KmlViewerUi.prototype.initControls = function () {
         width: 300,
         minValue: 0.5,
         maxValue: 10.0,
-        value: 1.0,
+        value: 5.0,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0} jaar per seconde', thumb.value);
