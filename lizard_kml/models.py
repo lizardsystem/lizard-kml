@@ -9,14 +9,27 @@ class Category(models.Model):
     One Category contains many KmlResource's.
     """
 
-    name = models.CharField(_('name'), max_length=40)
-    description = models.TextField(_('description'), null=True, blank=True)
+    name = models.CharField(
+        db_column='name',
+        verbose_name=_('name'),
+        max_length=40,
+        null=False, blank=False,
+        help_text=_('category_name_help_text')
+    )
+    description = models.TextField(
+        db_column='description',
+        verbose_name=_('description'),
+        null=True, blank=True,
+        help_text=_('category_description_help_text')
+    )
 
     def __unicode__(self):
         return u'%s' % self.name
 
     class Meta:
         ordering = ('name', )
+        verbose_name = _('Category')
+        verbose_name_plural = _('Categories')
 
 
 class KmlResource(models.Model):
@@ -26,19 +39,50 @@ class KmlResource(models.Model):
     A KmlResource belongs to one Category.
     """
 
-    name = models.CharField(_('name'), max_length=80)
-    description = models.TextField(_('description'), null=True, blank=True)
-    # is_dynamic indicates whether to use kml_type or url ...
+    name = models.CharField(
+        db_column='name',
+        verbose_name=_('name'),
+        max_length=80,
+        null=False, blank=False,
+        help_text=_('kml_resource_name_help_text')
+    )
+    description = models.TextField(
+        db_column='description',
+        verbose_name=_('description'),
+        null=True, blank=True,
+        help_text=_('kml_resource_description_help_text')
+    )
+    category = models.ForeignKey('Category', null=False, blank=False)
+    # is_dynamic indicates whether to actually use the url ...
     # not quite BCNF but that's not really relevant with such a tiny domain model
-    is_dynamic = models.BooleanField(_('is_dynamic'))
-    kml_type = models.CharField(_('kml_type'), max_length=40, blank=True, null=True)
-    url = models.CharField(_('url'), max_length=200, blank=True, null=True)
-    category = models.ForeignKey('Category', null=True, blank=True)
-    slug = models.SlugField(null=True, blank=True)
-    preview_image = models.FileField(upload_to='preview_images', max_length=500)
+    url = models.CharField(
+        db_column='url',
+        verbose_name=_('URL'),
+        max_length=200, blank=True, null=True,
+        help_text=_('url_help_text')
+    )
+    is_dynamic = models.BooleanField(
+        db_column='is_dynamic',
+        verbose_name=_('dynamic'),
+        help_text=_('is_dynamic_help_text')
+    )
+    slug = models.SlugField(
+        db_column='slug',
+        verbose_name=_('system name'),
+        null=True, blank=True,
+        help_text=_('slug_help_text')
+    )
+    preview_image = models.FileField(
+        db_column='preview_image',
+        verbose_name=_('preview image'),
+        upload_to='uploaded_preview_images', max_length=500,
+        help_text=_('preview_image_help_text')
+    )
 
     def __unicode__(self):
         return u'%s' % self.name
 
     class Meta:
-        ordering = ('name', )
+        ordering = ['name']
+        verbose_name = _('KML resource')
+        verbose_name_plural = _('KML resources')

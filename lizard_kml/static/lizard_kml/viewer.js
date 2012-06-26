@@ -759,8 +759,6 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
             return false; // NOTE: this exits the forEach loop
         }
     });
-    //return found;
-    //row.rowCls = (row.rowCls || '') + ' ' + Ext.tree.View.loadingCls;
 };
 
 /* ************************************************************************ */
