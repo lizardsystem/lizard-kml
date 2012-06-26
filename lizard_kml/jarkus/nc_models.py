@@ -138,12 +138,11 @@ def makejarkustransect(id, **args):
     dataset.close()
     # return dict to conform to the "rendering context"
 
-    
     tr.lon, tr.lat
     return tr
 
 #TODO: @cache.beaker_cache(None, expire=600)
-def makejarkusoverview():
+def makejarkuslod():
     dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
     overview = {}
     # Get the locations of the beach transect lines..

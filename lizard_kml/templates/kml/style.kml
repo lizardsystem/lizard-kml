@@ -1,0 +1,28 @@
+{% spaceless %}
+<?xml version="1.0" encoding="UTF-8"?>
+{% load tools %}
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+    <Document>
+        <name>Style</name>
+        <Style id="preloader">
+            <LineStyle>
+                <color>ff000000</color>
+                <width>2</width>
+            </LineStyle>
+        </Style>
+        {# this the style for the upper line #}
+        {% for key, color in colors.items %}
+        <Style id="{{ key }}">
+            <LineStyle>
+                <color>ff{{ color }}</color>
+                <width>2</width>
+            </LineStyle>
+            <PolyStyle>
+                <color>{{ polyalpha }}{{ color }}</color>
+                <outline>{{ outline }}</outline>
+            </PolyStyle>
+        </Style>
+        {% endfor %}
+    </Document>
+</kml>
+{% endspaceless %}

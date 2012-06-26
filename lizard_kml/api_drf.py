@@ -35,5 +35,10 @@ class CategoryTreeView(View):
         ]
 
     def _mk_kml_resource_url(self, kml_resource):
-        return self.request.build_absolute_uri(
-            reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk}))
+        if kml_resource.slug == 'jarkus':
+            rela = reverse('lizard-jarkus-kml', kwargs={'kml_type': 'lod'})
+        else:
+            rela = reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk})
+        #now = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
+        #return self.request.build_absolute_uri(rela) + '?timestamp=' + str(now)
+        return self.request.build_absolute_uri(rela)

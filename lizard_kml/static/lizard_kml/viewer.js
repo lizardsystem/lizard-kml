@@ -544,13 +544,13 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
 
     var polyalpha = buildSlider({
         fieldLabel: 'Transparantie',
-        increment: 0.05,
+        increment: 0.1,
         minValue: 0.0,
         maxValue: 1.0,
         value: 0.8,
-        decimalPrecision: 2,
+        decimalPrecision: 1,
         tipText: function (thumb) {
-            return Ext.String.format('{0}%', thumb.value);
+            return Ext.String.format('{0}%', thumb.value * 100);
         }
     });
 
@@ -784,7 +784,7 @@ function GETimeSliderControl() {
 }
 
 GETimeSliderControl.prototype.startControl = function () {
-    this.animationStopInterval = window.setInterval(this.animationStopTick.bind(this), 300);
+    this.animationStopInterval = window.setInterval(this.animationStopTick.bind(this), 1000);
 };
 
 GETimeSliderControl.prototype.stopControl = function () {

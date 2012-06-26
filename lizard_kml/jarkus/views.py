@@ -27,11 +27,11 @@ class JarkusKmlView(View):
     def get(self, request, kml_type, id=None):
         """generate KML XML tree into a zipfile response"""
 
-        args = {}
-        args.update(request.GET.items())
+        kml_args_dict = {}
+        kml_args_dict.update(request.GET.items())
         if id is not None:
-            args['id'] = int(id)
-        return build_kml(self, kml_type, args)
+            id = int(id)
+        return build_kml(self, kml_type, id, kml_args_dict)
 
 class InfoView(ViewContextMixin, TemplateView):
     """

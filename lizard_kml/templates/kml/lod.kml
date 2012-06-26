@@ -3,7 +3,7 @@
 {% load tools %}
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
     <Document>
-        <name>Transect Overview</name>
+        <name>Transect Lod</name>
         <open>1</open>
         <Style id="thin">
             <LineStyle>
@@ -39,22 +39,22 @@
                         <east>{{ line.bbox.east }}</east>
                         <west>{{ line.bbox.west }}</west>
                         <minAltitude>-20</minAltitude>
-                        <!-- Make 50 meters high, so you get more transects if you fly over them -->
+                        {# Make 50 meters high, so you get more transects if you fly over them #}
                         <maxAltitude>50</maxAltitude>
                         <altitudeMode>absolute</altitudeMode>
                     </LatLonAltBox>
                     <Lod>
-                        <!-- Don't show too many lines -->
-                        <!-- alternate lod, so we get different transects at different levels -->
+                        {# Don't show too many lines #}
+                        {# alternate lod, so we get different transects at different levels #}
                         <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
                     </Lod>
                 </Region>
                 <Link>
                     {% comment %}
                     Replace these query parameters in the url tag... (or extend url to match these parameters)
-                    Don't forget to escape &
-                    {% endcomment %}.
-                    <href>{% absurl lizard-jarkus-kml kml_type='transect' id=line.id %}?{{ transect_url_params }}</href>
+                    Don't forget to escape &.
+                    {% endcomment %}
+                    <href>{% absurl lizard-jarkus-kml kml_type='transect' id=line.id %}?{{ kml_args }}</href>
                     <viewRefreshMode>onRegion</viewRefreshMode>
                 </Link>
             </NetworkLink>
@@ -67,8 +67,8 @@
                 <description>
                     <![CDATA[
                     {% comment %}
-                    <!-- Still use an iframe, in case someone opens this page in google earth directly -->
-                    <iframe src="{% absurl lizard-kml-info id=line.id %}" width="400"/>
+                    {# Still use an iframe, in case someone opens this page in google earth directly #}
+                    <iframe src="{% absurl lizard-kml-info id=line.id %}" height="400" width="400"/>
                     {% endcomment %}
                     <p><img src="{% url lizard-kml-chart chart_type="eeg" id=line.id %}" /></p>
                     <p><img src="{% url lizard-kml-chart chart_type="jarkustimeseries" id=line.id %}" /></p>
@@ -109,6 +109,13 @@
             {% endcomment %}
             {% endfor %}
         </Folder>
+        <Placemark id="style-preloader">
+            <name>Style preloader</name>
+            <styleUrl>{% absurl lizard-jarkus-kml kml_type='style' %}?{{ kml_args }}#preloader</styleUrl>
+            <LineString>
+                <coordinates>0,0,0 0.1,0.1,0.1</coordinates>
+            </LineString>
+        </Placemark>
     </Document>
 </kml>
 {% endspaceless %}

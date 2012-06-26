@@ -29,8 +29,8 @@ urlpatterns = patterns(
     #url(r'^kml/(?P<kml_type>[-a-zA-Z0-9_]+)/$', KmlView.as_view(), name='lizard-kml-kml'),
     url(r'^kml/(?P<kml_resource_id>[0-9]+)/$', KmlResourceView.as_view(), name='lizard-kml-kml'),
 
-    url(r'^api_tp/', include(category_resource.urls)),
-    url(r'^api_tp/', include(kmlsource_resource.urls)),
+    #url(r'^api_tp/', include(category_resource.urls)),
+    #url(r'^api_tp/', include(kmlsource_resource.urls)),
     url(r'^api_drf/$', CategoryTreeView.as_view(), name='api-category-tree'),
 )
 

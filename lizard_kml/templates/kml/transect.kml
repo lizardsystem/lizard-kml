@@ -1,40 +1,27 @@
 {% spaceless %}
 <?xml version="1.0" encoding="UTF-8"?>
+{% load tools %}
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
-  <Document>
-    <name>{{ transect.id }}</name>
-
-    <!-- this the style for the upper line -->
-    {% for key, color in colors.items %}
-    <Style id="{{ key }}">
-      <LineStyle>
-	<color>ff{{ color }}</color>
-	<width>2</width>
-      </LineStyle>
-      <PolyStyle>
-      	<color>{{ polyalpha }}{{ color }} </color>
-      	<outline>{{ outline }}</outline>
-      </PolyStyle>
-    </Style>
-    {% endfor %}
-    {% for year, val in years.items %}
-    <Placemark>
-      <name>{{ year }}</name>
-      <styleUrl>#{{ val.style }}</styleUrl>
-      ## first one without extrude
-      <LineString>
-	<extrude>{{ extrude }}</extrude>
-	<altitudeMode>absolute</altitudeMode>
-	<coordinates>
-	  {{ val.coordinates }}
-	</coordinates>
-      </LineString>
-      <TimeSpan id="ID">
-	<begin>{{ val.begindate }}</begin>     <!-- kml:dateTime -->
-	<end>{{ val.enddate }}</end>         <!-- kml:dateTime -->
-      </TimeSpan>
-    </Placemark>
-    {% endfor %}
-  </Document>
+    <Document>
+        <name>{{ transect.id }}</name>
+        {% for year, val in years.items %}
+        <Placemark>
+            <name>{{ year }}</name>
+            <styleUrl>{% absurl lizard-jarkus-kml kml_type='style' %}?{{ kml_args }}#{{ val.style }}</styleUrl>
+            {# first one without extrude #}
+            <LineString>
+                <extrude>{{ extrude }}</extrude>
+                <altitudeMode>absolute</altitudeMode>
+                <coordinates>{{ val.coordinates }}</coordinates>
+            </LineString>
+            <TimeSpan>
+                {# kml:dateTime #}
+                <begin>{{ val.begindate }}</begin>
+                {# kml:dateTime #}
+                <end>{{ val.enddate }}</end>
+            </TimeSpan>
+        </Placemark>
+        {% endfor %}
+    </Document>
 </kml>
 {% endspaceless %}

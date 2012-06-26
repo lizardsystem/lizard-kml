@@ -73,11 +73,7 @@ class KmlResourceView(View):
         if not kml_resource.is_dynamic:
             content, content_type = get_mirrored_kml(kml_resource.url)
         else:
-            # TODO HACK REMOVE ME
-            args = {}
-            args.update(request.GET.items())
-            content = build_kml(self, 'lod', args)
-            content_type = MIME_KMZ
+            raise Exception('KML is dynamic')
         response = HttpResponse(content, content_type=content_type)
         response['Content-Disposition'] = 'attachment; filename=kml_resource{}.kmz'.format(kml_resource.pk)
         return response
@@ -93,45 +89,8 @@ class ViewerView(ViewContextMixin, TemplateView):
     def get(self, request):
         return super(ViewerView, self).get(self, request)
 
-    def category_tree(self):
-        try:
-            return [
-                {
-                    'name': category.name,
-                    'description': category.description,
-                    'children': self._kml_resource_tree(category),
-                }
-                for category in Category.objects.all()
-            ]
-        except Exception as ex:
-            # wrap exception here to ensure
-            # exception doesn't have silent_variable_failure set
-            raise Exception(ex)
-
-    def _kml_resource_tree(self, category):
-        return [
-            {
-                'id': kml_resource.pk,
-                'name': kml_resource.name,
-                'url': self._mk_kml_resource_url(kml_resource),
-                'is_dynamic': kml_resource.is_dynamic,
-                'description': kml_resource.description,
-                'preview_image_url': kml_resource.preview_image.url
-            }
-            for kml_resource in category.kmlresource_set.all()
-        ]
-
-    def _mk_kml_resource_url(self, kml_resource):
-        if kml_resource.is_dynamic:
-            rela = reverse('lizard-jarkus-kml', kwargs={'kml_type': 'lod'})
-        else:
-            rela = reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk})
-        now = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
-        return self.request.build_absolute_uri(rela) + '?timestamp=' + str(now)
-
     def color_maps(self):
         return COLOR_MAPS
-
 
 COLOR_MAPS = [('GnBu', (0, 0, 200, 21)),
  ('Greys', (0, 25, 200, 46)),
