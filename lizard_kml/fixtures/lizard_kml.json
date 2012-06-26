@@ -169,7 +169,20 @@
         "is_dynamic": "0",
         "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms/kml?LAYERS=natura2000:natura2000",
         "category": "4",
-        "preview_image": "../static_media/lizard_kml/figures/8.png"
+        "preview_image": "../static_media/lizard_kml/figures/9.png"
+    }
+},
+{
+    "pk": 10,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Ecologische hoofdstructuur",
+        "description": "Ecologische hoofdstructuur",
+        "is_dynamic": "0",
+        "url": "http://geodata.nationaalgeoregister.nl/nok2010/wms/kml?LAYERS=nok2010:ehs",
+        "category": "4",
+        "preview_image": "../static_media/lizard_kml/figures/10.png"
     }
 }
+]
 ]
