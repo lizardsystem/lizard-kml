@@ -25,6 +25,13 @@
         "name": "Ingrepen"
     }
 },
+{
+    "pk": 4,
+    "model": "lizard_kml.category",
+    "fields": {
+        "name": "WMS"
+    }
+},
 
 
 
@@ -63,7 +70,6 @@
         "name": "Jarkus",
         "description": "Jarkus",
         "is_dynamic": "1",
-        "kml_type": "lod",
         "url": "",
         "slug": "jarkus",
         "category": "1",
@@ -145,10 +151,25 @@
         "category": "3",
         "preview_image": "../static_media/lizard_kml/figures/8.png"
     }
+},
+
+
+
+
+
+
+
+
+{
+    "pk": 9,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "Natura 2000",
+        "description": "Natura 2000",
+        "is_dynamic": "0",
+        "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms/kml?LAYERS=natura2000:natura2000",
+        "category": "4",
+        "preview_image": "../static_media/lizard_kml/figures/8.png"
+    }
 }
-
-
-
-
-
 ]
