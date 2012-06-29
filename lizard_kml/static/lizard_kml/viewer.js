@@ -419,13 +419,12 @@ KmlViewerUi.prototype.initControls = function () {
             // },
             itemmouseenter: function (thisView, node, item, index, event, eOpts) {
                 if (node instanceof KmlResourceNode) {
-                    $('#kml-preview').attr('src', node.get('preview_image_url'));
-                    $('#kml-preview-container').show();
+                    kvu.showPreviewImage(node.get('preview_image_url'));
                 }
             },
             itemmouseleave: function (thisView, node, item, index, event, eOpts) {
                 if (node instanceof KmlResourceNode) {
-                    $('#kml-preview-container').hide();
+                    kvu.hidePreviewImage();
                 }
             },
             /*
@@ -505,7 +504,8 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         autoOpen: false,
         height: 362,
         width: 216,
-        position: 'left middle'
+        position: 'left middle',
+        zIndex: 10005 // above slider thumbs
     });
 
     var lift = buildSlider({
@@ -519,6 +519,8 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         },
         logarithmic: true
     });
+    lift.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/ophoging.gif'));
+    lift.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var exaggeration = buildSlider({
         fieldLabel: 'Opschaling',
@@ -531,11 +533,21 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         },
         logarithmic: true
     });
+    exaggeration.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/opschaling.gif'));
+    exaggeration.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var extrude = Ext.create('Ext.form.field.Checkbox', {
         fieldLabel: 'Uitvullen',
-        boxLabel: 'Ja'
+        boxLabel: 'Ja',
+        listeners: {
+            render: function (c) {
+                c.getEl().on('mouseenter', function () { this.fireEvent('mouseenter', c); }, c);
+                c.getEl().on('mouseleave', function () { this.fireEvent('mouseleave', c); }, c);
+            },
+        }
     });
+    extrude.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/uitvullen.png'));
+    extrude.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var colormaps = Ext.create('Ext.button.Button', {
         text: 'Kleurenmap',
@@ -567,6 +579,8 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             return Ext.String.format('{0}m', thumb.value);
         },
     });
+    move.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/verschuiving.png'));
+    move.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var confirm = Ext.create('Ext.button.Button', {
         text: 'Wijzig weergave',
@@ -599,6 +613,19 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             confirm
         ]
     });
+};
+
+/**
+ */
+KmlViewerUi.prototype.showPreviewImage = function (url) {
+    $('#kml-preview').attr('src', url);
+    $('#kml-preview-container').show();
+};
+
+/**
+ */
+KmlViewerUi.prototype.hidePreviewImage = function () {
+    $('#kml-preview-container').hide();
 };
 
 /**
