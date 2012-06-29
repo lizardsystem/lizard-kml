@@ -123,3 +123,14 @@ hr {
     vertical-align:middle;
     display:inline-block;
 }
+
+#kml-stream-percentage {
+    margin-right:30px;
+    color:#c22;
+    float:right;
+}
+
+#kml-stream-percentage.ready {
+    color:#2a2;
+    font-weight:bold;
+}

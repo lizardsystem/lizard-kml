@@ -41,6 +41,7 @@ function refreshLoadedModules() {
         kfc = new KmlFileCollection();
         // object for controlling the Google Earth time slider.
         tsc = new GETimeSliderControl();
+        strc = new GEStreamingControl();
         kvu.init();
     }
 }
@@ -713,7 +714,10 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     
         // enable the sun
         //ge.getSun().setVisibility(true);
-    
+
+        // enable nav control
+        ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
+
         // enable the atmosphere
         ge.getOptions().setAtmosphereVisibility(true);
     
@@ -725,6 +729,10 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     
         // start timeslider control
         tsc.startControl();
+
+        // start streaming pct checker
+        strc.startControl();
+
         kvu.setControlsDisabled(false);
     }
     else {
@@ -814,12 +822,6 @@ function GETimeSliderControl() {
 
 GETimeSliderControl.prototype.startControl = function () {
     this.animationStopInterval = window.setInterval(this.animationStopTick.bind(this), 1000);
-};
-
-GETimeSliderControl.prototype.stopControl = function () {
-    if (this.animationStopInterval) {
-        window.clearInterval(this.animationStopInterval);
-    }
 };
 
 GETimeSliderControl.prototype.togglePlayPause = function () {
@@ -912,6 +914,41 @@ GETimeSliderControl.prototype.setCurrentTime = function (time) {
     var timeStamp = ge.createTimeStamp('');
     timeStamp.getWhen().set(time);
     ge.getTime().setTimePrimitive(timeStamp);
+};
+
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+/* ************************************************************************ */
+
+/**
+ * Google Earth streaming percentage listener.
+ */
+function GEStreamingControl() {
+    this.$el = $('#kml-stream-percentage');
+    this.$number = $('#kml-stream-percentage .number');
+    this.interval = null;
+}
+
+GEStreamingControl.prototype.startControl = function () {
+    this.interval = window.setInterval(this.tick.bind(this), 500);
+};
+
+GEStreamingControl.prototype.tick = function () {
+    var pct = ge.getStreamingPercent();
+    if (pct != 0) {
+        this.$number.html(pct);
+        if (pct == 100) {
+            this.$el.addClass('ready');
+        }
+        else {
+            this.$el.removeClass('ready');
+        }
+    }
 };
 
 /* ************************************************************************ */
