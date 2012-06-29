@@ -314,7 +314,7 @@ KmlViewerUi.prototype.initControls = function () {
     var previewPanel = Ext.create('Ext.panel.Panel', {
         id: 'previewpanel',
         title: 'Voorbeeld',
-        collapsed: true,
+        //collapsed: true,
         height: 190,
         html: '<div id="kml-preview-container"><img id="kml-preview" src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D" alt="preview" width="200" height="150" /></div>'
     });
@@ -428,6 +428,7 @@ KmlViewerUi.prototype.initControls = function () {
                     $('#kml-preview-container').hide();
                 }
             },
+            /*
             mouseenter: {
                 element: 'el',
                 fn: function (thisView, event, eOpts) {
@@ -440,6 +441,7 @@ KmlViewerUi.prototype.initControls = function () {
                     previewPanel.collapse();
                 }
             },
+            */
             itemcontextmenu: function (thisView, node, item, index, event) {
                 if (node instanceof KmlResourceNode) {
                     contextMenu.node = node;

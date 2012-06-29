@@ -77,7 +77,7 @@
                 </description>
             </Placemark>
             {% comment %}
-            <Placemark id="{{ line.id }}-pm">
+            <Placemark id="{{ line.id }}-pin-placemark">
                 <Point>
                     <coordinates>{{ line.point_coordinates }}</coordinates>
                 </Point>
@@ -109,6 +109,7 @@
             {% endcomment %}
             {% endfor %}
         </Folder>
+        {# ensures the style KML is preloaded, so there's no delay when all transects load #}
         <Placemark id="style-preloader">
             <name>Style preloader</name>
             <styleUrl>{% absurl lizard-jarkus-kml kml_type='style' %}?{{ kml_args }}#preloader</styleUrl>
