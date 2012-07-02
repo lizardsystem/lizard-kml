@@ -77,6 +77,7 @@
                 </description>
             </Placemark>
             {% comment %}
+            <!--
             <Placemark id="{{ line.id }}-pin-placemark">
                 <Point>
                     <coordinates>{{ line.point_coordinates }}</coordinates>
@@ -85,9 +86,11 @@
                     <minLodPixels>{% cycle 64 32 64 16 64 32 64 8 %}</minLodPixels>
                 </Lod>
             </Placemark>
+            -->
             {% endcomment %}
             {% comment %}
             {# for debugging lod #}
+            <!--
             <Placemark>
                 <styleUrl>#whiteline</styleUrl>
                 <Polygon>
@@ -106,6 +109,7 @@
                     </outerBoundaryIs>
                 </Polygon>
             </Placemark>
+            -->
             {% endcomment %}
             {% endfor %}
         </Folder>

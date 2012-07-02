@@ -18,9 +18,11 @@
                 <color>ff{{ color }}</color>
                 <width>2</width>
                 {% comment %}
+                <!--
                 <gx:outerColor>ffffffff</gx:outerColor>
                 <gx:outerWidth>0.1</gx:outerWidth>
                 <gx:drawOrder>{{ forloop.counter }}</gx:drawOrder>
+                -->
                 {% endcomment %}
             </LineStyle>
             <PolyStyle>

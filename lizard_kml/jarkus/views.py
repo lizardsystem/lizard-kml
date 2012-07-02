@@ -84,7 +84,6 @@ class ChartView(View):
         """generate info into a response"""
 
         self.id = int(id)
-        import cStringIO
         transect = makejarkustransect(id)
         # TODO, sanitize the GET.... (format=png/pdf,size?)
         if chart_type == 'eeg':
