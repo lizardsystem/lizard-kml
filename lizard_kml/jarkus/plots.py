@@ -4,10 +4,8 @@ import itertools
 import cStringIO
 import functools
 import logging
-from threading import Lock
 
 import numpy
-from numpy import ma
 from numpy import isnan, hstack, newaxis, zeros
 
 import scipy.interpolate
@@ -16,52 +14,56 @@ import matplotlib
 # use in memory backend
 matplotlib.use('Agg')
 
-from matplotlib import pyplot as p
+from matplotlib import pyplot
 from matplotlib import text
+from matplotlib import colors
 from matplotlib.dates import mx2num, date2num
 import matplotlib.ticker
 import matplotlib.collections
 import matplotlib.cm as cm
+from numpy.ma import filled, masked_array
 
 import extra_cm
 
 log = logging.getLogger(__name__)
-pylablock = Lock()
+
+class TimeStagNormalize(colors.Normalize):
+    def inverse(self, value):
+        result_value = colors.Normalize.inverse(self, value)
+        print value, '=', result_value
+        return result_value
 
 def jarkustimeseries(transect, plotproperties=None):
     """create a timeseries plot for a transect"""
     if plotproperties is None:
         plotproperties = {}
     f = cStringIO.StringIO()
-
     # interpolation function
     z = transect.interpolate_z()
     # create the plot
     if len(z.shape) != 2:
         raise ValueError('Z should be of dim 2')
     # use a fixed min, max for color interpolation, we have no green on beaches but it shows a lot of contrast
-    # HACK: uses a lock....
-    # pylab is stateful, we don't want to call it from multiple threads at the same time
-    pylablock.acquire()
-    try:
-        # TODO: Make this stateless.... (only call methods on figures and axes)
-        p.figure(figsize=(3, 2))
-        fig = p.pcolor(transect.cross_shore, date2num(transect.t), z, vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
-        p.colorbar()
-        # setup date ticks, maybe this can be done shorter
-        datelocator = matplotlib.dates.AutoDateLocator()
-        dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
-        fig.axes.yaxis.set_major_formatter(dateformatter)
-        fig.axes.set_xlabel('Cross shore distana.set_colorbarce [m]')
-        fig.axes.set_ylabel('Measurement time [y]')
-        for o in fig.axes.findobj(text.Text):
-            o.set_size('xx-small')
-        for o in fig.colorbar[1].findobj(text.Text):
-            o.set_size('xx-small')
-        p.savefig(f, **plotproperties)
-    finally:
-        pylablock.release()
+    # TODO: Make this stateless.... (only call methods on figures and axes)
+    fig = pyplot.figure(figsize=(4, 3))
+    plot = fig.add_subplot(111)
+    mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z, vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
+    #mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z, norm=TimeStagNormalize(), cmap=extra_cm.GMT_drywet_r)
+    bar = fig.colorbar(mappable)
+    # setup date ticks, maybe this can be done shorter
+    datelocator = matplotlib.dates.AutoDateLocator()
+    dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
+    plot.yaxis.set_major_formatter(dateformatter)
+    plot.set_xlabel('Cross shore distance [m]')
+    plot.set_ylabel('Measurement time [y]')
+    for o in plot.findobj(text.Text):
+        o.set_size('xx-small')
+    for o in mappable.colorbar[1].findobj(text.Text):
+        o.set_size('xx-small')
+    fig.savefig(f, **plotproperties)
     f.seek(0)
+    # cleanup
+    fig.clf()
     return f.getvalue()
 
 def eeg(transect, plotproperties=None):
@@ -90,29 +92,114 @@ def eeg(transect, plotproperties=None):
     # create the lines
     lines = matplotlib.collections.LineCollection(segs, offsets=offsets)
     # create a new figure
-    pylablock.acquire()
-    try:
-        f = p.figure(figsize=(3, 2))
-        # and axes
-        ax = p.axes()
-        # add the lines
-        ax.add_collection(lines)
-        # set the x axis
-        p.xlim(transect.cross_shore.min(), transect.cross_shore.max())
-        # set the y axis (add a bit of room cause the wiggles go over a few years)
-        p.ylim(t.min()-730,t.max()+730)
-        for o in ax.axes.findobj(text.Text):
-            o.set_size('xx-small')
-        datelocator = matplotlib.dates.AutoDateLocator()
-        dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
-        ax.axes.yaxis.set_major_formatter(dateformatter)
-        buf = cStringIO.StringIO()
-
-        p.savefig(buf, **plotproperties)
-    finally:
-        pylablock.release()
+    fig = pyplot.figure(figsize=(4, 3))
+    # add axes
+    plot = fig.add_subplot(111)
+    # add the lines
+    plot.add_collection(lines)
+    # set the x axis
+    plot.set_xlim(transect.cross_shore.min(), transect.cross_shore.max())
+    # set the y axis (add a bit of room cause the wiggles go over a few years)
+    plot.set_ylim(t.min()-730,t.max()+730)
+    for o in plot.findobj(text.Text):
+        o.set_size('xx-small')
+    datelocator = matplotlib.dates.AutoDateLocator()
+    dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
+    plot.yaxis.set_major_formatter(dateformatter)
+    buf = cStringIO.StringIO()
+    fig.savefig(buf, **plotproperties)
     buf.seek(0)
-    #cleanup
-    #p.clf()
+    # cleanup
+    fig.clf()
     return buf.getvalue()
 
+import netCDF4
+import netcdftime
+import scipy.interpolate
+import numpy as np
+import matplotlib
+
+def fill_z(x, z):
+    # Interpolate over time and space
+    cross_shore = x
+    filled = []
+    # Space first
+    for i in range(z.shape[0]):
+        z_idx = ~(z[i,:].mask)
+        interp = scipy.interpolate.interp1d(cross_shore[z_idx], z[i,z_idx], bounds_error=False)
+        zinterp = interp(cross_shore)
+        filled.append(zinterp)
+    zfilled = masked_array(filled, mask=np.isnan(np.array(filled)))
+
+    # Fill up with old or new data
+    for i in range(zfilled.shape[1]):
+        a = zfilled[:,i]
+        xp = np.arange(len(a))
+        if not a.mask.all():
+            zfilled[:,i] = scipy.interp(xp, xp[~a.mask], a[~a.mask])
+    return zfilled
+
+def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
+    # loop from last to first counting backwards
+    for i in range(-1,-1*zfilled.shape[0]+1,-1):
+        t = timenum[-i]
+        minz = np.nanmin(
+            zfilled[-1:-i:-1,:],
+            axis=0
+            )
+        plot.fill_between(
+            cross_shore,
+            minz,
+            zfilled[-i,:],
+            alpha=0.3,
+            color=sm.to_rgba(t),
+            where=minz > zfilled[-i,:],
+            interpolate=True,
+            linewidth=0
+            )
+    if (plotlatest):
+        plot.plot(cross_shore, zfilled[-1,:],'k-', alpha=0.5, linewidth=1)
+
+def mean():
+    # Create the plot
+    url  = '/media/WORKSPACE/lizard-kml/transect.nc'
+    ds = netCDF4.Dataset(url)
+    # Lookup variables
+    id = ds.variables['id'][:]
+    # idx, = (id == 7004000).nonzero()
+    ids, = ((id < 7004000) & (id > 7003000)).nonzero()
+    timevar = ds.variables['time']
+    time = netcdftime.num2date(timevar[:], timevar.units)
+    cross_shore = ds.variables['cross_shore'][:]
+
+    timenum = matplotlib.dates.date2num(time)
+    # Define color for years
+    sm = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
+    sm.set_clim(np.min(timenum), np.max(timenum))
+    sm.set_array(timenum)
+
+    fig = pyplot.figure()
+    plot = fig.add_subplot(111)
+    for i, id in enumerate(ids):
+        print 'Plotting', id
+        z = ds.variables['altitude'][:,id,:]
+        if z.mask.all(1).any():
+            continue
+        zfilled = fill_z(cross_shore, z+i*4)
+        timeplot(plot, cross_shore, zfilled, timenum, sm)
+
+    # Format the colorbar
+    cb = fig.colorbar(sm)
+    yearsfmt = matplotlib.dates.DateFormatter('%Y')
+    yearsloc = matplotlib.dates.YearLocator()
+    #cb.locator = yearsloc
+    cb.formatter = yearsfmt
+    cb.update_ticks()
+
+    # save image
+    plot.set_xlim(-500, 1000)
+    fig.savefig('jarkusgeo.pdf')
+    fig.clf()
+
+if __name__ == '__main__':
+    mean()
