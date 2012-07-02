@@ -24,7 +24,7 @@
                 {% endcomment %}
             </LineStyle>
             <PolyStyle>
-                <color>{{ polyalpha }}{{ color }}</color>
+                <color>ff{{ color }}</color>
                 <outline>{{ outline }}</outline>
                 <fill>1</fill>
             </PolyStyle>
