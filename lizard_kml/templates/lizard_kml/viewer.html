@@ -40,13 +40,14 @@
 <span class="icon-backward kml-action-rewind"></span>
 <span class="icon-play kml-action-playpause"></span>
 <span id="ext-play-rate-slider"></span>
-<span id="kml-stream-percentage" class="ready"><span class="number">100</span> %</span>
-{% comment %}
-<a href="javascript:void(0)" onclick="kfc.unloadAll()">unloadAll</a>
-<a href="javascript:void(0)" onclick="kvu.replaceMapWithErrorMessage('test')">mkerror</a>
-{% endcomment %}
 {% endspaceless %}
 {% endblock %}
+
+{% block object-actions %}
+{% spaceless %}
+<span id="kml-stream-percentage" class="ready"><span class="number">100</span> %</span>
+{% endspaceless %}
+{% endblock object-actions %}
 
 {% block content %}
 <div id="map3d"></div>

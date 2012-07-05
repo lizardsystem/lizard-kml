@@ -22,6 +22,10 @@
 }
 
 /* extjs overrides */
+.x-fieldset {
+    padding:4px;
+}
+
 .x-form-item-label {
     font-size:11px;
     padding-top:0;
@@ -125,9 +129,8 @@ hr {
 }
 
 #kml-stream-percentage {
-    margin-right:30px;
+    margin-right:20px;
     color:#c22;
-    float:right;
 }
 
 #kml-stream-percentage.ready {

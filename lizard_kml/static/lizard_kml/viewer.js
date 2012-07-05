@@ -36,6 +36,7 @@ var jarkusKmlParams = {
     outline:0,
     move:0.1
 };
+var emptyGif = 'data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D';
 
 // either the Google or Ext callbacks won't work properly, so
 // solve it with this
@@ -392,7 +393,7 @@ KmlViewerUi.prototype.initControls = function () {
         title: 'Voorbeeld',
         //collapsed: true,
         height: 190,
-        html: '<div id="kml-preview-container"><img id="kml-preview" src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D" alt="preview" width="200" height="150" /></div>'
+        html: '<div id="kml-preview-container"><img id="kml-preview" src="' + emptyGif + '" alt="preview" width="200" height="150" /></div>'
     });
 
     // build a model for tree nodes containing some extra kml data
@@ -535,7 +536,7 @@ KmlViewerUi.prototype.initControls = function () {
         title: 'Accordion Layout',
         defaults: {
             // applied to each contained panel
-            bodyStyle: 'padding:5px'
+            bodyStyle: 'padding:2px'
         },
         disabled: true,
         layout: {
@@ -681,7 +682,9 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
 
     var actions = Ext.create('Ext.form.FieldSet', {
         title: 'Acties',
-        defaults: {anchor: '100%'},
+        defaults: {
+            anchor: '100%'
+        },
         layout: {
             type: 'anchor',
             align: 'stretch'
@@ -693,11 +696,12 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
 
     var display = Ext.create('Ext.form.FieldSet', {
         title: 'Weergave',
-        defaults: {anchor: '100%'},
+        defaults: {
+            anchor: '100%'
+        },
         layout: {
             type: 'anchor',
             align: 'stretch'
-            //padding: 5
         },
         items: [
             lift,
@@ -717,7 +721,6 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         layout: {
             type: 'vbox',
             align: 'stretch'
-            //padding: 5
         },
         items: [
             display,
@@ -743,6 +746,7 @@ KmlViewerUi.prototype.showPreviewImage = function (url) {
 /**
  */
 KmlViewerUi.prototype.hidePreviewImage = function () {
+    $('#kml-preview').attr('src', emptyGif);
     $('#kml-preview-container').hide();
 };
 
@@ -981,7 +985,7 @@ KmlViewerUi.prototype.addSelectedItem = function (item) {
 };
 
 KmlViewerUi.prototype.twoItemsSelected = function () {
-    // found out ID's of the selected Jarkusraaien
+    // found out ID's of the selected transects
     var id_min = Math.min.apply(null, this.selectedItems);
     var id_max = Math.max.apply(null, this.selectedItems);
 
@@ -992,7 +996,7 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     var url = this.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
     if ((id_max - id_min) < 500) {
         this.showMainBalloon(
-            '<p>Gemiddelde voor Transects ' + id_min + ' tot ' + id_max + '</p>' +
+            '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
             '<img src="' + url + '" alt="Loading..." />'
         );
     }
