@@ -34,7 +34,7 @@ class Category(models.Model):
 KML_RESOURCE_CHOICES = [
     ('static', _('Static')),
     ('dynamic', _('Dynamic')),
-    ('WMS', _('WMS'))
+    ('wms', _('WMS'))
 ]
 
 class KmlResource(models.Model):

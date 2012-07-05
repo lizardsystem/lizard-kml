@@ -1,5 +1,5 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
-from django.template import RequestContext
+from django.template import Context, Template
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
@@ -25,7 +25,7 @@ import calendar
 
 logger = logging.getLogger(__name__)
 
-KML_MIRROR_CACHE_DURATION = 60 * 60 * 24 # in seconds: 24 hour
+KML_MIRROR_CACHE_DURATION = 60 * 60 * 48 # in seconds: 24 hour
 KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
@@ -66,12 +66,23 @@ def get_mirrored_kml(url):
             content_type = MIME_KMZ
         return content, content_type
 
+def get_wms_kml(kml_resource):
+    context = {
+        'name': kml_resource.name,
+        'wms_url': kml_resource.url
+    }
+    content = render_to_kmz("kml/wms.kml", context)
+    content_type = MIME_KMZ
+    return content, content_type
+
 class KmlResourceView(View):
     @never_cache
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
         if kml_resource.kml_type == 'static':
             content, content_type = get_mirrored_kml(kml_resource.url)
+        elif kml_resource.kml_type == 'wms':
+            content, content_type = get_wms_kml(kml_resource)
         else:
             raise Exception('KML is dynamic, please use its specific URL as found in urls.py.')
         response = HttpResponse(content, content_type=content_type)

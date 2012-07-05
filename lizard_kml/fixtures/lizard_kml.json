@@ -190,7 +190,7 @@
     "fields": {
         "name": "EJtest",
         "description": "EJtest",
-        "kml_type": "WMS",
+        "kml_type": "wms",
         "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=natura2000:natura2000&STYLES=lnv_natura2000&TRANSPARENT=TRUE&FORMAT=image/gif",
         "category": "4",
         "preview_image": "../static_media/lizard_kml/figures/11.png"

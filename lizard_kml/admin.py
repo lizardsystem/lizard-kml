@@ -19,10 +19,16 @@ class KmlResourceForm(forms.ModelForm):
 
 class KmlResourceAdmin(admin.ModelAdmin):
     model = KmlResource
-    list_display = ['name', 'category', 'url', 'kml_type', 'slug']
+    list_display = ['name', 'category', 'limited_url', 'kml_type', 'slug']
     fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image']
     ordering = ['category', 'name']
     form = KmlResourceForm
+
+    def limited_url(self, obj):
+        if len(obj.url) > 100:
+            return obj.url[:100] + '[...]'
+        return obj.url
+    limited_url.short_description = 'URL'
 
 class KmlResourceInlineForm(forms.ModelForm):
     class Meta:
