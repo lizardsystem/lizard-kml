@@ -27,6 +27,9 @@ import extra_cm
 
 logger = logging.getLogger(__name__)
 
+class WouldTakeTooLong(Exception):
+    pass
+
 class TimeStagNormalize(colors.Normalize):
     def inverse(self, value):
         result_value = colors.Normalize.inverse(self, value)
@@ -173,6 +176,8 @@ def jarkusmean(id_min, id_max, nc_resource, plotproperties=None):
         ids_all = dataset.variables['id'][:]
         # idx, = (id == 7004000).nonzero()
         ids = ((ids_all < id_max) & (ids_all > id_min)).nonzero()[0]
+        if len(ids) > 15:
+            raise WouldTakeTooLong()
         timevar = dataset.variables['time']
         time = netcdftime.num2date(timevar[:], timevar.units)
         cross_shore = dataset.variables['cross_shore'][:]

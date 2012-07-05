@@ -574,6 +574,8 @@ KmlViewerUi.prototype.initControls = function () {
 /**
  */
 KmlViewerUi.prototype.initJarkusPanel = function () {
+    var me = this;
+
     // build colormaps dialog
     $("#colormaps").dialog({
         title: 'Selecteer kleurenmap',
@@ -673,7 +675,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
     var multiselect = Ext.create('Ext.button.Button', {
         text: 'Grafiek over meerdere raaien',
         handler: function() {
-            kvu.startMultiSelect();
+            me.toggleMultiSelect();
         }
     });
 
@@ -921,6 +923,15 @@ KmlViewerUi.prototype.showMainBalloon = function (html) {
     var balloon = ge.createHtmlStringBalloon('');
     balloon.setContentString(html);
     ge.setBalloon(balloon);
+};
+
+KmlViewerUi.prototype.toggleMultiSelect = function () {
+    if (this.isMultiSelectEnabled) {
+        this.stopMultiSelect();
+    }
+    else {
+        this.startMultiSelect();
+    }
 };
 
 KmlViewerUi.prototype.startMultiSelect = function () {
