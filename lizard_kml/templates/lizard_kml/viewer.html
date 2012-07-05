@@ -1,5 +1,6 @@
 {% extends "lizard_kml/lizard_ui_realbase.html" %}
 {# extends "lizard_ui/realbase.html" #}
+{% load tools %}
 
 {% block title %}Kustviewer - Lizard{% endblock %}
 
@@ -54,6 +55,10 @@
 {% block page %}
 {% include "lizard_kml/colormap.html" %}
 {{ block.super }}
+<div id="url-base" style="display:none;"
+     data-api-url="{% absurl lizard-kml-api %}"
+     data-jarkusmean-chart-url="{% absurl lizard-kml-chart chart_type='jarkusmean' %}">
+</div>
 <div id="loader">
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Om deze site te bezoeken, is een browser met ondersteuning voor Javascript nodig.</noscript></div>

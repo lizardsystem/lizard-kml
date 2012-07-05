@@ -237,10 +237,20 @@ function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
  * UI component.
  */
 function KmlViewerUi() {
+    // fetch URL bases
+    var $url_base = $('#url-base');
+    this.api_url = $url_base.attr('data-api-url');
+    this.jarkusmean_chart_url = $url_base.attr('data-jarkusmean-chart-url');
+
+    // components
     this.treeStore = null;
     this.treePanel = null;
     this.jarkusPanel = null;
     this.accordion = null;
+
+    // for multiselection
+    this.isMultiSelectEnabled = false;
+    this.selectedItems = [];
 }
 
 /**
@@ -422,7 +432,7 @@ KmlViewerUi.prototype.initControls = function () {
         },
         proxy: {
             type: 'ajax',
-            url: '/kml/api_drf/?format=json',
+            url: this.api_url + '?format=json',
             reader: {
                 type: 'json'
             }
@@ -838,6 +848,10 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
         // start streaming pct checker
         strc.startControl();
 
+        // add the global click handler
+        this.addGlobalClickHandler();
+
+        // show the right upper controls
         kvu.setControlsDisabled(false);
     }
     else {
@@ -903,27 +917,77 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
     });
 };
 
+KmlViewerUi.prototype.showMainBalloon = function (html) {
+    var balloon = ge.createHtmlStringBalloon('');
+    balloon.setContentString(html);
+    ge.setBalloon(balloon);
+};
+
 KmlViewerUi.prototype.startMultiSelect = function () {
-    var kmlObject = kfc.getBySlug('jarkus').kmlObject;
-    var placemarks = kmlObject.getElementsByType('KmlPlacemark');
-    var len = placemarks.getLength();
+    this.isMultiSelectEnabled = true;
+    this.showMainBalloon('Klik op twee Jarkusraaien, waartussen de grafiek berekend moet worden.');
+};
 
-    google.earth.executeBatch(ge, function () {
-        for (var i = 0; i < len; ++i) {
-            var placemark = placemarks.item(i);
-            google.earth.addEventListener(placemark, 'click', function (event) {
-                var clickItem = event.getTarget();
-                console.log(clickItem.getId());
+KmlViewerUi.prototype.stopMultiSelect = function () {
+     // clear selected items
+    this.selectedItems.length = 0;
+    this.isMultiSelectEnabled = false;
+};
 
-                var balloon = ge.createHtmlStringBalloon('');
-                balloon.setMaxWidth(600);
-                balloon.setContentString('<a href="#" onclick="alert(\'Running some JavaScript!\');">Alert!</a>');
-                ge.setBalloon(balloon);
+KmlViewerUi.prototype.addGlobalClickHandler = function () {
+    google.earth.addEventListener(ge.getGlobe(), 'click', this.clickHandler.bind(this));
+};
 
-                event.preventDefault();
-            });
+KmlViewerUi.prototype.clickHandler = function (event) {
+    var target = event.getTarget();
+    if (target.getType() === 'KmlPlacemark') {
+        // this probably means the user click on an item
+        // that originates from our custom KML data
+        if (this.isMultiSelectEnabled) {
+            // don't show the normal popup
+            event.preventDefault();
+            // pass the clicked placemark
+            kvu.addSelectedItem(target);
         }
-    });
+    }
+};
+
+KmlViewerUi.prototype.addSelectedItem = function (item) {
+    var id = item.getId();
+    console.log('selected ' + id);
+    // store clicked items
+    this.selectedItems.push(parseInt(id));
+    var itemIndex = this.selectedItems.length;
+    if (this.selectedItems.length === 2) {
+        this.twoItemsSelected();
+    }
+    else {
+        var balloon = ge.createHtmlStringBalloon('');
+        balloon.setFeature(item);
+        balloon.setContentString('Selectie item nummer ' + itemIndex + ', met ID ' + id + '.');
+        ge.setBalloon(balloon);
+    }
+};
+
+KmlViewerUi.prototype.twoItemsSelected = function () {
+    // found out ID's of the selected Jarkusraaien
+    var id_min = Math.min.apply(null, this.selectedItems);
+    var id_max = Math.max.apply(null, this.selectedItems);
+
+    // stop multi selection mode
+    this.stopMultiSelect();
+
+    // show the graph
+    var url = this.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
+    if ((id_max - id_min) < 500) {
+        this.showMainBalloon(
+            '<p>Gemiddelde voor Transects ' + id_min + ' tot ' + id_max + '</p>' +
+            '<img src="' + url + '" alt="Loading..." />'
+        );
+    }
+    else {
+        this.showMainBalloon('Te veel items geselecteerd.');
+    }
 };
 
 /* ************************************************************************ */

@@ -30,7 +30,7 @@ urlpatterns = patterns(
 
     #url(r'^api_tp/', include(category_resource.urls)),
     #url(r'^api_tp/', include(kmlsource_resource.urls)),
-    url(r'^api_drf/$', CategoryTreeView.as_view(), name='api-category-tree'),
+    url(r'^api_drf/$', CategoryTreeView.as_view(), name='lizard-kml-api'),
 )
 
 urlpatterns += debugmode_urlpatterns()
