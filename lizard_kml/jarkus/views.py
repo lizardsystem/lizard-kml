@@ -8,11 +8,12 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.conf import settings
 from django.utils.translation import ugettext as _
+from django.core.servers.basehttp import FileWrapper
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
 from lizard_kml.jarkus.nc_models import makejarkustransect
-from lizard_kml.jarkus.plots import eeg, jarkustimeseries
+from lizard_kml.jarkus.plots import eeg, jarkustimeseries, jarkusmean
 
 import logging
 import xlwt
@@ -83,14 +84,21 @@ class ChartView(View):
     def get(self, request, chart_type, id=None):
         """generate info into a response"""
 
-        self.id = int(id)
-        transect = makejarkustransect(id)
         # TODO, sanitize the GET.... (format=png/pdf,size?)
-        if chart_type == 'eeg':
-            bytes = eeg(transect, {'format':'png'})
-        elif chart_type == 'jarkustimeseries':
-            bytes = jarkustimeseries(transect, {'format':'png' })
-        response = HttpResponse(bytes, mimetype="image/png")
+        if chart_type in ['eeg', 'jarkustimeseries']:
+            id = int(id)
+            transect = makejarkustransect(id)
+            if chart_type == 'eeg':
+                fd = eeg(transect, {'format':'png'})
+            elif chart_type == 'jarkustimeseries':
+                fd = jarkustimeseries(transect, {'format':'png' })
+        elif chart_type == 'jarkusmean':
+            id_min = int(request.GET['id_min']) # 7003001
+            id_max = int(request.GET['id_max']) # 7003150
+            fd = jarkusmean(id_min, id_max, settings.NC_RESOURCE, {'format':'png' })
+        # wrap the file descriptor as a generator (8 KB reads)
+        wrapper = FileWrapper(fd)
+        response = HttpResponse(wrapper, mimetype="image/png")
         # TODO for pdf:
         # response['Content-Disposition'] = 'attachment; filename=transect{}.{}'.format(self.id, format=format)
         return response

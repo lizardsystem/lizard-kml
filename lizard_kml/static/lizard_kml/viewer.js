@@ -660,12 +660,30 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         }
     });
 
-    this.jarkusPanel = Ext.create('Ext.panel.Panel', {
-        title: 'Jarkus',
-        collapsed: true,
-        disabled: true,
+    var multiselect = Ext.create('Ext.button.Button', {
+        text: 'Grafiek over meerdere raaien',
+        handler: function() {
+            kvu.startMultiSelect();
+        }
+    });
+
+    var actions = Ext.create('Ext.form.FieldSet', {
+        title: 'Acties',
+        defaults: {anchor: '100%'},
         layout: {
-            type: 'vbox',
+            type: 'anchor',
+            align: 'stretch'
+        },
+        items: [
+            multiselect
+        ]
+    });
+
+    var display = Ext.create('Ext.form.FieldSet', {
+        title: 'Weergave',
+        defaults: {anchor: '100%'},
+        layout: {
+            type: 'anchor',
             align: 'stretch'
             //padding: 5
         },
@@ -677,6 +695,21 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             polyalpha,
             move,
             confirm
+        ]
+    });
+
+    this.jarkusPanel = Ext.create('Ext.panel.Panel', {
+        title: 'Jarkus',
+        collapsed: true,
+        disabled: true,
+        layout: {
+            type: 'vbox',
+            align: 'stretch'
+            //padding: 5
+        },
+        items: [
+            display,
+            actions
         ]
     });
 };
@@ -866,6 +899,29 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
         if (id === kml_id) {
             node.set('loading', loading);
             return false; // NOTE: this exits the forEach loop
+        }
+    });
+};
+
+KmlViewerUi.prototype.startMultiSelect = function () {
+    var kmlObject = kfc.getBySlug('jarkus').kmlObject;
+    var placemarks = kmlObject.getElementsByType('KmlPlacemark');
+    var len = placemarks.getLength();
+
+    google.earth.executeBatch(ge, function () {
+        for (var i = 0; i < len; ++i) {
+            var placemark = placemarks.item(i);
+            google.earth.addEventListener(placemark, 'click', function (event) {
+                var clickItem = event.getTarget();
+                console.log(clickItem.getId());
+
+                var balloon = ge.createHtmlStringBalloon('');
+                balloon.setMaxWidth(600);
+                balloon.setContentString('<a href="#" onclick="alert(\'Running some JavaScript!\');">Alert!</a>');
+                ge.setBalloon(balloon);
+
+                event.preventDefault();
+            });
         }
     });
 };
@@ -1118,6 +1174,17 @@ KmlFileCollection.prototype.get = function (id) {
     for (var i in this.kmlFiles) {
         var kmlFile = this.kmlFiles[i];
         if (kmlFile.id === id) {
+            return kmlFile;
+        }
+    }
+};
+
+/**
+ */
+KmlFileCollection.prototype.getBySlug = function (slug) {
+    for (var i in this.kmlFiles) {
+        var kmlFile = this.kmlFiles[i];
+        if (kmlFile.slug === slug) {
             return kmlFile;
         }
     }

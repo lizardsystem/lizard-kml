@@ -82,14 +82,13 @@ class Transect(object):
         lon, lat = proj(x,y,inverse=True)
         return lon, lat
 
-
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
 # @cache.beaker_cache('id', expire=60)
 def makejarkustransect(id, **args):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
     id = int(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
-    dataset = netCDF4.Dataset(settings.NC_RESOURCE)
+    dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
     tr = Transect(id)
 
     # Opendap is index based, so we have to do some numpy tricks to get the data over (and fast)

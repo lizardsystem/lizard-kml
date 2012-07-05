@@ -25,7 +25,7 @@ from numpy.ma import filled, masked_array
 
 import extra_cm
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class TimeStagNormalize(colors.Normalize):
     def inverse(self, value):
@@ -37,7 +37,6 @@ def jarkustimeseries(transect, plotproperties=None):
     """create a timeseries plot for a transect"""
     if plotproperties is None:
         plotproperties = {}
-    f = cStringIO.StringIO()
     # interpolation function
     z = transect.interpolate_z()
     # create the plot
@@ -60,11 +59,14 @@ def jarkustimeseries(transect, plotproperties=None):
         o.set_size('xx-small')
     for o in mappable.colorbar[1].findobj(text.Text):
         o.set_size('xx-small')
-    fig.savefig(f, **plotproperties)
-    f.seek(0)
+
+    buf = cStringIO.StringIO()
+    fig.savefig(buf, **plotproperties)
+    buf.seek(0)
     # cleanup
     fig.clf()
-    return f.getvalue()
+    # return an 'open' file descriptor
+    return buf
 
 def eeg(transect, plotproperties=None):
     """plot eeg like plot of transects"""
@@ -106,12 +108,14 @@ def eeg(transect, plotproperties=None):
     datelocator = matplotlib.dates.AutoDateLocator()
     dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
     plot.yaxis.set_major_formatter(dateformatter)
+
     buf = cStringIO.StringIO()
     fig.savefig(buf, **plotproperties)
     buf.seek(0)
     # cleanup
     fig.clf()
-    return buf.getvalue()
+    # return an 'open' file descriptor
+    return buf
 
 import netCDF4
 import netcdftime
@@ -124,7 +128,7 @@ def fill_z(x, z):
     cross_shore = x
     filled = []
     # Space first
-    for i in range(z.shape[0]):
+    for i in xrange(z.shape[0]):
         z_idx = ~(z[i,:].mask)
         interp = scipy.interpolate.interp1d(cross_shore[z_idx], z[i,z_idx], bounds_error=False)
         zinterp = interp(cross_shore)
@@ -132,7 +136,7 @@ def fill_z(x, z):
     zfilled = masked_array(filled, mask=np.isnan(np.array(filled)))
 
     # Fill up with old or new data
-    for i in range(zfilled.shape[1]):
+    for i in xrange(zfilled.shape[1]):
         a = zfilled[:,i]
         xp = np.arange(len(a))
         if not a.mask.all():
@@ -141,7 +145,7 @@ def fill_z(x, z):
 
 def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
     # loop from last to first counting backwards
-    for i in range(-1,-1*zfilled.shape[0]+1,-1):
+    for i in xrange(-1,-1*zfilled.shape[0]+1,-1):
         t = timenum[-i]
         minz = np.nanmin(
             zfilled[-1:-i:-1,:],
@@ -160,33 +164,37 @@ def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
     if (plotlatest):
         plot.plot(cross_shore, zfilled[-1,:],'k-', alpha=0.5, linewidth=1)
 
-def mean():
-    # Create the plot
-    url  = '/media/WORKSPACE/lizard-kml/transect.nc'
-    ds = netCDF4.Dataset(url)
-    # Lookup variables
-    id = ds.variables['id'][:]
-    # idx, = (id == 7004000).nonzero()
-    ids, = ((id < 7004000) & (id > 7003000)).nonzero()
-    timevar = ds.variables['time']
-    time = netcdftime.num2date(timevar[:], timevar.units)
-    cross_shore = ds.variables['cross_shore'][:]
+def jarkusmean(id_min, id_max, nc_resource, plotproperties=None):
+    id_min = int(id_min)
+    id_max = int(id_max)
+    dataset = netCDF4.Dataset(nc_resource, 'r')
+    try:
+        # Lookup variables
+        ids_all = dataset.variables['id'][:]
+        # idx, = (id == 7004000).nonzero()
+        ids = ((ids_all < id_max) & (ids_all > id_min)).nonzero()[0]
+        timevar = dataset.variables['time']
+        time = netcdftime.num2date(timevar[:], timevar.units)
+        cross_shore = dataset.variables['cross_shore'][:]
 
-    timenum = matplotlib.dates.date2num(time)
-    # Define color for years
-    sm = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
-    sm.set_clim(np.min(timenum), np.max(timenum))
-    sm.set_array(timenum)
+        # Define color for years
+        timenum = matplotlib.dates.date2num(time)
+        sm = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
+        sm.set_clim(np.min(timenum), np.max(timenum))
+        sm.set_array(timenum)
 
-    fig = pyplot.figure()
-    plot = fig.add_subplot(111)
-    for i, id in enumerate(ids):
-        print 'Plotting', id
-        z = ds.variables['altitude'][:,id,:]
-        if z.mask.all(1).any():
-            continue
-        zfilled = fill_z(cross_shore, z+i*4)
-        timeplot(plot, cross_shore, zfilled, timenum, sm)
+        # Create the plot
+        fig = pyplot.figure()
+        plot = fig.add_subplot(111)
+        for i, id in enumerate(ids):
+            z = dataset.variables['altitude'][:,id,:]
+            if z.mask.all(1).any():
+                continue
+            logger.debug('Plotting %s', id)
+            zfilled = fill_z(cross_shore, z+i*4)
+            timeplot(plot, cross_shore, zfilled, timenum, sm)
+    finally:
+        dataset.close()
 
     # Format the colorbar
     cb = fig.colorbar(sm)
@@ -196,10 +204,14 @@ def mean():
     cb.formatter = yearsfmt
     cb.update_ticks()
 
-    # save image
     plot.set_xlim(-500, 1000)
-    fig.savefig('jarkusgeo.pdf')
-    fig.clf()
 
-if __name__ == '__main__':
-    mean()
+    # save image
+    buf = cStringIO.StringIO()
+    fig.savefig(buf, **plotproperties)
+    buf.seek(0)
+
+    # cleanup
+    fig.clf()
+    # return an 'open' file descriptor
+    return buf
