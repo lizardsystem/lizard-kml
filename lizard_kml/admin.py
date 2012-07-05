@@ -10,7 +10,7 @@ def pass_help_text(Model, field_name):
 class KmlResourceForm(forms.ModelForm):
     class Meta:
         model = KmlResource
-        fields = ['name', 'description', 'category', 'url', 'is_dynamic', 'slug', 'preview_image']
+        fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image']
         widgets = {
             'name': forms.TextInput(attrs={'size': 100}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 50}),
@@ -19,13 +19,14 @@ class KmlResourceForm(forms.ModelForm):
 
 class KmlResourceAdmin(admin.ModelAdmin):
     model = KmlResource
-    list_display = ['name', 'category', 'url', 'slug']
-    fields = ['name', 'description', 'category', 'url', 'is_dynamic', 'slug', 'preview_image']
+    list_display = ['name', 'category', 'url', 'kml_type', 'slug']
+    fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image']
+    ordering = ['category', 'name']
     form = KmlResourceForm
 
 class KmlResourceInlineForm(forms.ModelForm):
     class Meta:
-        fields = ['name', 'url', 'category', 'slug']
+        fields = ['name', 'url', 'category', 'kml_type', 'slug']
         widgets = {
             'name': forms.TextInput(attrs={'size': 50}),
             'description': forms.Textarea(attrs={'rows': 4, 'cols': 30}),

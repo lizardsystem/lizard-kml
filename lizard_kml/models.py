@@ -31,6 +31,11 @@ class Category(models.Model):
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
+KML_RESOURCE_CHOICES = [
+    ('static', _('Static')),
+    ('dynamic', _('Dynamic')),
+    ('WMS', _('WMS'))
+]
 
 class KmlResource(models.Model):
     """
@@ -58,13 +63,20 @@ class KmlResource(models.Model):
     url = models.CharField(
         db_column='url',
         verbose_name=_('URL'),
-        max_length=200, blank=True, null=True,
+        max_length=500, blank=True, null=True,
         help_text=_('url_help_text')
     )
-    is_dynamic = models.BooleanField(
-        db_column='is_dynamic',
-        verbose_name=_('dynamic'),
-        help_text=_('is_dynamic_help_text')
+    #is_dynamic = models.BooleanField(
+    #    db_column='is_dynamic',
+    #    verbose_name=_('dynamic'),
+    #    help_text=_('is_dynamic_help_text')
+    #)
+    kml_type = models.CharField(
+        db_column='kml_type',
+        verbose_name=_('type'),
+        max_length=20,
+        choices=KML_RESOURCE_CHOICES,
+        help_text=_('kml_type_help_text')
     )
     slug = models.SlugField(
         db_column='slug',

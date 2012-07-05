@@ -45,7 +45,7 @@
     "fields": {
         "name": "Vaklodingen info",
         "description": "Vaklodingen info",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/Vaklodingen_overview.kml",
         "category": "1",
         "preview_image": "../static_media/lizard_kml/figures/1.png"
@@ -57,7 +57,7 @@
     "fields": {
         "name": "Vaklodingen",
         "description": "Vaklodingen",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/Vaklodingen.kml",
         "category": "1",
         "preview_image": "../static_media/lizard_kml/figures/2.png"
@@ -69,7 +69,7 @@
     "fields": {
         "name": "Jarkus",
         "description": "Jarkus",
-        "is_dynamic": "1",
+        "kml_type": "dynamic",
         "url": "",
         "slug": "jarkus",
         "category": "1",
@@ -82,7 +82,7 @@
     "fields": {
         "name": "Lidar",
         "description": "Lidar",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://dtvirt5.deltares.nl/kml/rijkswaterstaat/kustlidar.kml",
         "category": "1",
         "preview_image": "../static_media/lizard_kml/figures/4.png"
@@ -94,7 +94,7 @@
     "fields": {
         "name": "AHN",
         "description": "AHN",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://dtvirt5.deltares.nl/kml/tno/AHN.kml",
         "category": "1",
         "preview_image": "../static_media/lizard_kml/figures/5.png"
@@ -114,7 +114,7 @@
     "fields": {
         "name": "1965-heden",
         "description": "Hoogwater - Laagwater - Duinvoet (1965-heden)",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/Jarkus_strandlijnen.kml",
         "category": "2",
         "preview_image": "../static_media/lizard_kml/figures/6.png"
@@ -126,7 +126,7 @@
     "fields": {
         "name": "1843-1999",
         "description": "Hoogwater - Laagwater - Duinvoet (1843-1999)",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://kml.deltares.nl/kml/rijkswaterstaat/strandlijnen/strandlijnen.kml",
         "category": "2",
         "preview_image": "../static_media/lizard_kml/figures/7.png"
@@ -146,7 +146,7 @@
     "fields": {
         "name": "Suppleties",
         "description": "Suppleties",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://kml.deltares.nl/kml/rijkswaterstaat/suppleties/rws_suppletiedatabase.kmz",
         "category": "3",
         "preview_image": "../static_media/lizard_kml/figures/8.png"
@@ -166,7 +166,7 @@
     "fields": {
         "name": "Natura 2000",
         "description": "Natura 2000",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms/kml?LAYERS=natura2000:natura2000",
         "category": "4",
         "preview_image": "../static_media/lizard_kml/figures/9.png"
@@ -178,10 +178,22 @@
     "fields": {
         "name": "Ecologische hoofdstructuur",
         "description": "Ecologische hoofdstructuur",
-        "is_dynamic": "0",
+        "kml_type": "static",
         "url": "http://geodata.nationaalgeoregister.nl/nok2010/wms/kml?LAYERS=nok2010:ehs",
         "category": "4",
         "preview_image": "../static_media/lizard_kml/figures/10.png"
+    }
+},
+{
+    "pk": 11,
+    "model": "lizard_kml.kmlresource",
+    "fields": {
+        "name": "EJtest",
+        "description": "EJtest",
+        "kml_type": "WMS",
+        "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=natura2000:natura2000&STYLES=lnv_natura2000&TRANSPARENT=TRUE&FORMAT=image/gif",
+        "category": "4",
+        "preview_image": "../static_media/lizard_kml/figures/11.png"
     }
 }
 ]

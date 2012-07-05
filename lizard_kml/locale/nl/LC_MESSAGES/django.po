@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-26 11:47+0200\n"
+"POT-Creation-Date: 2012-07-05 16:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:14 models.py:44
+#: models.py:14 models.py:49
 msgid "name"
 msgstr "naam"
 
@@ -26,7 +26,7 @@ msgstr "naam"
 msgid "category_name_help_text"
 msgstr "Naam van de categorie."
 
-#: models.py:21 models.py:51
+#: models.py:21 models.py:56
 msgid "description"
 msgstr "beschrijving"
 
@@ -42,61 +42,78 @@ msgstr "Categorie"
 msgid "Categories"
 msgstr "Categorieën"
 
-#: models.py:47
+#: models.py:35
+msgid "Static"
+msgstr "Statisch"
+
+#: models.py:36
+msgid "Dynamic"
+msgstr "Dynamisch"
+
+#: models.py:37
+msgid "WMS"
+msgstr "WMS"
+
+#: models.py:52
 msgid "kml_resource_name_help_text"
 msgstr "Naam van de KML bron."
 
-#: models.py:53
+#: models.py:58
 msgid "kml_resource_description_help_text"
 msgstr "Omschrijving van de KML bron. Is momenteel niet in gebruik."
 
-#: models.py:60
+#: models.py:65
 msgid "URL"
 msgstr "URL"
 
-#: models.py:62
+#: models.py:67
 msgid "url_help_text"
 msgstr ""
 "URL van het externe KML bestand, dat gekoppeld wordt aan de kustviewer. Mag "
 "leeg blijven als naar een dynamisch opgebouwde KML wordt verwezen, zoals de "
 "jarkus-data."
 
-#: models.py:66
-msgid "dynamic"
-msgstr "dynamisch"
+#: models.py:76
+#, fuzzy
+msgid "type"
+msgstr "type"
 
-#: models.py:67
-msgid "is_dynamic_help_text"
+#: models.py:79
+msgid "kml_type_help_text"
 msgstr ""
-"Alleen aanvinken indien dit een 'dynamische' KML bron betreft, zoals "
-"bijvoorbeeld in het geval van de jarkus-data."
+"Het type KML waar deze referentie naar gaat wijzen. Laat dit op 'Dynamisch' "
+"staan, voor de Jarkus data. Het URL veld wordt in dit geval niet gebruikt. "
+"Gebruik 'Statisch' om naar statische KML bestanden, die ergens op internet "
+"staan, te verwijzen. Het URL veld moet in dit geval wijzen naar een geldig "
+"KML bestand. Als laatste is het ook mogelijk om een 'WMS' bron te koppelen. "
+"Hiervoor moet in het URL veld een geldige WMS URL opgegeven worden."
 
-#: models.py:71
+#: models.py:83
 msgid "system name"
-msgstr "systeem naam"
+msgstr "systeemnaam"
 
-#: models.py:73
+#: models.py:85
 msgid "slug_help_text"
 msgstr ""
 "Unieke (systeem) naam voor deze KML bron. Aan de hand van dit veld koppelt "
 "het system extra functionaliteit aan de KML bron. Momenteel is alleen de "
 "naam 'jarkus' hier bruikbaar."
 
-#: models.py:77
+#: models.py:89
 msgid "preview image"
-msgstr "voorbeeld plaatje"
+msgstr "voorbeeld-plaatje"
 
-#: models.py:79
+#: models.py:91
 msgid "preview_image_help_text"
 msgstr ""
 "Plaatje wat getoond wordt als vooruitzicht, als men met de muis boven de KML "
 "bron gaat staan."
 
-#: models.py:87
+#: models.py:99
 msgid "KML resource"
 msgstr "KML bestand"
 
-#: models.py:88
+#: models.py:100
 msgid "KML resources"
 msgstr "KML bestanden"
 

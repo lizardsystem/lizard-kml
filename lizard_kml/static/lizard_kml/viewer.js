@@ -39,7 +39,7 @@ var jarkusKmlParams = {
 var emptyGif = 'data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D';
 
 // either the Google or Ext callbacks won't work properly, so
-// solve it with this
+// solve it with an interval
 function refreshLoadedModules() {
     if (document.readyState === 'complete' && isExtReady && google.earth) {
         clearInterval(loadInterval);
@@ -54,28 +54,9 @@ function refreshLoadedModules() {
 }
 var loadInterval = setInterval(refreshLoadedModules, 200);
 
-// TEMP
 function kmlViewerSetColormap(colormap) {
     jarkusKmlParams['colormap'] = colormap;
     $('#colormaps').dialog('close');
-}
-// TEMP
-function addPlacemarkClickListeners(kmlObject) {
-    var placemarks = kmlObject.getElementsByType('KmlPlacemark');
-    for (var i = 0; i < placemarks.getLength(); ++i) {
-        var placemark = placemarks.item(i);
-        var url = '/kml/info/'+ placemark.getId() + '/';
-        google.earth.addEventListener(placemark, 'click', function (event) {
-            setDescription(event, url);
-        });
-    }
-}
-// TEMP
-function setDescription(event, url) {
-    var placemark = event.getTarget();
-    $.get(url, {}, function (data) {
-        placemark.setDescription(data)
-    });
 }
 
 /* ************************************************************************ */
@@ -1080,6 +1061,7 @@ GETimeSliderControl.prototype.animationStopTick = function () {
             // playback has been stopped by some other means,
             // like the timeslider
             this.isPlaying = false;
+            // update the UI
             kvu.setPlaying(false);
         }
         else if (this.isPastEnd()) {
@@ -1390,52 +1372,3 @@ KmlFile.prototype.toString = function () {
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
-
-// ////////
-// ////////
-// ////////
-// ////////
-// TESTS
-// ////////
-// ////////
-// ////////
-
-function refreshNetworkLinks() {
-    //var allNetworkLinks = ge.getElementsByType('KmlNetworkLink');
-    var allNetworkLinks = ge.getLayerRoot().getElementsByType('KmlNetworkLink');
-    var len = allNetworkLinks.getLength();
-    alert(len);
-    for (var i=0; i<len; i++) {
-        var networkLink = allNetworkLinks.item(i);
-        var link = networkLink.getLink();
-        var oldHref = link.getHref();
-        //var location = parseUrl(oldHref);
-        //location.search = '?a=b';
-        link.setHref(oldHref);
-    }
-}
-
-function removewms() {
-var features = ge.getFeatures();
-while (features.getFirstChild())
-features.removeChild(features.getFirstChild());
-}
-
-function addwms() {
-var groundOverlay = ge.createGroundOverlay('');
-groundOverlay.setIcon(ge.createIcon(''))
-groundOverlay.getIcon().setHref("http://129.206.228.72/cached/osm?LAYERS=osm_auto:all&SRS=EPSG%3A900913&FORMAT=image%2Fpng&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX=313086.067,6574807.423,626172.1348,6887893.4908&WIDTH=256&HEIGHT=256");
-groundOverlay.setLatLonBox(ge.createLatLonBox(''));
-
-var center = ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);
-var north = center.getLatitude();
-var south = center.getLatitude();
-var east = center.getLongitude();
-var west = center.getLongitude();
-var rotation = 0;
-
-var latLonBox = groundOverlay.getLatLonBox();
-latLonBox.setBox(north,south,east,west,rotation);
-groundOverlay.getIcon().setViewRefreshMode(ge.VIEW_REFRESH_ON_STOP);
-ge.getFeatures().appendChild(groundOverlay);
-}

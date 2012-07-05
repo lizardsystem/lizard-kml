@@ -70,10 +70,10 @@ class KmlResourceView(View):
     @never_cache
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
-        if not kml_resource.is_dynamic:
+        if kml_resource.kml_type == 'static':
             content, content_type = get_mirrored_kml(kml_resource.url)
         else:
-            raise Exception('KML is dynamic')
+            raise Exception('KML is dynamic, please use its specific URL as found in urls.py.')
         response = HttpResponse(content, content_type=content_type)
         response['Content-Disposition'] = 'attachment; filename=kml_resource{}.kmz'.format(kml_resource.pk)
         return response
