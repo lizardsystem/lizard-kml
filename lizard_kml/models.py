@@ -74,6 +74,7 @@ class KmlResource(models.Model):
     kml_type = models.CharField(
         db_column='kml_type',
         verbose_name=_('type'),
+        null=False, blank=False,
         max_length=20,
         choices=KML_RESOURCE_CHOICES,
         help_text=_('kml_type_help_text')
@@ -88,7 +89,8 @@ class KmlResource(models.Model):
         db_column='preview_image',
         verbose_name=_('preview image'),
         upload_to='uploaded_preview_images', max_length=500,
-        help_text=_('preview_image_help_text')
+        help_text=_('preview_image_help_text'),
+        default='../static_media/lizard_kml/loader2.gif'
     )
 
     def __unicode__(self):

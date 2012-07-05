@@ -188,12 +188,11 @@
     "pk": 11,
     "model": "lizard_kml.kmlresource",
     "fields": {
-        "name": "EJtest",
-        "description": "EJtest",
+        "name": "Test directe WMS laag",
+        "description": "Test directe WMS laag",
         "kml_type": "wms",
-        "url": "http://geodata.nationaalgeoregister.nl/natura2000/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=natura2000:natura2000&STYLES=lnv_natura2000&TRANSPARENT=TRUE&FORMAT=image/gif",
-        "category": "4",
-        "preview_image": "../static_media/lizard_kml/figures/11.png"
+        "url": "http://www2.demis.nl/WMS/wms.ashx?wms=WorldMap&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=Topography&STYLES=default&TRANSPARENT=FALSE&FORMAT=image/jpeg",
+        "category": "4"
     }
 }
 ]

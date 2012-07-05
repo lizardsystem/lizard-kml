@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-05 16:58+0200\n"
+"POT-Creation-Date: 2012-07-05 18:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,9 +69,9 @@ msgstr "URL"
 #: models.py:67
 msgid "url_help_text"
 msgstr ""
-"URL van het externe KML bestand, dat gekoppeld wordt aan de kustviewer. Mag "
-"leeg blijven als naar een dynamisch opgebouwde KML wordt verwezen, zoals de "
-"jarkus-data."
+"URL van het externe KML bestand, of de WMS laag, die gekoppeld wordt aan de "
+"kustviewer. Mag leeg blijven als naar een dynamisch opgebouwde KML wordt "
+"verwezen, zoals de jarkus-data."
 
 #: models.py:76
 #, fuzzy
@@ -95,9 +95,10 @@ msgstr "systeemnaam"
 #: models.py:85
 msgid "slug_help_text"
 msgstr ""
-"Unieke (systeem) naam voor deze KML bron. Aan de hand van dit veld koppelt "
-"het system extra functionaliteit aan de KML bron. Momenteel is alleen de "
-"naam 'jarkus' hier bruikbaar."
+"<b>Optioneel.</b> Unieke (systeem) naam voor deze KML bron. Aan de hand van "
+"dit veld koppelt het system extra functionaliteit aan de KML bron. Momenteel "
+"is alleen de naam 'jarkus' hier bruikbaar. Voor andere soorten data mag dit "
+"veld dus leeg blijven."
 
 #: models.py:89
 msgid "preview image"

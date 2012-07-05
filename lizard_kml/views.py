@@ -79,6 +79,7 @@ class KmlResourceView(View):
     @never_cache
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
+        logger.debug('Serving KML %s', kml_resource)
         if kml_resource.kml_type == 'static':
             content, content_type = get_mirrored_kml(kml_resource.url)
         elif kml_resource.kml_type == 'wms':
