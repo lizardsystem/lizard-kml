@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 
 from lizard_kml.models import Category, KmlResource
 
@@ -40,9 +41,17 @@ class KmlResourceInlineForm(forms.ModelForm):
         }
 
 class KmlResourceInline(admin.TabularInline):
+    def deeplink(self, obj):
+        url = reverse('admin:lizard_kml_kmlresource_change', args=(obj.id,))
+        return '<a href="{}"><b>Details</b></a>'.format(url)
+    deeplink.allow_tags = True
+    deeplink.short_description = 'Acties'
+
     model = KmlResource
-    ordering = ['name']
+    fields = ['name', 'url', 'category', 'kml_type', 'slug', 'deeplink']
+    readonly_fields = ['deeplink']
     extra = 0
+    ordering = ['name']
     can_delete = False
     form = KmlResourceInlineForm
 
