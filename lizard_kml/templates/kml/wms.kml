@@ -17,9 +17,6 @@
                 <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>
             </LookAt>
             <Icon>
-                {% comment %}
-                <href>http://geodata.nationaalgeoregister.nl/natura2000/wms?SERVICE=WMS&amp;VERSION=1.1.1&amp;REQUEST=GetMap&amp;SRS=EPSG:4326&amp;WIDTH=512&amp;HEIGHT=512&amp;LAYERS=natura2000:natura2000&amp;STYLES=lnv_natura2000&amp;TRANSPARENT=TRUE&amp;FORMAT=image/gif</href>
-                {% endcomment %}
                 <href>{{ wms_url }}</href>
                 <viewRefreshMode>onStop</viewRefreshMode>
             </Icon>
