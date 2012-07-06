@@ -9,6 +9,7 @@ Running the application
 Install the dependencies:
 
    $> aptitude install python-psycopg2 python-imaging python-matplotlib python-pyproj
+
    $> easy_install netCDF4
 
 Initialize the Python interpreter paths:
