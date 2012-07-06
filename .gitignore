@@ -43,3 +43,6 @@ src
 
 # Ignore generated apache config files
 etc/*.apache.conf
+
+# lizard-kml specific
+transect.nc
