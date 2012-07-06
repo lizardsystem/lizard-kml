@@ -90,7 +90,7 @@ class KmlResource(models.Model):
         verbose_name=_('preview image'),
         upload_to='uploaded_preview_images', max_length=500,
         help_text=_('preview_image_help_text'),
-        default='../static_media/lizard_kml/loader2.gif'
+        null=True, blank=True
     )
 
     def __unicode__(self):

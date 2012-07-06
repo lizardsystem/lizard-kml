@@ -1,9 +1,11 @@
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from djangorestframework.views import View
 
 from lizard_kml.models import Category
 
+DEFAULT_PREVIEW_IMAGE = settings.STATIC_URL + 'lizard_kml/figures/none.png'
 
 class CategoryTreeView(View):
     _IGNORE_IE_ACCEPT_HEADER = False # keep this for IE8 and IE9
@@ -29,7 +31,7 @@ class CategoryTreeView(View):
                 'kml_type': k.kml_type,
                 'kml_url': self._mk_kml_resource_url(k),
                 'slug': k.slug,
-                'preview_image_url': k.preview_image.url
+                'preview_image_url': k.preview_image.url if k.preview_image else DEFAULT_PREVIEW_IMAGE
             }
             for k in category.kmlresource_set.all()
         ]
@@ -39,6 +41,4 @@ class CategoryTreeView(View):
             rela = reverse('lizard-jarkus-kml', kwargs={'kml_type': 'lod'})
         else:
             rela = reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk})
-        #now = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
-        #return self.request.build_absolute_uri(rela) + '?timestamp=' + str(now)
         return self.request.build_absolute_uri(rela)

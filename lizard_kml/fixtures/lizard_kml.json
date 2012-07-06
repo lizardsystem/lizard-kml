@@ -191,7 +191,7 @@
         "name": "Test directe WMS laag",
         "description": "Test directe WMS laag",
         "kml_type": "wms",
-        "url": "http://www2.demis.nl/WMS/wms.ashx?wms=WorldMap&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=Topography&STYLES=default&TRANSPARENT=FALSE&FORMAT=image/jpeg",
+        "url": "http://www2.demis.nl/WMS/wms.ashx?wms=WorldMap&VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=512&HEIGHT=512&LAYERS=Topography&STYLES=default&TRANSPARENT=FALSE&FORMAT=image/png",
         "category": "4"
     }
 }
