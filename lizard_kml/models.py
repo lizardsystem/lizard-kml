@@ -57,7 +57,7 @@ class KmlResource(models.Model):
         null=True, blank=True,
         help_text=_('kml_resource_description_help_text')
     )
-    category = models.ForeignKey('Category', null=False, blank=False)
+    category = models.ForeignKey('Category', verbose_name=_('Category'), null=False, blank=False)
     # is_dynamic indicates whether to actually use the url ...
     # not quite BCNF but that's not really relevant with such a tiny domain model
     url = models.CharField(
