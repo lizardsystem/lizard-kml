@@ -6,6 +6,10 @@ Keyhole Markup Language support for Lizard using the Google Earth plugin.
 Running the application
 --------------------------------
 
+Initialize the Python interpreter paths:
+
+    $> python bootstrap.py
+
 Download and build the dependencies:
 
     $> bin/buildout
@@ -20,7 +24,7 @@ Update the tables:
 
 Load some testdata (fixture):
 
-    $> bin/django loaddata lizard_kml_open_kml_data
+    $> bin/django loaddata lizard_kml
 
 Run the internal webserver:
 
