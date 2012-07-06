@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-05 18:05+0200\n"
+"POT-Creation-Date: 2012-07-06 03:19-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,7 +78,7 @@ msgstr ""
 msgid "type"
 msgstr "type"
 
-#: models.py:79
+#: models.py:80
 msgid "kml_type_help_text"
 msgstr ""
 "Het type KML waar deze referentie naar gaat wijzen. Laat dit op 'Dynamisch' "
@@ -88,11 +88,11 @@ msgstr ""
 "KML bestand. Als laatste is het ook mogelijk om een 'WMS' bron te koppelen. "
 "Hiervoor moet in het URL veld een geldige WMS URL opgegeven worden."
 
-#: models.py:83
+#: models.py:84
 msgid "system name"
 msgstr "systeemnaam"
 
-#: models.py:85
+#: models.py:86
 msgid "slug_help_text"
 msgstr ""
 "<b>Optioneel.</b> Unieke (systeem) naam voor deze KML bron. Aan de hand van "
@@ -100,21 +100,21 @@ msgstr ""
 "is alleen de naam 'jarkus' hier bruikbaar. Voor andere soorten data mag dit "
 "veld dus leeg blijven."
 
-#: models.py:89
+#: models.py:90
 msgid "preview image"
 msgstr "voorbeeld-plaatje"
 
-#: models.py:91
+#: models.py:92
 msgid "preview_image_help_text"
 msgstr ""
 "Plaatje wat getoond wordt als vooruitzicht, als men met de muis boven de KML "
 "bron gaat staan."
 
-#: models.py:99
+#: models.py:101
 msgid "KML resource"
 msgstr "KML bestand"
 
-#: models.py:100
+#: models.py:102
 msgid "KML resources"
 msgstr "KML bestanden"
 
