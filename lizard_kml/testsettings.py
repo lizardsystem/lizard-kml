@@ -76,6 +76,19 @@ NOSE_ARGS = ['--with-doctest', '--verbosity=3']
 SOUTH_TESTS_MIGRATE = False # To disable migrations and use syncdb instead
 SKIP_SOUTH_TESTS = True # To disable South's own unit tests
 
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'nl-NL'
+# For at-runtime language switching.  Note: they're shown in reverse order in
+# the interface!
+LANGUAGES = [
+#    ('en', 'English'),
+    ('nl', 'Nederlands'),
+]
+# If you set this to False, Django will make some optimizations so as not to
+# load the internationalization machinery.
+USE_I18N = True
+
 # Used for django-staticfiles (and for media files)
 STATIC_URL = '/static_media/'
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
