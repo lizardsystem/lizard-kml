@@ -230,6 +230,9 @@ function KmlViewerUi() {
     this.jarkusPanel = null;
     this.accordion = null;
 
+    // etc
+    this.previewImageUrl = emptyGif;
+
     // for multiselection
     this.isMultiSelectEnabled = false;
     this.selectedItems = [];
@@ -245,6 +248,7 @@ KmlViewerUi.prototype.init = function () {
     this.initControls();
     // bind above-content links etc.
     this.bindUiEvents();
+    this.initPreviewImage();
     // remove loading overlay
     // don't initialize Google Earth until after this is done 
     this.removeLoadingOverlay(this.initGoogleEarth.bind(this));
@@ -711,27 +715,38 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
 };
 
 /**
+ * Attach loading event to the preview image.
  */
-KmlViewerUi.prototype.showPreviewImage = function (url) {
-    var $preview = $('#kml-preview');
-    $preview.load(function() {
+KmlViewerUi.prototype.initPreviewImage = function () {
+    var me = this;
+    $('#kml-preview').load(function() {
         // only continue if the users mouse is still on the element
         // for which the preview is shown
-        if ($(this).attr('src') == url) {
+        if ($(this).attr('src') == me.previewImageUrl) {
             $('#kml-preview-container').show();
         }
     });
-    $preview.attr('src', url);
 };
 
 /**
+ * Load the passed URL and show the bottom left preview image.
+ */
+KmlViewerUi.prototype.showPreviewImage = function (url) {
+    this.previewImageUrl = url;
+    $('#kml-preview').attr('src', url);
+};
+
+/**
+ * Hide the preview image.
  */
 KmlViewerUi.prototype.hidePreviewImage = function () {
+    this.previewImageUrl = emptyGif;
     $('#kml-preview').attr('src', emptyGif);
     $('#kml-preview-container').hide();
 };
 
 /**
+ * Show or hide the Jarkus specific controls.
  */
 KmlViewerUi.prototype.setJarkusPanelEnabled = function (enabled) {
     this.jarkusPanel.setDisabled(!enabled);
@@ -773,7 +788,7 @@ KmlViewerUi.prototype.isChecked = function (id) {
 };
 
 /**
- * Disable (make gray') all UI controls.
+ * Disable (make gray) all UI controls.
  */
 KmlViewerUi.prototype.setControlsDisabled = function (disabled) {
     this.accordion.setDisabled(disabled);
@@ -899,7 +914,7 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
         var kml_id = node.get('kml_id');
         if (id === kml_id) {
             node.set('loading', loading);
-            return false; // NOTE: this exits the forEach loop
+            return false; // NOTE: this exits the cascadeBy loop
         }
     });
 };
@@ -1322,10 +1337,6 @@ KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
             // add new features
             this.kmlObject = kmlObject;
             ge.getFeatures().appendChild(kmlObject);
-            // add click handlers
-            if (this.slug === "jarkus") {
-                //addPlacemarkClickListeners(kmlObject);
-            }
         }
         else {
             console.log("load canceled");
