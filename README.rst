@@ -36,4 +36,4 @@ Run the internal webserver:
 
     $> bin/django runserver host:port
 
-All set, point your browser to http://host:port/kml/viewer/
+All set, point your browser to http://host:port/viewer/
