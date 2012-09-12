@@ -11,7 +11,7 @@ def pass_help_text(Model, field_name):
 class KmlResourceForm(forms.ModelForm):
     class Meta:
         model = KmlResource
-        fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image']
+        fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image', 'sorting_index']
         widgets = {
             'name': forms.TextInput(attrs={'size': 100}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 50}),
@@ -20,9 +20,9 @@ class KmlResourceForm(forms.ModelForm):
 
 class KmlResourceAdmin(admin.ModelAdmin):
     model = KmlResource
-    list_display = ['name', 'category', 'limited_url', 'kml_type', 'slug']
-    fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image']
-    ordering = ['category', 'name']
+    list_display = ['name', 'category', 'limited_url', 'kml_type', 'slug', 'sorting_index']
+    fields = ['name', 'description', 'category', 'url', 'kml_type', 'slug', 'preview_image', 'sorting_index']
+    ordering = ['category__sorting_index', 'sorting_index']
     form = KmlResourceForm
 
     def limited_url(self, obj):
@@ -33,7 +33,7 @@ class KmlResourceAdmin(admin.ModelAdmin):
 
 class KmlResourceInlineForm(forms.ModelForm):
     class Meta:
-        fields = ['name', 'url', 'category', 'kml_type', 'slug']
+        fields = ['name', 'url', 'category', 'kml_type', 'slug', 'sorting_index']
         widgets = {
             'name': forms.TextInput(attrs={'size': 50}),
             'description': forms.Textarea(attrs={'rows': 4, 'cols': 30}),
@@ -41,23 +41,25 @@ class KmlResourceInlineForm(forms.ModelForm):
         }
 
 class KmlResourceInline(admin.TabularInline):
-    def deeplink(self, obj):
-        url = reverse('admin:lizard_kml_kmlresource_change', args=(obj.id,))
-        return '<a href="{}"><b>Details</b></a>'.format(url)
-    deeplink.allow_tags = True
-    deeplink.short_description = 'Acties'
-
     model = KmlResource
-    fields = ['name', 'url', 'category', 'kml_type', 'slug', 'deeplink']
+    fields = ['name', 'url', 'category', 'kml_type', 'slug', 'deeplink', 'sorting_index']
     readonly_fields = ['deeplink']
     extra = 0
     ordering = ['name']
     can_delete = False
     form = KmlResourceInlineForm
 
+    def deeplink(self, obj):
+        url = reverse('admin:lizard_kml_kmlresource_change', args=(obj.id,))
+        return '<a href="{}"><b>Details</b></a>'.format(url)
+    deeplink.allow_tags = True
+    deeplink.short_description = 'Acties'
+
 class CategoryAdmin(admin.ModelAdmin):
     model = Category
-    fields = ['name', 'description']
+    list_display = ['name', 'collapsed_by_default', 'sorting_index']
+    fields = ['name', 'description', 'collapsed_by_default', 'sorting_index']
+    ordering = ['sorting_index']
     inlines = [KmlResourceInline]
 
 admin.site.register(Category, CategoryAdmin)

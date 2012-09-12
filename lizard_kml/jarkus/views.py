@@ -73,7 +73,7 @@ class XlsView(View):
                 sheet.write(i,j,value)
         wb.save(stream)
         bytes = stream.getvalue()
-        response = HttpResponse(bytes, mimetype="application/vnd.ms-excel")
+        response = HttpResponse(bytes, content_type="application/vnd.ms-excel")
         response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
         return response
 
@@ -100,7 +100,7 @@ class ChartView(View):
                 fd = jarkusmean(id_min, id_max, settings.NC_RESOURCE, {'format':'png'})
             # wrap the file descriptor as a generator (8 KB reads)
             wrapper = FileWrapper(fd)
-            response = HttpResponse(wrapper, mimetype="image/png")
+            response = HttpResponse(wrapper, content_type="image/png")
             # TODO for pdf:
             # response['Content-Disposition'] = 'attachment; filename=transect{}.{}'.format(self.id, format=format)
         except WouldTakeTooLong:

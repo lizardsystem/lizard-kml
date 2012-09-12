@@ -16,6 +16,7 @@ class CategoryTreeView(View):
                 'id': category.id,
                 'name': category.name,
                 'description': category.description,
+                'collapsed_by_default': category.collapsed_by_default,
                 'kml_resources': self._kml_resource_tree(category)
             }
             for category in Category.objects.all()

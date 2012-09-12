@@ -397,7 +397,7 @@ KmlViewerUi.prototype.initControls = function () {
                 categories.forEach(function (category) {
                     var categoryNode = rootNode.appendChild({
                         text: category.name,
-                        expanded: true,
+                        expanded: !category.collapsed_by_default,
                         leaf: false
                     });
                     category.kml_resources.forEach(function (k) {

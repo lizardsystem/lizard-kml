@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-06 13:31+0200\n"
+"POT-Creation-Date: 2012-09-12 10:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:14 models.py:49
+#: models.py:14 models.py:61
 msgid "name"
 msgstr "naam"
 
@@ -26,7 +26,7 @@ msgstr "naam"
 msgid "category_name_help_text"
 msgstr "Naam van de categorie."
 
-#: models.py:21 models.py:56
+#: models.py:21 models.py:68
 msgid "description"
 msgstr "beschrijving"
 
@@ -34,51 +34,68 @@ msgstr "beschrijving"
 msgid "category_description_help_text"
 msgstr "Omschrijving van de categorie. Is momenteel niet in gebruik."
 
-#: models.py:31 models.py:60
+#: models.py:27 models.py:104
+msgid "sorting index"
+msgstr "sorterings index"
+
+#: models.py:28 models.py:105
+msgid "sorting_index_help_text"
+msgstr ""
+"Optionele waarde om de volgorde van de lijst te bepalen. Er wordt aflopend "
+"gesorteerd, dus objecten met een lagere waarde komen eerst."
+
+#: models.py:33
+msgid "collapsed by default"
+msgstr "Categorie is standaard ingeklapt"
+
+#: models.py:34
+msgid "collapsed_by_default_help_text"
+msgstr "Indien aangevinkt, wordt deze categorie standaard ingeklapt. Dit is bijvoorbeeld handig voor categorieën met veel items."
+
+#: models.py:43 models.py:72
 msgid "Category"
 msgstr "Categorie"
 
-#: models.py:32
+#: models.py:44
 msgid "Categories"
 msgstr "Categorieën"
 
-#: models.py:35
+#: models.py:47
 msgid "Static"
 msgstr "Statisch"
 
-#: models.py:36
+#: models.py:48
 msgid "Dynamic"
 msgstr "Dynamisch"
 
-#: models.py:37
+#: models.py:49
 msgid "WMS"
 msgstr "WMS"
 
-#: models.py:52
+#: models.py:64
 msgid "kml_resource_name_help_text"
 msgstr "Naam van de KML bron."
 
-#: models.py:58
+#: models.py:70
 msgid "kml_resource_description_help_text"
 msgstr "Omschrijving van de KML bron. Is momenteel niet in gebruik."
 
-#: models.py:65
+#: models.py:77
 msgid "URL"
 msgstr "URL"
 
-#: models.py:67
+#: models.py:79
 msgid "url_help_text"
 msgstr ""
 "URL van het externe KML bestand, of de WMS laag, die gekoppeld wordt aan de "
 "Google Earth plugin. Mag leeg blijven als naar een dynamisch opgebouwde KML "
 "wordt verwezen, zoals de jarkus-data."
 
-#: models.py:76
-#, fuzzy
+#: models.py:83
 msgid "type"
 msgstr "type"
 
-#: models.py:80
+#: models.py:87
 msgid "kml_type_help_text"
 msgstr ""
 "<p class=\"help\">Het type KML waar deze referentie naar gaat wijzen. </p><p "
@@ -90,11 +107,11 @@ msgstr ""
 "bron te koppelen. Hiervoor moet in het URL veld een geldige WMS URL "
 "opgegeven worden.</p>"
 
-#: models.py:84
+#: models.py:91
 msgid "system name"
 msgstr "systeemnaam"
 
-#: models.py:86
+#: models.py:93
 msgid "slug_help_text"
 msgstr ""
 "Unieke (systeem) naam voor deze KML bron. Aan de hand van dit veld koppelt "
@@ -102,21 +119,21 @@ msgstr ""
 "naam 'jarkus' hier bruikbaar. Voor andere soorten data mag dit veld dus leeg "
 "blijven."
 
-#: models.py:90
+#: models.py:97
 msgid "preview image"
 msgstr "voorbeeld-plaatje"
 
-#: models.py:92
+#: models.py:99
 msgid "preview_image_help_text"
 msgstr ""
 "Plaatje wat getoond wordt als vooruitzicht, als men met de muis boven de KML "
 "bron gaat staan. De optimale grootte hiervoor is 200px breed, en 150px hoog."
 
-#: models.py:101
+#: models.py:114
 msgid "KML resource"
 msgstr "KML bestand"
 
-#: models.py:102
+#: models.py:115
 msgid "KML resources"
 msgstr "KML bestanden"
 

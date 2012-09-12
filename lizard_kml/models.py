@@ -22,12 +22,25 @@ class Category(models.Model):
         null=True, blank=True,
         help_text=_('category_description_help_text')
     )
+    sorting_index = models.IntegerField(
+        db_column='sorting_index',
+        verbose_name=_('sorting index'),
+        help_text=_('sorting_index_help_text'),
+        default=10000,
+        null=True, blank=True
+    )
+    collapsed_by_default = models.BooleanField(
+        db_column='collapsed_by_default',
+        verbose_name=_('collapsed by default'),
+        help_text=_('collapsed_by_default_help_text'),
+        default=False
+    )
 
     def __unicode__(self):
         return u'%s' % self.name
 
     class Meta:
-        ordering = ('name', )
+        ordering = ['sorting_index', 'name']
         verbose_name = _('Category')
         verbose_name_plural = _('Categories')
 
@@ -58,19 +71,14 @@ class KmlResource(models.Model):
         help_text=_('kml_resource_description_help_text')
     )
     category = models.ForeignKey('Category', verbose_name=_('Category'), null=False, blank=False)
-    # is_dynamic indicates whether to actually use the url ...
-    # not quite BCNF but that's not really relevant with such a tiny domain model
+    # kml_type indicates whether to actually use the url ...
+    # not quite BCNF but that's not really important with such a tiny domain model
     url = models.CharField(
         db_column='url',
         verbose_name=_('URL'),
         max_length=500, blank=True, null=True,
         help_text=_('url_help_text')
     )
-    #is_dynamic = models.BooleanField(
-    #    db_column='is_dynamic',
-    #    verbose_name=_('dynamic'),
-    #    help_text=_('is_dynamic_help_text')
-    #)
     kml_type = models.CharField(
         db_column='kml_type',
         verbose_name=_('type'),
@@ -92,11 +100,18 @@ class KmlResource(models.Model):
         help_text=_('preview_image_help_text'),
         null=True, blank=True
     )
+    sorting_index = models.IntegerField(
+        db_column='sorting_index',
+        verbose_name=_('sorting index'),
+        help_text=_('sorting_index_help_text'),
+        default=10000,
+        null=True, blank=True
+    )
 
     def __unicode__(self):
         return u'%s' % self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['sorting_index', 'name']
         verbose_name = _('KML resource')
         verbose_name_plural = _('KML resources')

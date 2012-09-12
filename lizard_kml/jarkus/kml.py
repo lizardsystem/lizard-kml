@@ -170,4 +170,4 @@ def build_test_kml():
         )
     )
     kml_str = etree.tostring(kml)
-    return HttpResponse(kml_str, mimetype='application/vnd.google-earth.kml')
+    return HttpResponse(kml_str, content_type='application/vnd.google-earth.kml')
