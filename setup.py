@@ -19,10 +19,10 @@ install_requires = [
     'matplotlib',
     'numpy',
     'scipy',
-    'netCDF4 == 1.0',
-    'xlwt == 0.7.4',
-    'django-tastypie == 0.9.11',
-    'djangorestframework == 0.3.3'
+    'netCDF4 >= 1.0, < 2.0',
+    'xlwt >= 0.7.4, < 0.8',
+    'django-tastypie >= 0.9.11, < 1.0',
+    'djangorestframework >= 0.3.3, < 0.4'
     ],
 
 tests_require = [
