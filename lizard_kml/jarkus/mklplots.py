@@ -2,25 +2,23 @@
 # <nbformat>3.0</nbformat>
 
 # <codecell>
-
-import netCDF4
 import bisect
+import datetime
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas
 import statsmodels.api as sm
+import netCDF4
 
-# <codecell>
-
+# Define url's to relevant databases
 mklurl = '/Users/fedorbaart/Downloads/MKL.nc'
 nourishmenturl = '/Users/fedorbaart/Downloads/suppleties.nc'
 transecturl = '/Users/fedorbaart/Downloads/transect.nc'
 
-# <codecell>
-
+# Function arguments.
 transect = 7004000
 
-# <codecell>
-
+# Read dataset and transform to dataframe
 ds = netCDF4.Dataset(transecturl)
 transectidx = bisect.bisect_left(ds.variables['id'],transect)
 alongshore = ds.variables['alongshore'][transectidx]
@@ -28,7 +26,7 @@ areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
 print areaname
 ds.close()
 
-# <codecell>
+# Read the nourishment data
 
 ds = netCDF4.Dataset(nourishmenturl)
 transectidx = bisect.bisect_left(ds.variables['id'], transect)
@@ -54,10 +52,10 @@ nourishmentdf =  pandas.DataFrame(vardict)
 volnames = ('vol_beach', 'vol_dune', 'vol_other', 'vol_shoreface')
 # toss out all the nulls
 filter = reduce(np.logical_or, [~pandas.isnull(nourishmentdf[name]) for name in volnames])
+# This contains the nourishments relevant to this area
 nourishmentdfsel = nourishmentdf[filter]
 
-# <codecell>
-
+# We can also get the nourishments from the other variables.
 ds = netCDF4.Dataset(nourishmenturl)
 vars = [name for name, var in ds.variables.items() if 'nourishment' in var.dimensions]
 vardict = {}
@@ -88,9 +86,9 @@ filter = reduce(np.logical_and, [
     ])
 nourishmentdfsel = nourishmentdf[filter]
 
-# <codecell>
-
+# Now read the mkl data.
 ds = netCDF4.Dataset(mklurl)
+# Use bisect to speed things up
 transectidx = bisect.bisect_left(ds.variables['id'], transect)
 vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
 # Convert all variables that are a function of time to a dataframe
@@ -99,7 +97,7 @@ vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables
 ds.close()
 mkldf =  pandas.DataFrame(vardict)
 
-# <codecell>
+# Build a statistical model
 
 import statsmodels.tsa
 filter = ~np.isnan(mkldf['momentary_coastline'])
@@ -108,7 +106,7 @@ dates= [(x - datetime.datetime(1970,1,1)).total_seconds()*365.25*3600*24.0 for x
 model = statsmodels.tsa.arima_model.ARMA(vals, dates=mkldf[filter]['time'], freq='A')
 result = model.fit(order=(1,0))
 
-# <codecell>
+# Plot the results.
 
 fig, ax1 = plt.subplots(1,1)
 ax1.plot(mkldf['time'][:], mkldf['momentary_coastline'][:])
@@ -118,21 +116,5 @@ ax1.set_ylabel('Nourishment volume [m]')
 #ax2.plot(df['time'], df['momentary_coastline'])
 #ax2.set_xlabel('time')
 #ax2.set_ylabel("{} [{}]".format(ds.variables['momentary_coastline'].long_name, ds.variables['momentary_coastline'].units))
-
-
-# <codecell>
-
-
-x
-
-# <codecell>
-
-netCDF4.chartostring?
-
-# <codecell>
-
-statsmodels.tsa.base.tsa_model??
-
-# <codecell>
 
 

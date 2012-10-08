@@ -6,7 +6,9 @@ import functools
 import logging
 
 import numpy
+import numpy as np
 from numpy import isnan, hstack, newaxis, zeros
+from numpy.ma import filled, masked_array
 
 import scipy.interpolate
 
@@ -21,7 +23,9 @@ from matplotlib.dates import mx2num, date2num
 import matplotlib.ticker
 import matplotlib.collections
 import matplotlib.cm as cm
-from numpy.ma import filled, masked_array
+
+import netCDF4
+import netcdftime
 
 import extra_cm
 
@@ -120,11 +124,6 @@ def eeg(transect, plotproperties=None):
     # return an 'open' file descriptor
     return buf
 
-import netCDF4
-import netcdftime
-import scipy.interpolate
-import numpy as np
-import matplotlib
 
 def fill_z(x, z):
     # Interpolate over time and space
