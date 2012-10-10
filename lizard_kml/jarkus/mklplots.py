@@ -26,36 +26,7 @@ areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
 print areaname
 ds.close()
 
-# Read the nourishment data
-
-ds = netCDF4.Dataset(nourishmenturl)
-transectidx = bisect.bisect_left(ds.variables['id'], transect)
-vars = [name for name, var in ds.variables.items() if var.dimensions == ('alongshore', 'n_time') ]
-print ds.variables['id'][transectidx]
-
-# Convert all variables that are a function of time to a dataframe
-vardict = {}
-vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['n_time'], ds.variables['n_time'].units)
-for var in vars:
-    if ('time' not in var):
-        vardict[var] = ds.variables[var][transectidx,:] 
-    else:
-        # lookup the time variable
-        # set the values that are nan to n_time
-        tnum = ds.variables[var][transectidx,:]
-        tnum[np.isnan(tnum)] = netCDF4.netcdftime.date2num(vardict['time'][np.isnan(tnum)], ds.variables[var].units)
-        t = netCDF4.netcdftime.num2date(tnum, ds.variables[var].units)
-        vardict[var] = t
-        
-ds.close()
-nourishmentdf =  pandas.DataFrame(vardict)
-volnames = ('vol_beach', 'vol_dune', 'vol_other', 'vol_shoreface')
-# toss out all the nulls
-filter = reduce(np.logical_or, [~pandas.isnull(nourishmentdf[name]) for name in volnames])
-# This contains the nourishments relevant to this area
-nourishmentdfsel = nourishmentdf[filter]
-
-# We can also get the nourishments from the other variables.
+# Read the nourishments from the dataset (only store the variables that are a function of nourishment)
 ds = netCDF4.Dataset(nourishmenturl)
 vars = [name for name, var in ds.variables.items() if 'nourishment' in var.dimensions]
 vardict = {}
@@ -111,10 +82,9 @@ result = model.fit(order=(1,0))
 fig, ax1 = plt.subplots(1,1)
 ax1.plot(mkldf['time'][:], mkldf['momentary_coastline'][:])
 ax1.set_ylabel('Nourishment volume [m]')
-
-#ax2 = ax1.twinx()
-#ax2.plot(df['time'], df['momentary_coastline'])
-#ax2.set_xlabel('time')
-#ax2.set_ylabel("{} [{}]".format(ds.variables['momentary_coastline'].long_name, ds.variables['momentary_coastline'].units))
+ax2 = ax1.twinx()
+ax2.plot(nourishmentdfsel['time'], nourishmentdfsel['momentary_coastline'])
+ax2.set_xlabel('time')
+ax2.set_ylabel("{} [{}]".format(ds.variables['momentary_coastline'].long_name, ds.variables['momentary_coastline'].units))
 
 
