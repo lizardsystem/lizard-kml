@@ -17,15 +17,50 @@ import matplotlib.gridspec
 # <codecell>
 
 # Define url's to relevant databases
-mklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc' #'/Users/fedorbaart/Downloads/MKL.nc'
-bklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' #'/Users/fedorbaart/Downloads/BKL_TKL_TND.nc'
-dfurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc' #'/Users/fedorbaart/Downloads/DF.nc'
-bwurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc' #'/Users/fedorbaart/Downloads/DF.nc'
-nourishmenturl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc' #'/Users/fedorbaart/Downloads/suppleties.nc'
+mklurl = '/Users/fedorbaart/Downloads/MKL.nc' 
+bklurl = '/Users/fedorbaart/Downloads/BKL_TKL_TND.nc' 
+dfurl = '/Users/fedorbaart/Downloads/DF.nc'
+bwurl = '/Users/fedorbaart/Downloads/DF.nc'
+nourishmenturl = '/Users/fedorbaart/Downloads/suppleties.nc'
+transecturl = '/Users/fedorbaart/Downloads/transect.nc'
+slurl = '/Users/fedorbaart/Downloads/strandlijnen.nc'
+
+mklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc'  
+bklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' 
+dfurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc' 
+bwurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc' 
+nourishmenturl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc' 
 transecturl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc' #'/Users/fedorbaart/Downloads/transect.nc'
+slurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc' #'/Users/fedorbaart/Downloads/transect.nc'
 
 # Function arguments.
 transect = 7004000
+
+# <codecell>
+
+ds = netCDF4.Dataset(slurl)
+transectidx = bisect.bisect_left(ds.variables['id'], transect)
+#assert ds.variables['trID'][transectidx] == transect, ds.variables['trID'][transectidx]
+year = ds.variables['year'][:]
+time = [datetime.datetime(x, 1,1) for x in year]
+mean_high_water = ds.variables['MHW'][transectidx,:]
+mean_low_water = ds.variables['MLW'][transectidx,:]
+dune_foot = ds.variables['DF'][transectidx,:]
+for i, x in enumerate(year):
+    plt.plot(ds.variables['MLW_x'][:,i], ds.variables['MLW_y'][:,i], '-')
+plt.xlim(20000,22000)
+plt.ylim(380000,380600)
+ds.close()
+
+shorelinedf = pandas.DataFrame(
+    data=dict(
+        time=time, 
+        mean_high_water=mean_high_water, 
+        mean_low_water=mean_low_water, 
+        dune_foot=dune_foot, 
+        year=year
+        )
+    )
 
 # <codecell>
 
@@ -46,10 +81,10 @@ transectdf = pandas.DataFrame(index=[transect], data=dict(mean_high_water=mean_h
 ds = netCDF4.Dataset(nourishmenturl)
 alltypes = set(x.strip() for x in netCDF4.chartostring(ds.variables['type'][:]))
 
-vars = [name for name, var in ds.variables.items() if 'nourishment' in var.dimensions]
+vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
 vardict = {}
 for var in vars:
-    if ('date' in var):
+    if ('date' in var and 'units' in ds.variables[var].ncattrs()):
         # lookup the time variable
         t = netCDF4.netcdftime.num2date(ds.variables[var], ds.variables[var].units)
         vardict[var] = t
@@ -72,26 +107,27 @@ typemap = {'':'strand',
     'dijkverzwaring':'duin', 
     'strandsuppletie banket':'strand', 
     'duinverzwaring':'duin', 
-    'strandsuppletie+vooroever':'strand', 
+    'strandsuppletie+vooroever':'overig', 
     'Duinverzwaring':'duin',
     'duin':'duin', 
     'duinverzwaring en strandsuppleti':'duin', 
     'vooroever':'vooroever', 
     'zeewaartse duinverzwaring':'duin', 
-    'banket': 'geulwand' ,
+    'banket': 'strand' ,
     'geulwand': 'geulwand', 
-    'anders':'geulwand', 
+    'anders':'overig', 
     'landwaartse duinverzwaring':'duin', 
-    'depot':'geulwand', 
+    'depot':'overig', 
     'vooroeversuppletie':'vooroever', 
-    'onderwatersuppletie':'geulwand', 
+    'onderwatersuppletie':'vooroever', 
     'geulwandsuppletie':'geulwand'
     }
 beachcolors = {
           'duin': 'peru',
           'strand': 'khaki',
           'vooroever': 'aquamarine',
-          'geulwand': 'lightseagreen'
+          'geulwand': 'lightseagreen',
+          'overig': 'grey'
     }
 # Filter by current area and match the area
 filter = reduce(np.logical_and, [
@@ -101,6 +137,9 @@ filter = reduce(np.logical_and, [
     ])
 
 nourishmentdfsel = nourishmentdf[filter]
+
+# <codecell>
+
 
 # <codecell>
 
@@ -188,7 +227,7 @@ gs = matplotlib.gridspec.GridSpec(4, 1, height_ratios=[5, 2, 2, 2])
 gs.update(hspace=0.1)
 
 # Some common style properties
-props = dict(linewidth=4, alpha=0.7, markeredgewidth=0, markersize=15, linestyle='-', marker='.')
+props = dict(linewidth=2, alpha=0.7, markeredgewidth=0, markersize=8, linestyle='-', marker='.')
 
 
 #Figuur 1: momentane kustlijn / te toetsenkustlijn / basiskustlijn, oftewel onderstaand tweede figuur. Bij voorkeur wel in het Nederlands en volgens mij klopt de tekst bij de as nu niet (afstand tot RSP (meters))
@@ -220,6 +259,9 @@ except ValueError, e:
 # Figuur 2: duinvoet / hoogwater / laagwater, vanaf (ongeveer) 1848 voor raai om de kilometer. Voor andere raaien vanaf 1965 (Jarkus) 
 ax2 = plt.subplot(gs[1], sharex=ax1)
 ax2.plot(dfdf['time'], dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
+ax2.plot(shorelinedf['time'], shorelinedf['dune_foot'], label='historische duinvoet positie', **props)
+ax2.plot(shorelinedf['time'], shorelinedf['mean_high_water'], label='historische hoogwater positie', **props)
+ax2.plot(shorelinedf['time'], shorelinedf['mean_high_water'], label='historische laagwater positie', **props)
 ax2.legend(loc='best')
 # Look up the location of the tick labels, because we're removing all but the first and last.
 locs = [ax2.yaxis.get_ticklocs()[0], ax2.yaxis.get_ticklocs()[-1]]
@@ -240,10 +282,12 @@ ax2.set_ylabel('Afstand [m]')
 # Share the x axis with axes ax1
 ax3 = plt.subplot(gs[2], sharex=ax1)
 # Plot the 3 lines
+'''
 ax3.fill_between(np.asarray(bwdf['time']), np.asarray(bwdf['beach_width_at_MLW']), np.asarray(bwdf['beach_width_at_MHW']), alpha=0.3, color='black')
 ax3.plot(bwdf['time'], bwdf['beach_width_at_MHW'], label='strandbreedte MHW', **props)
 ax3.plot(bwdf['time'], bwdf['beach_width_at_MLW'], label='strandbreedte MLW', **props)
-
+'''
+ax3.plot(dfdf['time'], dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
 # Dune foot is position but relative to RSP, so we can call it a width
 ax3.set_ylabel('Breedte [m]') 
 # Look up the location of the tick labels, because we're removing all but the first and last.
