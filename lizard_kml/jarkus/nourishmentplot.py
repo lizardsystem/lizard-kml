@@ -289,9 +289,10 @@ def combinedplot(dfs):
     # Set the main title
     ax1.set_title('Kengetallen van de toestand van de kust\ntransect %d (%s)' % (transect, str(areaname).strip()))
     # Plot the three lines
-    ax1.plot(matplotlib.dates.date2num(mkldf['time_MKL']), mkldf['momentary_coastline'], label='momentane kustlijn', **props)
-    ax1.plot(bkldf['time'], bkldf['basal_coastline'], label='basiskustlijn', **props)
-    ax1.plot(bkldf['time'], bkldf['testing_coastline'], label='te toetsenkustlijn', **props)
+    date2num = matplotlib.dates.date2num
+    ax1.plot(date2num(mkldf['time_MKL']), mkldf['momentary_coastline'], label='momentane kustlijn', **props)
+    ax1.plot(date2num(bkldf['time']), bkldf['basal_coastline'], label='basiskustlijn', **props)
+    ax1.plot(date2num(bkldf['time']), bkldf['testing_coastline'], label='te toetsenkustlijn', **props)
     
     # Plot the legend. This uses the label
     ax1.legend(loc='upper left')
@@ -308,10 +309,10 @@ def combinedplot(dfs):
     
     # Figuur 2: duinvoet / hoogwater / laagwater, vanaf (ongeveer) 1848 voor raai om de kilometer. Voor andere raaien vanaf 1965 (Jarkus) 
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
-    ax2.plot(dfdf['time'], dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
-    ax2.plot(shorelinedf['time'], shorelinedf['dune_foot'], label='historische duinvoet positie', **props)
-    ax2.plot(shorelinedf['time'], shorelinedf['mean_high_water'], label='historische hoogwater positie', **props)
-    ax2.plot(shorelinedf['time'], shorelinedf['mean_high_water'], label='historische laagwater positie', **props)
+    ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
+    ax2.plot(date2num(shorelinedf['time']), shorelinedf['dune_foot'], label='historische duinvoet positie', **props)
+    ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'], label='historische hoogwater positie', **props)
+    ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'], label='historische laagwater positie', **props)
     ax2.legend(loc='best')
     # Look up the location of the tick labels, because we're removing all but the first and last.
     locs = [ax2.yaxis.get_ticklocs()[0], ax2.yaxis.get_ticklocs()[-1]]
@@ -337,7 +338,7 @@ def combinedplot(dfs):
     ax3.plot(bwdf['time'], bwdf['beach_width_at_MHW'], label='strandbreedte MHW', **props)
     ax3.plot(bwdf['time'], bwdf['beach_width_at_MLW'], label='strandbreedte MLW', **props)
     '''
-    ax3.plot(dfdf['time'], dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
+    ax3.plot(date2num(dfdf['time']), dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
     # Dune foot is position but relative to RSP, so we can call it a width
     ax3.set_ylabel('Breedte [m]') 
     # Look up the location of the tick labels, because we're removing all but the first and last.
@@ -372,7 +373,7 @@ def combinedplot(dfs):
         # Common properties
         props = dict(alpha=0.7, linewidth=2)
         # Plot a bar per nourishment
-        ax4.fill_betweenx([0,row['volm']],row['beg_date'], row['end_date'], edgecolor=color, color=color, **props)
+        ax4.fill_betweenx([0,row['volm']],date2num(row['beg_date']), date2num(row['end_date']), edgecolor=color, color=color, **props)
         if label not in labels:
             # Fill_between's are not added with labels. 
             # So we'll create a proxy artist (a non plotted rectangle, with the same color)
@@ -391,7 +392,9 @@ def combinedplot(dfs):
     # This one we want to see
     ax4.xaxis.set_visible(True)
     # Show dates at decenia
-    ax4.xaxis.set_major_locator(matplotlib.dates.YearLocator(base=10))
+    locator = matplotlib.dates.YearLocator(base=25)
+    ax4.xaxis.set_major_locator(locator)
+    ax4.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
     # Now we plot the proxies with corresponding legends.
     legend = ax4.legend(proxies, labels, loc='upper left')
     return fig

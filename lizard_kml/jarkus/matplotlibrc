@@ -28,15 +28,15 @@
 # You can also deploy your own backend outside of matplotlib by
 # referring to the module name (which must be in the PYTHONPATH) as
 # 'module://my_backend'
-backend      : MacOSX
+# default backend
 
 # if you are runing pyplot inside a GUI and your backend choice
 # conflicts, we will automatically try and find a compatible one for
 # you if backend_fallback is True
 #backend_fallback: True
-interactive  : True
-toolbar      : toolbar2   # None | classic | toolbar2
-timezone     : UTC        # a pytz timezone string, eg US/Central or Europe/Paris
+# interactive  : True
+# toolbar      : toolbar2   # None | classic | toolbar2
+# timezone     : UTC        # a pytz timezone string, eg US/Central or Europe/Paris
 
 # Where your matplotlib data lives if you installed to a non-default
 # location.  This is where the matplotlib fonts, bitmaps, etc reside
@@ -103,7 +103,8 @@ patch.antialiased      : True    # render patches in antialised (no jaggies)
 # The font.size property is the default font size for text, given in pts.
 # 12pt is the standard value.
 #
-font.family          : monospace
+# Sans-serif looks best for plots
+font.family          : sans-serif
 #font.style          : normal
 #font.variant        : normal
 #font.weight         : medium
@@ -115,7 +116,8 @@ font.family          : monospace
 # small, medium, large, x-large, xx-large, larger, or smaller
 font.size           : 10.0
 # font.serif          : Bitstream Vera Serif, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
-#font.sans-serif     : Bitstream Vera Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
+# Some modern fonts
+font.sans-serif     : Bitstream Vera Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
 #font.cursive        : Apple Chancery, Textile, Zapf Chancery, Sand, cursive
 #font.fantasy        : Comic Sans MS, Chicago, Charcoal, Impact, Western, fantasy
 font.monospace      : Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
