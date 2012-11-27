@@ -10,7 +10,7 @@ Install the dependencies:
 
    $> aptitude install python-psycopg2 python-imaging python-matplotlib python-pyproj
 
-   $> easy_install netCDF4
+   $> easy_install netCDF4 pandas # or pip
 
 Initialize the Python interpreter paths:
 

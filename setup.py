@@ -17,6 +17,7 @@ install_requires = [
     'pkginfo',
     'PIL',
     'matplotlib',
+    'pandas',
     'numpy',
     'scipy',
     'netCDF4 >= 1.0, < 2.0',
