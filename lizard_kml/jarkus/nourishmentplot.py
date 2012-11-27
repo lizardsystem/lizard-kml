@@ -14,244 +14,7 @@ import statsmodels.api as sm
 import netCDF4
 import matplotlib.gridspec
 
-# <codecell>
-
-# Define url's to relevant databases
-#mklurl = '/Users/fedorbaart/Downloads/MKL.nc' 
-#bklurl = '/Users/fedorbaart/Downloads/BKL_TKL_TND.nc' 
-#dfurl = '/Users/fedorbaart/Downloads/DF.nc'
-#bwurl = '/Users/fedorbaart/Downloads/DF.nc'
-#nourishmenturl = '/Users/fedorbaart/Downloads/suppleties.nc'
-#transecturl = '/Users/fedorbaart/Downloads/transect.nc'
-#slurl = '/Users/fedorbaart/Downloads/strandlijnen.nc'
-
-#mklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc'  
-#bklurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' 
-#dfurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc' 
-#bwurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc' 
-#nourishmenturl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc' 
-#transecturl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc' #'/Users/fedorbaart/Downloads/transect.nc'
-#slurl = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc' #'/Users/fedorbaart/Downloads/transect.nc'
-
-# Function arguments.
-transect = 7004100
-
-# <codecell>
-
-def makeshorelinedf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc'):
-    ds = netCDF4.Dataset(url)
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise ValueError("Could not find shoreline for transect {}, closest is {}".format(transect, idfound))
-    year = ds.variables['year'][:]
-    time = [datetime.datetime(x, 1,1) for x in year]
-    mean_high_water = ds.variables['MHW'][transectidx,:]
-    mean_low_water = ds.variables['MLW'][transectidx,:]
-    dune_foot = ds.variables['DF'][transectidx,:]
-    shorelinedf = pandas.DataFrame(
-        data=dict(
-            time=time, 
-            mean_high_water=mean_high_water, 
-            mean_low_water=mean_low_water, 
-            dune_foot=dune_foot, 
-            year=year
-            )
-        )
-    return shorelinedf
-
-
-# <codecell>
-
-def maketransectdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'):
-    # Read dataset and transform to dataframe
-    ds = netCDF4.Dataset(url)
-    transectidx = bisect.bisect_left(ds.variables['id'],transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
-    
-    alongshore = ds.variables['alongshore'][transectidx]
-    areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
-    mean_high_water = ds.variables['mean_high_water'][transectidx]
-    mean_low_water = ds.variables['mean_low_water'][transectidx]
-    ds.close()
-    
-    transectdf = pandas.DataFrame(index=[transect], data=dict(transect=transect, areaname=areaname, mean_high_water=mean_high_water, mean_low_water=mean_low_water))
-    return transectdf
-
-# <codecell>
-
-# note that the areaname is a hack, because it is currently missing
-def makenourishmentdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc', areaname=""):
-    """Read the nourishments from the dataset (only store the variables that are a function of nourishment)"""
-    
-    ds = netCDF4.Dataset(url)
-    
-    transectidx = bisect.bisect_left(ds.variables['id'],transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
-    alongshore = ds.variables['alongshore'][transectidx]
-    # TODO fix this name, it's missing
-    # areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx,:])
-    
-    alltypes = set(x.strip() for x in netCDF4.chartostring(ds.variables['type'][:]))
-   
-    
-    # this dataset has data on nourishments and per transect. We'll use the per nourishments, for easier plotting. 
-    # skip a few variables that have nasty non-ascii (TODO: check how to deal with non-ascii in netcdf)
-    vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
-    vardict = {}
-    for var in vars:
-        if ('date' in var and 'units' in ds.variables[var].ncattrs()):
-            # lookup the time variable
-            t = netCDF4.netcdftime.num2date(ds.variables[var], ds.variables[var].units)
-            vardict[var] = t
-        elif 'stringsize' in ds.variables[var].dimensions:
-            vardict[var] = netCDF4.chartostring(ds.variables[var][:])
-        else:
-            vardict[var] = ds.variables[var][:]
-    
-    # this is specified in the unit decam, which should be dekam according to udunits specs.
-    assert ds.variables['beg_stretch'].units == 'decam'
-    ds.close()
-    # Put the data in a frame
-    nourishmentdf = pandas.DataFrame.from_dict(vardict)
-    # Compute nourishment volume in m3/m
-    nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
-    
-    # simplify for colors
-    typemap = {'':'strand', 
-        'strandsuppletie':'strand', 
-        'dijkverzwaring':'duin', 
-        'strandsuppletie banket':'strand', 
-        'duinverzwaring':'duin', 
-        'strandsuppletie+vooroever':'overig', 
-        'Duinverzwaring':'duin',
-        'duin':'duin', 
-        'duinverzwaring en strandsuppleti':'duin', 
-        'vooroever':'vooroever', 
-        'zeewaartse duinverzwaring':'duin', 
-        'banket': 'strand' ,
-        'geulwand': 'geulwand', 
-        'anders':'overig', 
-        'landwaartse duinverzwaring':'duin', 
-        'depot':'overig', 
-        'vooroeversuppletie':'vooroever', 
-        'onderwatersuppletie':'vooroever', 
-        'geulwandsuppletie':'geulwand'
-        }
-    beachcolors = {
-              'duin': 'peru',
-              'strand': 'khaki',
-              'vooroever': 'aquamarine',
-              'geulwand': 'lightseagreen',
-              'overig': 'grey'
-        }
-    # Filter by current area and match the area
-    filter = reduce(np.logical_and, [
-        alongshore >= nourishmentdf.beg_stretch,  
-        alongshore < nourishmentdf.end_stretch, 
-        nourishmentdf['kustvak'].apply(str.strip)==areaname.tostring().strip()
-        ])
-    
-    nourishmentdfsel = nourishmentdf[filter]
-    return nourishmentdfsel
-
-
-# <codecell>
-
-def makemkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc'):
-    # Now read the mkl data.
-    ds = netCDF4.Dataset(url)
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-    # Deal with nan's in an elegant way:
-    mkltime = ds.variables['time_MKL'][:,transectidx]
-    mkltime = np.ma.masked_array(mkltime, mask=np.isnan(mkltime))
-    vardict['time_MKL'] = netCDF4.netcdftime.num2date(mkltime, ds.variables['time_MKL'].units)
-    ds.close()
-    mkldf =  pandas.DataFrame(vardict)
-    mkldf = mkldf[np.logical_not(pandas.isnull(mkldf['time_MKL']))]
-    return mkldf
-
-
-# <codecell>
-
-def makebkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' ):
-    # Now read the mkl data.
-    ds = netCDF4.Dataset(url)
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-    ds.close()
-    bkldf =  pandas.DataFrame(vardict)
-    return bkldf
-
-
-# <codecell>
-
-def makebwdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc'):
-    # Now read the beachwidth data.
-    ds = netCDF4.Dataset(url)
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-    ds.close()
-    bwdf =  pandas.DataFrame(vardict)
-    return bwdf
-
-# <codecell>
-
-def makedfdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc'):
-    # Now read the dunefoot data.
-    ds = netCDF4.Dataset(url)
-    
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('alongshore', 'time')]
-    # Convert all variables that are a function of time to a dataframe
-    # Note inconcsiste dimension ordering
-    vardict = dict((var, ds.variables[var][transectidx,:]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-    ds.close()
-    dfdf =  pandas.DataFrame(vardict)
-    return dfdf
-
-
-# <codecell>
-
-def makedfs(transect):
-    shorelinedf = makeshorelinedf(transect)
-    transectdf = maketransectdf(transect)
-    nourishmentdf = makenourishmentdf(transect, areaname=transectdf['areaname'].irow(0))
-    mkldf = makemkldf(transect)
-    bkldf = makebkldf(transect)
-    bwdf = makebwdf(transect)
-    dfdf = makedfdf(transect)
-    return dict(
-        shorelinedf=shorelinedf,
-        transectdf=transectdf,
-        nourishmentdf=nourishmentdf,
-        mkldf=mkldf,
-        bkldf=bkldf,
-        bwdf=bwdf,
-        dfdf=dfdf
-        )
+from nc_models import makedfs
 
 # <codecell>
 
@@ -270,7 +33,6 @@ def combinedplot(dfs):
     areaname = transectdf['areaname'].irow(0)
     
     # Plot the results.
-
     fig = plt.figure(figsize=(10,10))
     # We define a grid of 3 areas 
     gs = matplotlib.gridspec.GridSpec(4, 1, height_ratios=[5, 2, 2, 2]) 
@@ -279,9 +41,8 @@ def combinedplot(dfs):
     # Some common style properties, also store they style information file for ggplot style in the directory where the script is.
     props = dict(linewidth=2, alpha=0.7, markeredgewidth=0, markersize=8, linestyle='-', marker='.')
 
-
     #Figuur 1: momentane kustlijn / te toetsenkustlijn / basiskustlijn, oftewel onderstaand tweede figuur. Bij voorkeur wel in het Nederlands en volgens mij klopt de tekst bij de as nu niet (afstand tot RSP (meters))
-    
+  
     # The first axis contains the coastal indicators related to volume
     # Create the axis, based on the gridspec
 
@@ -313,7 +74,9 @@ def combinedplot(dfs):
     ax2.plot(date2num(shorelinedf['time']), shorelinedf['dune_foot'], label='historische duinvoet positie', **props)
     ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'], label='historische hoogwater positie', **props)
     ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'], label='historische laagwater positie', **props)
-    ax2.legend(loc='best')
+    leg = ax2.legend(loc='best')
+    leg.get_frame().set_alpha(0.7)
+
     # Look up the location of the tick labels, because we're removing all but the first and last.
     locs = [ax2.yaxis.get_ticklocs()[0], ax2.yaxis.get_ticklocs()[-1]]
     # We don't want too much cluttering
@@ -402,8 +165,10 @@ def combinedplot(dfs):
 
 # <codecell>
 
-dfs = makedfs(transect)
-fig = combinedplot(dfs)
+if __name__ == '__main__':
+    transect = 7004200
+    dfs = makedfs(transect)
+    fig = combinedplot(dfs)
 
 
 # <codecell>

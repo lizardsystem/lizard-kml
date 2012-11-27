@@ -1,18 +1,28 @@
 # (c) Nelen & Schuurmans & Deltares.  GPL licensed, see LICENSE.rst
 # Code copied from openearth
-from django.conf import settings
-import netCDF4
-import datetime
 
-# Copied from openearthtools/kmldap
+# system modules
+import bisect
+import datetime
+from functools import partial
+import logging
+
+# numpy/scipy
 from numpy import any, all, ma, apply_along_axis, nonzero, array, isnan, logical_or, nan
 from numpy.ma import filled
 import numpy as np
 from scipy.interpolate import interp1d
-from functools import partial
 
+# pydata
+import pandas
+
+# web
+from django.conf import settings
+
+# data/gis
+import netCDF4
 import pyproj
-import logging
+
 logger = logging.getLogger(__name__)
 
 if '4.1.3' in netCDF4.getlibversion():
@@ -172,3 +182,236 @@ def makejarkuslod():
     dataset.close()
     # return dict to conform to the "rendering context"
     return overview
+
+
+# Now for a series of functions that read some datasets about the coast. I'm transforming everything to pandas dataframes
+# That way the data looks a bit more relational.
+# I'm using uncached versions at the moment. Total query time is about 3seconds on my wifi, which is just a bit too much.
+# Optional we can make local copies. Through wired connections it should be a bit faster.
+
+def makeshorelinedf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc'):
+    """Read information about shorelines"""
+    ds = netCDF4.Dataset(url)
+    transectidx = bisect.bisect_left(ds.variables['id'], transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find shoreline for transect {}, closest is {}".format(transect, idfound))
+    year = ds.variables['year'][:]
+    time = [datetime.datetime(x, 1,1) for x in year]
+    mean_high_water = ds.variables['MHW'][transectidx,:]
+    mean_low_water = ds.variables['MLW'][transectidx,:]
+    dune_foot = ds.variables['DF'][transectidx,:]
+    shorelinedf = pandas.DataFrame(
+        data=dict(
+            time=time, 
+            mean_high_water=mean_high_water, 
+            mean_low_water=mean_low_water, 
+            dune_foot=dune_foot, 
+            year=year
+            )
+        )
+    return shorelinedf
+
+
+
+def maketransectdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'):
+    """Read some transect data"""
+    ds = netCDF4.Dataset(url)
+    transectidx = bisect.bisect_left(ds.variables['id'],transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    
+    alongshore = ds.variables['alongshore'][transectidx]
+    areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
+    mean_high_water = ds.variables['mean_high_water'][transectidx]
+    mean_low_water = ds.variables['mean_low_water'][transectidx]
+    ds.close()
+    
+    transectdf = pandas.DataFrame(index=[transect], data=dict(transect=transect, areaname=areaname, mean_high_water=mean_high_water, mean_low_water=mean_low_water))
+    return transectdf
+
+# note that the areaname is a hack, because it is currently missing
+def makenourishmentdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc', areaname=""):
+    """Read the nourishments from the dataset (only store the variables that are a function of nourishment)"""
+    
+    ds = netCDF4.Dataset(url)
+    
+    transectidx = bisect.bisect_left(ds.variables['id'],transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    alongshore = ds.variables['alongshore'][transectidx]
+    # TODO fix this name, it's missing
+    # areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx,:])
+    
+    alltypes = set(x.strip() for x in netCDF4.chartostring(ds.variables['type'][:]))
+   
+    
+    # this dataset has data on nourishments and per transect. We'll use the per nourishments, for easier plotting. 
+    # skip a few variables that have nasty non-ascii (TODO: check how to deal with non-ascii in netcdf)
+    vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
+    vardict = {}
+    for var in vars:
+        if ('date' in var and 'units' in ds.variables[var].ncattrs()):
+            # lookup the time variable
+            t = netCDF4.netcdftime.num2date(ds.variables[var], ds.variables[var].units)
+            vardict[var] = t
+        elif 'stringsize' in ds.variables[var].dimensions:
+            vardict[var] = netCDF4.chartostring(ds.variables[var][:])
+        else:
+            vardict[var] = ds.variables[var][:]
+    
+    # this is specified in the unit decam, which should be dekam according to udunits specs.
+    assert ds.variables['beg_stretch'].units == 'decam'
+    ds.close()
+    # Put the data in a frame
+    nourishmentdf = pandas.DataFrame.from_dict(vardict)
+    # Compute nourishment volume in m3/m
+    nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
+    
+    # simplify for colors
+    typemap = {'':'strand', 
+        'strandsuppletie':'strand', 
+        'dijkverzwaring':'duin', 
+        'strandsuppletie banket':'strand', 
+        'duinverzwaring':'duin', 
+        'strandsuppletie+vooroever':'overig', 
+        'Duinverzwaring':'duin',
+        'duin':'duin', 
+        'duinverzwaring en strandsuppleti':'duin', 
+        'vooroever':'vooroever', 
+        'zeewaartse duinverzwaring':'duin', 
+        'banket': 'strand' ,
+        'geulwand': 'geulwand', 
+        'anders':'overig', 
+        'landwaartse duinverzwaring':'duin', 
+        'depot':'overig', 
+        'vooroeversuppletie':'vooroever', 
+        'onderwatersuppletie':'vooroever', 
+        'geulwandsuppletie':'geulwand'
+        }
+    beachcolors = {
+              'duin': 'peru',
+              'strand': 'khaki',
+              'vooroever': 'aquamarine',
+              'geulwand': 'lightseagreen',
+              'overig': 'grey'
+        }
+    # Filter by current area and match the area
+    filter = reduce(np.logical_and, [
+        alongshore >= nourishmentdf.beg_stretch,  
+        alongshore < nourishmentdf.end_stretch, 
+        nourishmentdf['kustvak'].apply(str.strip)==areaname.tostring().strip()
+        ])
+    
+    nourishmentdfsel = nourishmentdf[filter]
+    return nourishmentdfsel
+
+
+def makemkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc'):
+    """the momentary coastline data"""
+    ds = netCDF4.Dataset(url)
+    # Use bisect to speed things up
+    transectidx = bisect.bisect_left(ds.variables['id'], transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    
+    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
+    # Convert all variables that are a function of time to a dataframe
+    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
+    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    # Deal with nan's in an elegant way:
+    mkltime = ds.variables['time_MKL'][:,transectidx]
+    mkltime = np.ma.masked_array(mkltime, mask=np.isnan(mkltime))
+    vardict['time_MKL'] = netCDF4.netcdftime.num2date(mkltime, ds.variables['time_MKL'].units)
+    ds.close()
+    mkldf =  pandas.DataFrame(vardict)
+    mkldf = mkldf[np.logical_not(pandas.isnull(mkldf['time_MKL']))]
+    return mkldf
+
+
+def makebkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' ):
+    """the basal coastline data"""
+    ds = netCDF4.Dataset(url)
+    # Use bisect to speed things up
+    transectidx = bisect.bisect_left(ds.variables['id'], transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    
+    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
+    # Convert all variables that are a function of time to a dataframe
+    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
+    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    ds.close()
+    bkldf =  pandas.DataFrame(vardict)
+    return bkldf
+
+
+def makebwdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc'):
+    # Now read the beachwidth data.
+    ds = netCDF4.Dataset(url)
+    # Use bisect to speed things up
+    transectidx = bisect.bisect_left(ds.variables['id'], transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    
+    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
+    # Convert all variables that are a function of time to a dataframe
+    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
+    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    ds.close()
+    bwdf =  pandas.DataFrame(vardict)
+    return bwdf
+
+# <codecell>
+
+def makedfdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc'):
+    """read the dunefoot data"""
+    ds = netCDF4.Dataset(url)
+    
+    # Use bisect to speed things up
+    transectidx = bisect.bisect_left(ds.variables['id'], transect)
+    if ds.variables['id'][transectidx] != transect:
+        idfound = ds.variables['id'][transectidx]
+        ds.close()
+        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+    
+    vars = [name for name, var in ds.variables.items() if var.dimensions == ('alongshore', 'time')]
+    # Convert all variables that are a function of time to a dataframe
+    # Note inconcsiste dimension ordering
+    vardict = dict((var, ds.variables[var][transectidx,:]) for var in vars)
+    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    ds.close()
+    dfdf =  pandas.DataFrame(vardict)
+    return dfdf
+
+
+def makedfs(transect):
+    """create dataframes for coastal datasets available from openearth"""
+    # We could do this in a multithreading pool to speed up, but not for now.
+    shorelinedf = makeshorelinedf(transect)
+    transectdf = maketransectdf(transect)
+    nourishmentdf = makenourishmentdf(transect, areaname=transectdf['areaname'].irow(0))
+    mkldf = makemkldf(transect)
+    bkldf = makebkldf(transect)
+    bwdf = makebwdf(transect)
+    dfdf = makedfdf(transect)
+    return dict(
+        shorelinedf=shorelinedf,
+        transectdf=transectdf,
+        nourishmentdf=nourishmentdf,
+        mkldf=mkldf,
+        bkldf=bkldf,
+        bwdf=bwdf,
+        dfdf=dfdf
+        )
