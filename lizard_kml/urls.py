@@ -9,12 +9,8 @@ from lizard_ui.urls import debugmode_urlpatterns
 from lizard_kml.views import *
 from lizard_kml.jarkus.views import *
 from lizard_kml.api_drf import *
-from lizard_kml.api_tp import *
 
 admin.autodiscover()
-
-category_resource = CategoryResource()
-kmlsource_resource = KmlSourceResource()
 
 urlpatterns = patterns(
     '',
@@ -27,9 +23,6 @@ urlpatterns = patterns(
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^kml/(?P<kml_resource_id>[0-9]+)/$', KmlResourceView.as_view(), name='lizard-kml-kml'),
-
-    #url(r'^api_tp/', include(category_resource.urls)),
-    #url(r'^api_tp/', include(kmlsource_resource.urls)),
     url(r'^api_drf/$', CategoryTreeView.as_view(), name='lizard-kml-api'),
 )
 

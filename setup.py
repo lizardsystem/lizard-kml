@@ -10,19 +10,18 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'Django == 1.4',
+    'Django >= 1.4, < 1.5',
     'django-extensions',
     'django-nose',
-    'lizard-ui >= 3.0',
+    'lizard-ui >= 3.0, < 4.0',
     'pkginfo',
-    'PIL',
+    'Pillow',
     'matplotlib',
-    'pandas',
+    'pandas >= 0.9.1, < 1.0',
     'numpy',
-    'scipy',
+    'scipy >= 0.10.0, < 0.11',
     'netCDF4 >= 1.0, < 2.0',
     'xlwt >= 0.7.4, < 0.8',
-    'django-tastypie >= 0.9.11, < 1.0',
     'djangorestframework >= 0.3.3, < 0.4'
     ],
 
