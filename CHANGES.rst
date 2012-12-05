@@ -5,7 +5,9 @@ Changelog of lizard-kml
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Removed some old tastypie code.
+
+- Fixed dependency versions.
 
 
 0.3 (2012-04-22)
