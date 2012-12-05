@@ -56,53 +56,34 @@ class TestView(TestCase):
     # check for code 301 for URLs without a trailing slash,
     # and code 200 for URLs with a trailing slash.
 
-    def test_viewer_noslash(self):
-        resp = self.client.get('/kml/viewer')
-        self.assertEqual(301, resp.status_code)
-
-    def test_viewer_slash(self):
-        resp = self.client.get('/kml/viewer/')
+    def test_viewer(self):
+        resp = self.client.get('/viewer/')
         self.assertEqual(200, resp.status_code)
 
-    def test_lod_noslash(self):
-        resp = self.client.get('/kml/kml/lod')
-        self.assertEqual(301, resp.status_code)
-
-    def test_lod_slash(self):
-        resp = self.client.get('/kml/kml/lod/')
+    def test_lod(self):
+        resp = self.client.get('/jarkuskml/lod/')
         self.assertEqual(200, resp.status_code)
 
     # def test_areas(self):
-    #     resp = self.client.get('/kml/kml/area/?id=1')
+    #     resp = self.client.get('/kml/area/?id=1')
     #     self.assertEqual(200, resp.status_code)
 
-    def test_overview_noslash(self):
-        resp = self.client.get('/kml/kml/overview')
-        self.assertEqual(301, resp.status_code)
-
-    def test_overview_slash(self):
-        resp = self.client.get('/kml/kml/overview/')
+    def test_overview(self):
+        resp = self.client.get('/jarkuskml/overview/')
         self.assertEqual(200, resp.status_code)
 
-    def test_transect_noslash(self):
-        resp = self.client.get('/kml/kml/transect/7003800')
-        self.assertEqual(301, resp.status_code)
-
-    def test_transect_slash(self):
-        resp = self.client.get('/kml/kml/transect/7003800/')
+    def test_transect(self):
+        resp = self.client.get('/jarkuskml/transect/7003800/')
         self.assertEqual(200, resp.status_code)
 
     def test_transect_info(self):
-        resp = self.client.get('/kml/info/7003800/')
+        resp = self.client.get('/info/7003800/')
         self.assertEqual(200, resp.status_code)
+
     def test_transect_xls(self):
-        resp = self.client.get('/kml/xls/7003800/')
+        resp = self.client.get('/xls/7003800/')
         self.assertEqual(200, resp.status_code)
 
-    def test_transect_query_noslash(self):
-        resp = self.client.get('/kml/kml/transect/7003800?exaggeration=100&lift=100')
-        self.assertEqual(301, resp.status_code)
-
-    def test_transect_query_slash(self):
-        resp = self.client.get('/kml/kml/transect/7003800/?exaggeration=100&lift=100')
+    def test_transect_query(self):
+        resp = self.client.get('/jarkuskml/transect/7003800/?exaggeration=100&lift=100')
         self.assertEqual(200, resp.status_code)
