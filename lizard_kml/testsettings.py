@@ -69,7 +69,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages"
     )
 
-CACHE_BACKEND = 'file://%s' % os.path.join(BUILDOUT_DIR, 'var', 'cache')
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BUILDOUT_DIR, 'var', 'cache'),
+    }
+}
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-doctest', '--verbosity=3']
@@ -89,9 +94,10 @@ LANGUAGES = [
 # load the internationalization machinery.
 USE_I18N = True
 
+SECRET_KEY = 'testsettings'
+
 # Used for django-staticfiles (and for media files)
 STATIC_URL = '/static_media/'
-ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'static')
 MEDIA_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'media')

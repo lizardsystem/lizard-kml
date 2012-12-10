@@ -9,6 +9,8 @@ Changelog of lizard-kml
 
 - Fixed dependency versions.
 
+- Fixed test settings.
+
 
 0.3 (2012-04-22)
 ----------------
