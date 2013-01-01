@@ -2,7 +2,6 @@ import os
 import logging
 
 from lizard_ui.settingshelper import setup_logging
-from lizard_ui.settingshelper import STATICFILES_FINDERS
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -42,7 +41,6 @@ SITE_ID = 1
 INSTALLED_APPS = [
     'lizard_kml',
     'lizard_ui',
-    'staticfiles',
     'compressor',
     'south',
     'django_nose',
@@ -53,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.gis',
     'django.contrib.sites',
+    'django.contrib.staticfiles',
     ]
 ROOT_URLCONF = 'lizard_kml.urls'
 
@@ -100,7 +99,11 @@ STATIC_URL = '/static_media/'
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'static')
 MEDIA_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'media')
-STATICFILES_FINDERS = STATICFILES_FINDERS
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
 
 # NetCDF database containing the transect (coastal) data.
 # A local copy is highly recommended:
