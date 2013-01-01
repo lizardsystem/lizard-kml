@@ -1,5 +1,12 @@
 import os
+
 import logging
+# Set up logging here so we can log in the settings module.
+# After initialization, Django's LOGGING settings are used.
+logging.basicConfig(
+    format='%(asctime)s %(module)s %(message)s',
+    level=logging.DEBUG
+)
 
 from lizard_ui.settingshelper import setup_logging
 
@@ -146,6 +153,7 @@ for key in NC_RESOURCE:
 if os.getlogin() == 'fedorbaart':
     # fedors mac
     NC_RESOURCE['transect'] = '/Users/fedorbaart/Downloads/transect.nc'
+    logger.info('Fedors mac, using %s', NC_RESOURCE['transect'])
 
 try:
     # Import local settings that aren't stored in svn/git.

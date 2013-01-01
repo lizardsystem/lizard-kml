@@ -25,7 +25,26 @@ import netcdftime
 
 from lizard_kml.jarkus import extra_cm
 
-from django.conf import settings
+# web
+# remain a bit independant from Django settings, so we can test without them
+try:
+    from django.conf import settings
+except ImportError:
+    settings = None
+
+# use Django settings when defined
+if settings is not None and hasattr(settings, 'NC_RESOURCE'):
+    NC_RESOURCE = settings.NC_RESOURCE
+else:
+    NC_RESOURCE = {
+        'transect': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc',
+        'BKL_TKL_TND': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc',
+        'DF': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc',
+        'MKL': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc',
+        'strandbreedte': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc',
+        'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
+        'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
+    }
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +186,7 @@ def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
 def jarkusmean(id_min, id_max, plotproperties=None):
     id_min = int(id_min)
     id_max = int(id_max)
-    dataset = netCDF4.Dataset(settings.NC_RESOURCE['transect'], 'r')
+    dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     try:
         # Lookup variables
         ids_all = dataset.variables['id'][:]
