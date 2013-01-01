@@ -1,3 +1,4 @@
+(function (global) {
 // fix missing console logging
 if (!window.console) window.console = {};
 if (!window.console.log) window.console.log = function () { };
@@ -7,23 +8,16 @@ google.load('earth', '1');
 
 // configure Ext JS
 var isExtReady = false;
-Ext.BLANK_IMAGE_URL = '/static_media/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
+Ext.BLANK_IMAGE_URL = lizard.static_url + '/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
 Ext.form.Labelable.errorIconWidth = 16 // fix for Extjs bug
 Ext.onReady(function () {
     console.log('Ext ready');
     isExtReady = true;
 });
-// Ext.scopeResetCSS = true;
-// Ext.Loader.setConfig({
-//     enabled : true
-// });
-// Ext.require('Ext.fx.Anim');
-// Ext.require('Ext.data.Tree');
-// Ext.require('Ext.tree.Panel');
 
 // globals and constants
 var geDownloadUrl = 'http://www.google.com/earth/explore/products/plugin.html';
-var minimalPluginVersion = '6.2.0';
+var minimalPluginVersion = '6.0.0';
 var ge = null;
 var kvu = null;
 var kfc = null;
@@ -167,7 +161,8 @@ function parseVersionString(str) {
 }
 
 /**
- * Does what it says.
+ * Returns true when version string "vcurrent" is higher or equal to
+ * version "vmin".
  */
 function minVersionMet(vmin, vcurrent) {
     minimum = parseVersionString(vmin);
@@ -583,7 +578,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         },
         logarithmic: true
     });
-    lift.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/ophoging.gif'));
+    lift.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/ophoging.gif'));
     lift.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var exaggeration = buildSlider({
@@ -597,7 +592,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         },
         logarithmic: true
     });
-    exaggeration.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/opschaling.gif'));
+    exaggeration.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/opschaling.gif'));
     exaggeration.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var extrude = Ext.create('Ext.form.field.Checkbox', {
@@ -610,7 +605,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             }
         }
     });
-    extrude.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/uitvullen.png'));
+    extrude.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/uitvullen.png'));
     extrude.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var colormaps = Ext.create('Ext.button.Button', {
@@ -643,7 +638,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             return Ext.String.format('{0}m', thumb.value);
         }
     });
-    move.on('mouseenter', this.showPreviewImage.bind(this, '/static_media/lizard_kml/verschuiving.png'));
+    move.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/verschuiving.png'));
     move.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var confirm = Ext.create('Ext.button.Button', {
@@ -1047,7 +1042,10 @@ GETimeSliderControl.prototype.togglePlayPause = function () {
 
 GETimeSliderControl.prototype.rewind = function () {
     this.pause();
-    this.setCurrentTime(this.getExtentBegin());
+    var begin = this.getExtentBegin();
+    if (begin) {
+        this.setCurrentTime(begin);
+    }
 };
 
 GETimeSliderControl.prototype.setRate = function (rate) {
@@ -1383,3 +1381,4 @@ KmlFile.prototype.toString = function () {
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
+}(this));
