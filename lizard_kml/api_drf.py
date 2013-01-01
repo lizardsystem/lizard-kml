@@ -1,16 +1,27 @@
 from django.core.urlresolvers import reverse
 from django.conf import settings
-
-from djangorestframework.views import View
+from django.http import HttpResponse
+from django.utils import simplejson
+from django.utils.decorators import method_decorator
+from django.views.generic import View
+from django.views.decorators.cache import never_cache
 
 from lizard_kml.models import Category
 
 DEFAULT_PREVIEW_IMAGE = settings.STATIC_URL + 'lizard_kml/figures/none.png'
 
-class CategoryTreeView(View):
-    _IGNORE_IE_ACCEPT_HEADER = False # keep this for IE8 and IE9
+class JsonView(View):
+    @method_decorator(never_cache)
+    def get(self, request, *args, **kwargs):
+        data = self.get_json(request, *args, **kwargs)
+        if isinstance(data, HttpResponse):
+            return data
+        else:
+            serialized_data = simplejson.dumps(data)
+            return HttpResponse(serialized_data, content_type='application/json')
 
-    def get(self, request):
+class CategoryTreeView(JsonView):
+    def get_json(self, request):
         categories = [
             {
                 'id': category.id,

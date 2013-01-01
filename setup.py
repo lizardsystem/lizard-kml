@@ -22,7 +22,6 @@ install_requires = [
     'scipy >= 0.10.0, < 0.11',
     'netCDF4 >= 1.0, < 2.0',
     'xlwt >= 0.7.4, < 0.8',
-    'djangorestframework >= 0.3.3, < 0.4'
     ],
 
 tests_require = [
