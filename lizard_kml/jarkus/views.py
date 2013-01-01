@@ -14,7 +14,13 @@ from django.conf import settings
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
 from lizard_kml.jarkus.nc_models import makejarkustransect
-from lizard_kml.jarkus.plots import eeg, jarkustimeseries, jarkusmean, WouldTakeTooLong
+from lizard_kml.jarkus.plots import (
+    eeg,
+    jarkustimeseries,
+    jarkusmean,
+    nourishment,
+    WouldTakeTooLong
+)
 
 import logging
 import xlwt
@@ -87,13 +93,17 @@ class ChartView(View):
 
         # TODO, sanitize the GET.... (pass format=png/pdf, size etc?)
         try:
-            if chart_type in ['eeg', 'jarkustimeseries']:
+            if chart_type == 'eeg':
                 id = int(id)
                 transect = makejarkustransect(id)
-                if chart_type == 'eeg':
-                    fd = eeg(transect, {'format':'png'})
-                elif chart_type == 'jarkustimeseries':
-                    fd = jarkustimeseries(transect, {'format':'png'})
+                fd = eeg(transect, {'format':'png'})
+            elif chart_type == 'jarkustimeseries':
+                id = int(id)
+                transect = makejarkustransect(id)
+                fd = jarkustimeseries(transect, {'format':'png'})
+            elif chart_type == 'nourishment':
+                id = int(id)
+                fd = nourishment(id, {'format':'png'})
             elif chart_type == 'jarkusmean':
                 id_min = int(request.GET['id_min']) # e.g. 7003001
                 id_max = int(request.GET['id_max']) # e.g. 7003150

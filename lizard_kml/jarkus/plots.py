@@ -24,6 +24,8 @@ import netCDF4
 import netcdftime
 
 from lizard_kml.jarkus import extra_cm
+from lizard_kml.jarkus.nourishmentplot import combinedplot
+from lizard_kml.jarkus.nc_models import makedfs
 
 # web
 # remain a bit independant from Django settings, so we can test without them
@@ -141,7 +143,6 @@ def eeg(transect, plotproperties=None):
     # return an 'open' file descriptor
     return buf
 
-
 def fill_z(x, z):
     # Interpolate over time and space
     cross_shore = x
@@ -232,6 +233,22 @@ def jarkusmean(id_min, id_max, plotproperties=None):
     fig.savefig(buf, **plotproperties)
     buf.seek(0)
 
+    # cleanup
+    fig.clf()
+    # return an 'open' file descriptor
+    return buf
+
+def nourishment(transect_id, plotproperties=None):
+    transect_id = int(transect_id)
+    if plotproperties is None:
+        plotproperties = {}
+
+    dfs = makedfs(transect_id)
+    fig = combinedplot(dfs)
+
+    buf = cStringIO.StringIO()
+    fig.savefig(buf, **plotproperties)
+    buf.seek(0)
     # cleanup
     fig.clf()
     # return an 'open' file descriptor

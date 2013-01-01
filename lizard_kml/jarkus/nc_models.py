@@ -294,34 +294,6 @@ def makenourishmentdf(transect, areaname=""):
     # Compute nourishment volume in m3/m
     nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
     
-    # simplify for colors
-    typemap = {'':'strand', 
-        'strandsuppletie':'strand', 
-        'dijkverzwaring':'duin', 
-        'strandsuppletie banket':'strand', 
-        'duinverzwaring':'duin', 
-        'strandsuppletie+vooroever':'overig', 
-        'Duinverzwaring':'duin',
-        'duin':'duin', 
-        'duinverzwaring en strandsuppleti':'duin', 
-        'vooroever':'vooroever', 
-        'zeewaartse duinverzwaring':'duin', 
-        'banket': 'strand' ,
-        'geulwand': 'geulwand', 
-        'anders':'overig', 
-        'landwaartse duinverzwaring':'duin', 
-        'depot':'overig', 
-        'vooroeversuppletie':'vooroever', 
-        'onderwatersuppletie':'vooroever', 
-        'geulwandsuppletie':'geulwand'
-        }
-    beachcolors = {
-              'duin': 'peru',
-              'strand': 'khaki',
-              'vooroever': 'aquamarine',
-              'geulwand': 'lightseagreen',
-              'overig': 'grey'
-        }
     # Filter by current area and match the area
     filter = reduce(np.logical_and, [
         alongshore >= nourishmentdf.beg_stretch,  

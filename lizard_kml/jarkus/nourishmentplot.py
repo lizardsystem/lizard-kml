@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-if __name__ == '__main__':
-    print ('Be sure to run using [buildout_dir]/bin/python if you want'
-    ' to test using the same libraries as the site')
-    from lizard_kml.jarkus.matplotlib_settings import set_matplotlib_defaults
-    set_matplotlib_defaults()
-
 import bisect
 import datetime
 import numpy as np
@@ -17,7 +11,34 @@ import statsmodels.api as sm
 import netCDF4
 import matplotlib.gridspec
 
-from lizard_kml.jarkus.nc_models import makedfs
+# simplify for colors
+typemap = {'':'strand',
+    'strandsuppletie':'strand',
+    'dijkverzwaring':'duin',
+    'strandsuppletie banket':'strand',
+    'duinverzwaring':'duin',
+    'strandsuppletie+vooroever':'overig',
+    'Duinverzwaring':'duin',
+    'duin':'duin',
+    'duinverzwaring en strandsuppleti':'duin',
+    'vooroever':'vooroever',
+    'zeewaartse duinverzwaring':'duin',
+    'banket': 'strand',
+    'geulwand': 'geulwand',
+    'anders':'overig',
+    'landwaartse duinverzwaring':'duin',
+    'depot':'overig',
+    'vooroeversuppletie':'vooroever',
+    'onderwatersuppletie':'vooroever',
+    'geulwandsuppletie':'geulwand'
+    }
+beachcolors = {
+          'duin': 'peru',
+          'strand': 'khaki',
+          'vooroever': 'aquamarine',
+          'geulwand': 'lightseagreen',
+          'overig': 'grey'
+    }
 
 def combinedplot(dfs):
     """Create a combined plot of the coastal data"""
@@ -164,6 +185,24 @@ def combinedplot(dfs):
     return fig
 
 if __name__ == '__main__':
+    print (
+        'Be sure to run using [buildout_dir]/bin/python if you want'
+        ' to test using the same libraries as the site'
+    )
+    try:
+        from lizard_kml.jarkus.matplotlib_settings import set_matplotlib_defaults
+    except ImportError:
+        # import locally anyway
+        from matplotlib_settings import set_matplotlib_defaults
+
+    set_matplotlib_defaults()
+
+    try:
+        from lizard_kml.jarkus.nc_models import makedfs
+    except ImportError:
+        # import locally anyway
+        from nc_models import makedfs
+
     transect = 7004200
     dfs = makedfs(transect)
     fig = combinedplot(dfs)
