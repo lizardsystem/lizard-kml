@@ -48,6 +48,10 @@ def get_mirrored_kml(url):
 
         # check the content type
         content_type = headers['Content-Type'].strip()
+        # sometimes servers like to add ';mode=networklink' to the content-type
+        if ';' in content_type:
+            content_type = content_type.split(';')[0]
+        # ensure only known types are proxy'd
         if content_type not in KML_MIRROR_TYPES:
             raise Exception('Unsupported Content-Type')
 
