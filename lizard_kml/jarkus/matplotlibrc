@@ -1,5 +1,10 @@
 ### MATPLOTLIBRC FORMAT
 
+# -----------------------------------------------------------------
+# Note: also change matplotlib_settings.py, if you want settings to
+# propagate to the site as well.
+# -----------------------------------------------------------------
+
 # This is a sample matplotlib configuration file - you can find a copy
 # of it on your system in
 # site-packages/matplotlib/mpl-data/matplotlibrc.  If you edit it
