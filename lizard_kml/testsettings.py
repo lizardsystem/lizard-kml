@@ -6,6 +6,14 @@ from lizard_ui.settingshelper import setup_logging
 DEBUG = True
 TEMPLATE_DEBUG = True
 
+# Set matplotlib defaults.
+import matplotlib
+# Force matplotlib to not use any Xwindows backend.
+matplotlib.use('Agg')
+# Import specific matplotlib settings for this app.
+from lizard_kml.jarkus.matplotlib_settings import set_matplotlib_defaults
+set_matplotlib_defaults()
+
 # SETTINGS_DIR allows media paths and so to be relative to this settings file
 # instead of hardcoded to c:\only\on\my\computer.
 SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -91,6 +99,7 @@ LANGUAGES = [
 # If you set this to False, Django will make some optimizations so as not to
 # load the internationalization machinery.
 USE_I18N = True
+LOCALE_PATHS = (os.path.join(SETTINGS_DIR, 'locale'),)
 
 SECRET_KEY = 'testsettings'
 
