@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-# <nbformat>3.0</nbformat>
 
-# <codecell>
+if __name__ == '__main__':
+    print ('Be sure to run using [buildout_dir]/bin/python if you want'
+    ' to test using the same libraries as the site')
+    from lizard_kml.jarkus.matplotlib_settings import set_matplotlib_defaults
+    set_matplotlib_defaults()
 
 import bisect
 import datetime
@@ -14,9 +17,8 @@ import statsmodels.api as sm
 import netCDF4
 import matplotlib.gridspec
 
-from nc_models import makedfs
-
-# <codecell>
+# Fixed: use absolute import here
+from lizard_kml.jarkus.nc_models import makedfs
 
 def combinedplot(dfs):
     """Create a combined plot of the coastal data"""
@@ -162,18 +164,8 @@ def combinedplot(dfs):
     legend = ax4.legend(proxies, labels, loc='upper left')
     return fig
 
-
-# <codecell>
-
 if __name__ == '__main__':
     transect = 7004200
     dfs = makedfs(transect)
     fig = combinedplot(dfs)
-
-
-# <codecell>
-
-
-# <codecell>
-
-
+    fig.savefig('nourishment-7004200.png')
