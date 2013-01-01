@@ -16,12 +16,30 @@ from scipy.interpolate import interp1d
 # pydata
 import pandas
 
-# web
-from django.conf import settings
-
 # data/gis
 import netCDF4
 import pyproj
+
+# web
+# remain a bit independant from Django settings, so we can test without them
+try:
+    from django.conf import settings
+except ImportError:
+    settings = None
+
+# use Django settings when defined
+if settings is not None and hasattr(settings, 'NC_RESOURCE'):
+    NC_RESOURCE = settings.NC_RESOURCE
+else:
+    NC_RESOURCE = {
+        'transect': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc',
+        'BKL_TKL_TND': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc',
+        'DF': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc',
+        'MKL': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc',
+        'strandbreedte': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc',
+        'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
+        'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
+    }
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +47,7 @@ if '4.1.3' in netCDF4.getlibversion():
     logger.warn('There is a problem with the netCDF 4.1.3 library that causes performance issues for opendap queries, you are using netcdf version {}'.format(netCDF4.getlibversion()))
 
 proj = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs')
+
 
 class Transect(object):
     """Transect that has coordinates and time"""
@@ -92,13 +111,14 @@ class Transect(object):
         lon, lat = proj(x,y,inverse=True)
         return lon, lat
 
+
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
 # @cache.beaker_cache('id', expire=60)
-def makejarkustransect(id, **args):
+def makejarkustransect(id):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
     id = int(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
-    dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
+    dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     tr = Transect(id)
 
     # Opendap is index based, so we have to do some numpy tricks to get the data over (and fast)
@@ -150,9 +170,10 @@ def makejarkustransect(id, **args):
     tr.lon, tr.lat
     return tr
 
+
 #TODO: @cache.beaker_cache(None, expire=600)
 def makejarkuslod():
-    dataset = netCDF4.Dataset(settings.NC_RESOURCE, 'r')
+    dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     overview = {}
     # Get the locations of the beach transect lines..
     # For some reason index 0 leads to the whole variable being send over.
@@ -189,9 +210,9 @@ def makejarkuslod():
 # I'm using uncached versions at the moment. Total query time is about 3seconds on my wifi, which is just a bit too much.
 # Optional we can make local copies. Through wired connections it should be a bit faster.
 
-def makeshorelinedf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc'):
+def makeshorelinedf(transect):
     """Read information about shorelines"""
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['strandlijnen'], 'r')
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
@@ -214,10 +235,9 @@ def makeshorelinedf(transect, url='http://opendap.deltares.nl/thredds/dodsC/open
     return shorelinedf
 
 
-
-def maketransectdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'):
+def maketransectdf(transect):
     """Read some transect data"""
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     transectidx = bisect.bisect_left(ds.variables['id'],transect)
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
@@ -233,11 +253,12 @@ def maketransectdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opend
     transectdf = pandas.DataFrame(index=[transect], data=dict(transect=transect, areaname=areaname, mean_high_water=mean_high_water, mean_low_water=mean_low_water))
     return transectdf
 
+
 # note that the areaname is a hack, because it is currently missing
-def makenourishmentdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc', areaname=""):
+def makenourishmentdf(transect, areaname=""):
     """Read the nourishments from the dataset (only store the variables that are a function of nourishment)"""
     
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['suppleties'], 'r')
     
     transectidx = bisect.bisect_left(ds.variables['id'],transect)
     if ds.variables['id'][transectidx] != transect:
@@ -312,9 +333,9 @@ def makenourishmentdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/op
     return nourishmentdfsel
 
 
-def makemkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc'):
+def makemkldf(transect):
     """the momentary coastline data"""
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['MKL'], 'r')
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
     if ds.variables['id'][transectidx] != transect:
@@ -336,9 +357,9 @@ def makemkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/ri
     return mkldf
 
 
-def makebkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc' ):
+def makebkldf(transect):
     """the basal coastline data"""
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['BKL_TKL_TND'], 'r')
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
     if ds.variables['id'][transectidx] != transect:
@@ -355,9 +376,9 @@ def makebkldf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/ri
     return bkldf
 
 
-def makebwdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc'):
+def makebwdf(transect):
     # Now read the beachwidth data.
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['strandbreedte'], 'r')
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
     if ds.variables['id'][transectidx] != transect:
@@ -373,11 +394,10 @@ def makebwdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rij
     bwdf =  pandas.DataFrame(vardict)
     return bwdf
 
-# <codecell>
 
-def makedfdf(transect, url='http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc'):
+def makedfdf(transect):
     """read the dunefoot data"""
-    ds = netCDF4.Dataset(url)
+    ds = netCDF4.Dataset(NC_RESOURCE['DF'], 'r')
     
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)

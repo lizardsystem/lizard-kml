@@ -3,6 +3,8 @@ import matplotlib as mpl
 def set_matplotlib_defaults():
     # reset to matplotlibs internal defaults
     mpl.rcdefaults()
+    # use in memory backend
+    mpl.use('Agg')
     # Sans-serif looks best for plots
     mpl.rcParams['font.family'] = 'sans-serif'
     # Some modern fonts

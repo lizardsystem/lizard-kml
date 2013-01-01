@@ -3,13 +3,12 @@ import logging
 
 from lizard_ui.settingshelper import setup_logging
 
+logger = logging.getLogger(__name__)
+
 DEBUG = True
 TEMPLATE_DEBUG = True
 
 # Set matplotlib defaults.
-import matplotlib
-# Force matplotlib to not use any Xwindows backend.
-matplotlib.use('Agg')
 # Import specific matplotlib settings for this app.
 from lizard_kml.jarkus.matplotlib_settings import set_matplotlib_defaults
 set_matplotlib_defaults()
@@ -114,27 +113,42 @@ STATICFILES_FINDERS = [
     'compressor.finders.CompressorFinder',
 ]
 
-# NetCDF database containing the transect (coastal) data.
-# A local copy is highly recommended:
-# wget http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc
-# Also available over the internet:
-# NC_RESOURCE = 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc'
-# Use this if we break the deltares server:
-# NC_RESOURCE = 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc'
-NC_RESOURCE = os.path.join(BUILDOUT_DIR, 'transect.nc')
+LIZARD_KML_STANDALONE = True
+
+# NetCDF databases containing transect (coastal) data, for example.
+# Local copies are highly recommended:
+# wget "http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc"
+NC_RESOURCE_LOCAL_DIR = os.path.join(BUILDOUT_DIR, 'var', 'netcdf')
+
+# by default, just use the remote versions
+NC_RESOURCE = {
+    'transect': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc',
+    # Use this if we break the deltares server:
+    #'transect': 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc',
+    'BKL_TKL_TND': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc',
+    'DF': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc',
+    'MKL': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc',
+    'strandbreedte': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc',
+    'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
+    'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
+}
+
+# when a local copy of the .nc file is provided, use that instead
+for key in NC_RESOURCE:
+    fn = key + '.nc'
+    path = os.path.join(NC_RESOURCE_LOCAL_DIR, fn)
+    if os.path.isfile(path):
+        logger.info('Using %s', path)
+        NC_RESOURCE[key] = path
 
 # other local testsettings
 # TODO should move these to local test settings, and send Fedor an email about it :)
 if os.getlogin() == 'fedorbaart':
     # fedors mac
-    NC_RESOURCE = '/Users/fedorbaart/Downloads/transect.nc'
+    NC_RESOURCE['transect'] = '/Users/fedorbaart/Downloads/transect.nc'
 
 try:
     # Import local settings that aren't stored in svn/git.
     from lizard_kml.local_testsettings import *
 except ImportError:
     pass
-
-# ensure NC_RESOURCE points to an existing file to avoid developer confusion
-if not (NC_RESOURCE and os.path.isfile(NC_RESOURCE)):
-    logging.warn('Be sure to set NC_RESOURCE in your local_testsettings.py, and point it to the transect.nc database file.')

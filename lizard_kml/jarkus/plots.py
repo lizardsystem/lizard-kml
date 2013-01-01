@@ -12,10 +12,6 @@ from numpy.ma import filled, masked_array
 
 import scipy.interpolate
 
-import matplotlib
-# use in memory backend
-matplotlib.use('Agg')
-
 from matplotlib import pyplot
 from matplotlib import text
 from matplotlib import colors
@@ -27,7 +23,9 @@ import matplotlib.cm as cm
 import netCDF4
 import netcdftime
 
-import extra_cm
+from lizard_kml.jarkus import extra_cm
+
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -166,10 +164,10 @@ def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
     if (plotlatest):
         plot.plot(cross_shore, zfilled[-1,:],'k-', alpha=0.5, linewidth=1)
 
-def jarkusmean(id_min, id_max, nc_resource, plotproperties=None):
+def jarkusmean(id_min, id_max, plotproperties=None):
     id_min = int(id_min)
     id_max = int(id_max)
-    dataset = netCDF4.Dataset(nc_resource, 'r')
+    dataset = netCDF4.Dataset(settings.NC_RESOURCE['transect'], 'r')
     try:
         # Lookup variables
         ids_all = dataset.variables['id'][:]

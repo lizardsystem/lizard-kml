@@ -1,4 +1,7 @@
-# (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
+import logging
+import os
+
+from django.conf import settings
 from django.conf.urls.defaults import include
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
@@ -12,11 +15,12 @@ from lizard_kml.api import *
 
 logger = logging.getLogger(__name__)
 
-admin.autodiscover()
+# ensure NC_RESOURCE points to an existing file to avoid developer confusion
+if not (settings.NC_RESOURCE['transect'].startswith('http') or os.path.isfile(settings.NC_RESOURCE['transect'])):
+    logger.warn('Be sure to point NC_RESOURCE to some valid files in your settings.')
 
 urlpatterns = patterns(
     '',
-    url(r'^admin/', include(admin.site.urls)),
     url(r'^viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
@@ -28,4 +32,10 @@ urlpatterns = patterns(
     url(r'^api/$', CategoryTreeView.as_view(), name='lizard-kml-api'),
 )
 
-urlpatterns += debugmode_urlpatterns()
+if getattr(settings, 'LIZARD_KML_STANDALONE', False):
+    admin.autodiscover()
+    urlpatterns += patterns(
+        '',
+        (r'^admin/', include(admin.site.urls)),
+    )
+    urlpatterns += debugmode_urlpatterns()

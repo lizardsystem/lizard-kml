@@ -8,14 +8,15 @@ from django.template.loader import render_to_string
 from django.contrib.gis.shortcuts import render_to_kmz, render_to_kml, compress_kml
 from django.utils.datastructures import SortedDict
 
-from nc_models import makejarkustransect, makejarkuslod
+from lizard_kml.jarkus.nc_models import makejarkustransect, makejarkuslod
 from lizard_kml import helpers
+
 import numpy as np
 import matplotlib.cm
 import matplotlib.colors
 import logging
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 def build_kml(view, kml_type, id, kml_args_dict):
     '''builds a dynamic KML file'''

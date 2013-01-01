@@ -97,7 +97,7 @@ class ChartView(View):
             elif chart_type == 'jarkusmean':
                 id_min = int(request.GET['id_min']) # e.g. 7003001
                 id_max = int(request.GET['id_max']) # e.g. 7003150
-                fd = jarkusmean(id_min, id_max, settings.NC_RESOURCE, {'format':'png'})
+                fd = jarkusmean(id_min, id_max, settings.NC_RESOURCE['transect'], {'format':'png'})
             # wrap the file descriptor as a generator (8 KB reads)
             wrapper = FileWrapper(fd)
             response = HttpResponse(wrapper, content_type="image/png")

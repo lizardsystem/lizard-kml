@@ -17,7 +17,6 @@ import statsmodels.api as sm
 import netCDF4
 import matplotlib.gridspec
 
-# Fixed: use absolute import here
 from lizard_kml.jarkus.nc_models import makedfs
 
 def combinedplot(dfs):
