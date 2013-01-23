@@ -993,7 +993,7 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     // fix tabs height causing jumping behaviour
                     // the tab contents should scroll
                     $tabs.find('.ui-tabs-panel.ui-widget-content').css({
-                        'height': 350,
+                        'height': 340,
                         'overflow-y': 'auto'
                     });
                 }

@@ -21,6 +21,11 @@
     margin:0 auto;
 }
 
+/* jquery overrides */
+.ui-tabs .ui-tabs-panel {
+    padding:0;
+}
+
 /* extjs overrides */
 .x-fieldset {
     padding:4px;
