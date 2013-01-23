@@ -66,20 +66,11 @@
             {% endspaceless %}
             {% endblock logo %}
           </div>
-          <div id="portal-actions">
-            {% block portal-actions %}
-            &nbsp;
-            {% endblock portal-actions %}
-          </div>
-          <div id="portal-tabs">
-            {% block portal-tabs %}
-            &nbsp;
-            {% endblock portal-tabs %}
-          </div>
           <div id="breadcrumbs">
             &raquo; <a href="/" title="{% trans "Back to homepage" %}">Home</a>
             &rarr; <a href="{% url lizard-kml-viewer %}">Kustviewer</a>
           </div>
+          <img src="{{ STATIC_URL }}lizard_kml/logos.png" alt="Logos" style="float:right;"/>
         </div>
         {% endblock header %}
         {# End of header #}

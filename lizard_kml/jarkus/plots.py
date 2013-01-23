@@ -70,7 +70,7 @@ def jarkustimeseries(transect, plotproperties=None):
         raise ValueError('Z should be of dim 2')
     # use a fixed min, max for color interpolation, we have no green on beaches but it shows a lot of contrast
     # TODO: Make this stateless.... (only call methods on figures and axes)
-    fig = pyplot.figure(figsize=(4, 3))
+    fig = pyplot.figure(figsize=(7, 3))
     plot = fig.add_subplot(111)
     mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z, vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
     #mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z, norm=TimeStagNormalize(), cmap=extra_cm.GMT_drywet_r)
@@ -120,7 +120,7 @@ def eeg(transect, plotproperties=None):
     # create the lines
     lines = matplotlib.collections.LineCollection(segs, offsets=offsets)
     # create a new figure
-    fig = pyplot.figure(figsize=(4, 3))
+    fig = pyplot.figure(figsize=(7, 3))
     # add axes
     plot = fig.add_subplot(111)
     # add the lines

@@ -981,6 +981,8 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     // minimum size to fit nourishment plot
                     balloon.setMinWidth(800);
                     balloon.setMinHeight(400);
+                    balloon.setMaxWidth(800);
+                    balloon.setMaxHeight(400);
                     ge.setBalloon(balloon);
                     // fill out the div
                     var $tabs = $(div).find('.tabs');
