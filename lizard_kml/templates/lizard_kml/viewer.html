@@ -14,7 +14,8 @@
       href="{{ STATIC_URL }}lizard_kml/viewer.css" />
 {% endblock css %}
 
-{% block map-javascript %}
+{% block javascript %}
+{{ block.super }}
 <script type="text/javascript">
 if (typeof lizard === 'undefined') {
     var lizard = {};
@@ -24,7 +25,7 @@ lizard.static_url = '{{ STATIC_URL }}';
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1a/ext-all.js"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
-{% endblock map-javascript %}
+{% endblock javascript %}
 
 {% block sidebar %}
 <div id="accordion" class="sidebarbox sidebarbox-stretched">

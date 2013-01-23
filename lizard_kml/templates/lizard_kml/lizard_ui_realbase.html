@@ -14,20 +14,16 @@
           href="{{ STATIC_URL }}sprites/sprite.css"
           type="text/css"
           media="screen, projection" />
-    {# CSS for jqueryui: "smoothness" theme #}
+    {# Jquery UI #}
     <link type="text/css"
-          href="{{ STATIC_URL }}jqueryui/smoothness/jquery-ui-1.8.11.custom.css"
+          href="{{ STATIC_URL }}lizard_kml/jquery-ui/css/smoothness/jquery-ui-1.8.24.custom.css"
           rel="stylesheet"
           media="screen, projection" />
-    {# Our own css comes last #}
+    {# Lizard #}
     <link rel="stylesheet"
           href="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.css"
           type="text/css"
           media="screen, projection" />
-    <link rel="stylesheet"
-          href="{{ STATIC_URL }}lizard_ui/print.css"
-          type="text/css"
-          media="print" />
     {% endblock css %}
     {% endcompress %}
 
@@ -35,9 +31,11 @@
     {% block javascript %}
     {# Jquery #}
     <script type="text/javascript"
-            src="{{ STATIC_URL }}jquery/jquery.js"></script>
+            src="{{ STATIC_URL }}lizard_kml/jquery/jquery-1.8.3.js"></script>
+    {# Jquery UI #}
     <script type="text/javascript"
-            src="{{ STATIC_URL }}jqueryui/jqueryui.min.js"></script>
+            src="{{ STATIC_URL }}lizard_kml/jquery-ui/jquery-ui-1.8.24.custom.min.js"></script>
+    {# Lizard #}
     <script type="text/javascript"
             src="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.js"></script>
     {% endblock javascript %}

@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.conf import settings
 from django.utils.translation import ugettext as _
+from django.utils.decorators import method_decorator
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 from django.views.decorators.cache import never_cache
 
@@ -31,6 +32,24 @@ KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
 MIME_KMZ = 'application/vnd.google-earth.kmz'
 KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ]
+MIME_TO_EXT = {
+    MIME_KML: 'kml',
+    MIME_KMZ: 'kmz',
+}
+COLOR_MAPS = [
+    ('GnBu', (0, 0, 200, 21)),
+    ('Greys', (0, 25, 200, 46)),
+    ('Oranges', (0, 50, 200, 71)),
+    ('autumn', (0, 76, 200, 97)),
+    ('Blues', (0, 101, 200, 122)),
+    ('cool', (0, 126, 200, 147)),
+    ('hot', (0, 152, 200, 173)),
+    ('hsv', (0, 177, 200, 198)),
+    ('summer', (0, 202, 200, 223)),
+    ('YlGn', (0, 228, 200, 249)),
+    ('bwr', (0, 253, 200, 274)),
+    ('YlOrBr', (0, 278, 200, 300))
+]
 
 class HeadRequest(urllib2.Request):
     def get_method(self):
@@ -48,9 +67,11 @@ def get_mirrored_kml(url):
 
         # check the content type
         content_type = headers['Content-Type'].strip()
+
         # sometimes servers like to add ';mode=networklink' to the content-type
         if ';' in content_type:
             content_type = content_type.split(';')[0]
+
         # ensure only known types are proxy'd
         if content_type not in KML_MIRROR_TYPES:
             raise Exception('Unsupported Content-Type')
@@ -80,7 +101,7 @@ def get_wms_kml(kml_resource):
     return content, content_type
 
 class KmlResourceView(View):
-    @never_cache
+    @method_decorator(never_cache)
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
         logger.debug('Serving KML %s', kml_resource)
@@ -91,7 +112,9 @@ class KmlResourceView(View):
         else:
             raise Exception('KML is dynamic, please use its specific URL as found in urls.py.')
         response = HttpResponse(content, content_type=content_type)
-        response['Content-Disposition'] = 'attachment; filename=kml_resource{}.kmz'.format(kml_resource.pk)
+        # properly add extension, all though it's mostly ignored
+        ext = MIME_TO_EXT.get(content_type, 'kml')
+        response['Content-Disposition'] = 'attachment; filename=kml_resource{}.{}'.format(kml_resource.pk, ext)
         return response
 
 class ViewerView(ViewContextMixin, TemplateView):
@@ -107,16 +130,3 @@ class ViewerView(ViewContextMixin, TemplateView):
 
     def color_maps(self):
         return COLOR_MAPS
-
-COLOR_MAPS = [('GnBu', (0, 0, 200, 21)),
- ('Greys', (0, 25, 200, 46)),
- ('Oranges', (0, 50, 200, 71)),
- ('autumn', (0, 76, 200, 97)),
- ('Blues', (0, 101, 200, 122)),
- ('cool', (0, 126, 200, 147)),
- ('hot', (0, 152, 200, 173)),
- ('hsv', (0, 177, 200, 198)),
- ('summer', (0, 202, 200, 223)),
- ('YlGn', (0, 228, 200, 249)),
- ('bwr', (0, 253, 200, 274)),
- ('YlOrBr', (0, 278, 200, 300))]

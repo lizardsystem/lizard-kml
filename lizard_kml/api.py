@@ -53,4 +53,5 @@ class CategoryTreeView(JsonView):
             rela = reverse('lizard-jarkus-kml', kwargs={'kml_type': 'lod'})
         else:
             rela = reverse('lizard-kml-kml', kwargs={'kml_resource_id': kml_resource.pk})
-        return self.request.build_absolute_uri(rela)
+        absurl = self.request.build_absolute_uri(rela)
+        return absurl

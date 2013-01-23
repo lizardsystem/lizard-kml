@@ -66,13 +66,9 @@
                 </LineString>
                 <description>
                     <![CDATA[
-                    {% comment %}
-                    {# Still use an iframe, in case someone opens this page in google earth directly #}
-                    <iframe src="{% absurl lizard-kml-info id=line.id %}" height="400" width="400"/>
-                    {% endcomment %}
-                    <p><img src="{% url lizard-kml-chart chart_type="eeg" id=line.id %}" /></p>
-                    <p><img src="{% url lizard-kml-chart chart_type="jarkustimeseries" id=line.id %}" /></p>
-                    <p>Download data as: <a href="{% url lizard-kml-xls id=line.id %}">xls</a></p>
+                    <div>
+                        <a href="{% absurl lizard-kml-info id=line.id %}" data-dynamic-info="true">info</a>
+                    </div>
                     ]]>
                 </description>
             </Placemark>

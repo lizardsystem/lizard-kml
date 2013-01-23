@@ -27,6 +27,8 @@ try:
 except ImportError:
     settings = None
 
+logger = logging.getLogger(__name__)
+
 # use Django settings when defined
 if settings is not None and hasattr(settings, 'NC_RESOURCE'):
     NC_RESOURCE = settings.NC_RESOURCE
@@ -41,13 +43,17 @@ else:
         'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
     }
 
-logger = logging.getLogger(__name__)
-
 if '4.1.3' in netCDF4.getlibversion():
     logger.warn('There is a problem with the netCDF 4.1.3 library that causes performance issues for opendap queries, you are using netcdf version {}'.format(netCDF4.getlibversion()))
 
 proj = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs')
 
+class NoDataForTransect(Exception):
+    def __init__(self, transect_id, closest_transect_id):
+        self.transect_id = transect_id
+        self.closest_transect_id = closest_transect_id
+        message = "Could not find transect data for transect {}, closest is {}".format(transect_id, closest_transect_id)
+        super(NoDataForTransect, self).__init__(message)
 
 class Transect(object):
     """Transect that has coordinates and time"""
@@ -217,7 +223,7 @@ def makeshorelinedf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find shoreline for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     year = ds.variables['year'][:]
     time = [datetime.datetime(x, 1,1) for x in year]
     mean_high_water = ds.variables['MHW'][transectidx,:]
@@ -242,7 +248,7 @@ def maketransectdf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     
     alongshore = ds.variables['alongshore'][transectidx]
     areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
@@ -264,7 +270,7 @@ def makenourishmentdf(transect, areaname=""):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     alongshore = ds.variables['alongshore'][transectidx]
     # TODO fix this name, it's missing
     # areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx,:])
@@ -313,7 +319,7 @@ def makemkldf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     
     vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
     # Convert all variables that are a function of time to a dataframe
@@ -337,7 +343,7 @@ def makebkldf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     
     vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
     # Convert all variables that are a function of time to a dataframe
@@ -356,7 +362,7 @@ def makebwdf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     
     vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
     # Convert all variables that are a function of time to a dataframe
@@ -376,7 +382,7 @@ def makedfdf(transect):
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
-        raise ValueError("Could not find transect data for transect {}, closest is {}".format(transect, idfound))
+        raise NoDataForTransect(transect, idfound)
     
     vars = [name for name, var in ds.variables.items() if var.dimensions == ('alongshore', 'time')]
     # Convert all variables that are a function of time to a dataframe

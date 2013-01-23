@@ -55,7 +55,7 @@ def combinedplot(dfs):
     areaname = transectdf['areaname'].irow(0)
     
     # Plot the results.
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(7,9))
     # We define a grid of 3 areas 
     gs = matplotlib.gridspec.GridSpec(4, 1, height_ratios=[5, 2, 2, 2]) 
     gs.update(hspace=0.1)

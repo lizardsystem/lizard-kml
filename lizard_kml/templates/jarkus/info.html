@@ -1,0 +1,20 @@
+{% load tools %}
+<div class="placemark-info-popup">
+    <div id="info-{{ view.id }}-tabs" class="tabs">
+        <ul>
+            <li><a href="#info-{{ view.id }}-tabs-eeg">EEG</a></li>
+            <li><a href="#info-{{ view.id }}-tabs-timeseries">Timeseries</a></li>
+            <li><a href="#info-{{ view.id }}-tabs-nourishment">Nourishment</a></li>
+        </ul>
+        <div id="info-{{ view.id }}-tabs-eeg">
+            <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}"/>
+        </div>
+        <div id="info-{{ view.id }}-tabs-timeseries">
+            <img src="{% absurl lizard-kml-chart chart_type='jarkustimeseries' id=view.id %}"/>
+        </div>
+        <div id="info-{{ view.id }}-tabs-nourishment">
+            <p><img src="{% absurl lizard-kml-chart chart_type='nourishment' id=view.id %}"/></p>
+        </div>
+    </div>
+    <p>Download data als: <a href="{% absurl lizard-kml-xls id=view.id %}">xls</a></p>
+</div>

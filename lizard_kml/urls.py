@@ -6,6 +6,7 @@ from django.conf.urls.defaults import include
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
 from django.contrib import admin
+from django.shortcuts import redirect
 
 from lizard_ui.urls import debugmode_urlpatterns
 
@@ -19,8 +20,12 @@ logger = logging.getLogger(__name__)
 if not (settings.NC_RESOURCE['transect'].startswith('http') or os.path.isfile(settings.NC_RESOURCE['transect'])):
     logger.warn('Be sure to point NC_RESOURCE to some valid files in your settings.')
 
+def to_viewer(request):
+    return redirect('lizard-kml-viewer')
+
 urlpatterns = patterns(
     '',
+    url(r'^$', to_viewer, name='lizard-kml-root'),
     url(r'^viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),

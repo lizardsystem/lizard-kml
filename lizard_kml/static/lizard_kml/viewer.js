@@ -15,6 +15,10 @@ Ext.onReady(function () {
     isExtReady = true;
 });
 
+// configure jQuery
+// disable all animations
+$.fx.off = true;
+
 // globals and constants
 var geDownloadUrl = 'http://www.google.com/earth/explore/products/plugin.html';
 var minimalPluginVersion = '6.0.0';
@@ -955,6 +959,44 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             // pass the clicked placemark
             kvu.addSelectedItem(target);
         }
+        else {
+            // don't show the normal balloon
+            event.preventDefault();
+            // fetch url to the info panel
+            var html = target.getDescription();
+            var $link = $(html).find('a[data-dynamic-info="true"]');
+            var url = $link.attr('href');
+            // retrieve the info
+            $.get(
+                url,
+                {},
+                function (data) {
+                    var balloon = ge.createHtmlDivBalloon('');
+                    balloon.setFeature(target);
+                    // create a div containing the placemark info,
+                    // so we can have JavaScript augment it (using jQuery Tabs)
+                    var div = document.createElement('DIV');
+                    div.innerHTML = data;
+                    balloon.setContentDiv(div);
+                    // minimum size to fit nourishment plot
+                    balloon.setMinWidth(800);
+                    balloon.setMinHeight(400);
+                    ge.setBalloon(balloon);
+                    // fill out the div
+                    var $tabs = $(div).find('.tabs');
+                    // initialize tabs, if there are any
+                    $tabs.tabs({
+                        heightStyle: 'fill'
+                    });
+                    // fix tabs height causing jumping behaviour
+                    // the tab contents should scroll
+                    $tabs.find('.ui-tabs-panel.ui-widget-content').css({
+                        'height': 350,
+                        'overflow-y': 'auto'
+                    });
+                }
+            );
+        }
     }
 };
 
@@ -1298,10 +1340,15 @@ function KmlFile(id, baseUrl, slug) {
  * Get the url for this KML file.
  */
 KmlFile.prototype.fullUrl = function () {
-    if (this.slug === "jarkus")
-        return this.baseUrl + '?' + jQuery.param(jarkusKmlParams);
-    else
+    if (this.slug === "jarkus") {
+        // circumvent Google Earths aggressive caching
+        var random = (new Date()).toString();
+        var params = $.extend({'random': random}, jarkusKmlParams);
+        return this.baseUrl + '?' + jQuery.param(params);
+    }
+    else {
         return this.baseUrl;
+    }
 };
 
 /**

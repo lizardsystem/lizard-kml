@@ -137,3 +137,12 @@ hr {
     color:#2a2;
     font-weight:bold;
 }
+
+.placemark-info-popup .holder li span.loading {
+    background-image: url('/static_media/lizard_kml/loading.gif');
+}
+
+.placemark-info-popup .holder li span.broken {
+    background-image: url('/static_media/lizard_kml/broken.png');
+    background-color: #be3730;
+}
