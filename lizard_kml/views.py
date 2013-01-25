@@ -31,7 +31,8 @@ KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
 MIME_KMZ = 'application/vnd.google-earth.kmz'
-KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ]
+MIME_XML = 'text/xml' # some site like to send this
+KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ, MIME_XML]
 MIME_TO_EXT = {
     MIME_KML: 'kml',
     MIME_KMZ: 'kmz',

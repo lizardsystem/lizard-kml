@@ -218,10 +218,9 @@ function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
  * UI component.
  */
 function KmlViewerUi() {
-    // fetch URL bases
-    var $url_base = $('#url-base');
-    this.api_url = $url_base.attr('data-api-url');
-    this.jarkusmean_chart_url = $url_base.attr('data-jarkusmean-chart-url');
+    // fetch URLs
+    this.api_url = lizard.kml.api_url;
+    this.jarkusmean_chart_url = lizard.kml.jarkusmean_chart_url;
 
     // components
     this.treeStore = null;

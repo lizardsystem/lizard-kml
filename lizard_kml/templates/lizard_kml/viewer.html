@@ -21,6 +21,9 @@ if (typeof lizard === 'undefined') {
     var lizard = {};
 }
 lizard.static_url = '{{ STATIC_URL }}';
+lizard.kml = {};
+lizard.kml.api_url = '{% absurl lizard-kml-api %}';
+lizard.kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkusmean" %}';
 </script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1a/ext-all.js"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
@@ -55,10 +58,6 @@ lizard.static_url = '{{ STATIC_URL }}';
 {% block page %}
 {% include "lizard_kml/colormap.html" %}
 {{ block.super }}
-<div id="url-base" style="display:none;"
-     data-api-url="{% absurl lizard-kml-api %}"
-     data-jarkusmean-chart-url="{% absurl lizard-kml-chart chart_type='jarkusmean' %}">
-</div>
 <div id="loader">
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Voor weergave van deze site is een browser met ondersteuning voor Javascript nodig.</noscript></div>
