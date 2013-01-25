@@ -959,44 +959,47 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             kvu.addSelectedItem(target);
         }
         else {
-            // don't show the normal balloon
-            event.preventDefault();
             // fetch url to the info panel
             var html = target.getDescription();
             var $link = $(html).find('a[data-dynamic-info="true"]');
-            var url = $link.attr('href');
-            // retrieve the info
-            $.get(
-                url,
-                {},
-                function (data) {
-                    var balloon = ge.createHtmlDivBalloon('');
-                    balloon.setFeature(target);
-                    // create a div containing the placemark info,
-                    // so we can have JavaScript augment it (using jQuery Tabs)
-                    var div = document.createElement('DIV');
-                    div.innerHTML = data;
-                    balloon.setContentDiv(div);
-                    // minimum size to fit nourishment plot
-                    balloon.setMinWidth(800);
-                    balloon.setMinHeight(400);
-                    balloon.setMaxWidth(800);
-                    balloon.setMaxHeight(400);
-                    ge.setBalloon(balloon);
-                    // fill out the div
-                    var $tabs = $(div).find('.tabs');
-                    // initialize tabs, if there are any
-                    $tabs.tabs({
-                        heightStyle: 'fill'
-                    });
-                    // fix tabs height causing jumping behaviour
-                    // the tab contents should scroll
-                    $tabs.find('.ui-tabs-panel.ui-widget-content').css({
-                        'height': 340,
-                        'overflow-y': 'auto'
-                    });
-                }
-            );
+            // don't do anything if there's no dynamic info link
+            if ($link) {
+                // don't show the normal balloon
+                event.preventDefault();
+                var url = $link.attr('href');
+                // retrieve the info
+                $.get(
+                    url,
+                    {},
+                    function (data) {
+                        var balloon = ge.createHtmlDivBalloon('');
+                        balloon.setFeature(target);
+                        // create a div containing the placemark info,
+                        // so we can have JavaScript augment it (using jQuery Tabs)
+                        var div = document.createElement('DIV');
+                        div.innerHTML = data;
+                        balloon.setContentDiv(div);
+                        // minimum size to fit nourishment plot
+                        balloon.setMinWidth(800);
+                        balloon.setMinHeight(400);
+                        balloon.setMaxWidth(800);
+                        balloon.setMaxHeight(400);
+                        ge.setBalloon(balloon);
+                        // fill out the div
+                        var $tabs = $(div).find('.tabs');
+                        // initialize tabs, if there are any
+                        $tabs.tabs({
+                            heightStyle: 'fill'
+                        });
+                        // fix tabs height causing jumping behaviour
+                        // the tab contents should scroll
+                        $tabs.find('.ui-tabs-panel.ui-widget-content').css({
+                            'height': 340,
+                            'overflow-y': 'auto'
+                        });
+                    }
+                );
+            }
         }
     }
 };
