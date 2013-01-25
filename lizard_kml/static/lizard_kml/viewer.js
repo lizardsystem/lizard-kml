@@ -963,7 +963,7 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             var html = target.getDescription();
             var $link = $(html).find('a[data-dynamic-info="true"]');
             // don't do anything if there's no dynamic info link
-            if ($link) {
+            if ($link.length == 1) {
                 // don't show the normal balloon
                 event.preventDefault();
                 var url = $link.attr('href');
