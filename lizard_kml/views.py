@@ -31,8 +31,7 @@ KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
 MIME_KMZ = 'application/vnd.google-earth.kmz'
-MIME_XML = 'text/xml' # some site like to send this
-KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ, MIME_XML]
+KML_MIRROR_TYPES = [MIME_KML, MIME_KMZ]
 MIME_TO_EXT = {
     MIME_KML: 'kml',
     MIME_KMZ: 'kmz',
@@ -78,12 +77,19 @@ def get_mirrored_kml(url):
             raise Exception('Unsupported Content-Type')
 
         # prevent humongous downloads
-        content_length = int(headers['Content-Length'].strip())
-        if content_length >= KML_MIRROR_MAX_CONTENT_LENGTH:
-            raise Exception('KML_MIRROR_MAX_CONTENT_LENGTH exceeded')
+        # some servers (Geoserver...) won't even send this header
+        if 'Content-Length' in headers:
+            content_length = int(headers['Content-Length'].strip())
+            if content_length >= KML_MIRROR_MAX_CONTENT_LENGTH:
+                raise Exception('KML_MIRROR_MAX_CONTENT_LENGTH exceeded')
 
         # perform the download
         content = response.read(KML_MIRROR_MAX_CONTENT_LENGTH)
+
+        # when len(content) == KML_MIRROR_MAX_CONTENT_LENGTH,
+        # this probably means there's more data available
+        if len(content) >= KML_MIRROR_MAX_CONTENT_LENGTH:
+            raise Exception('KML_MIRROR_MAX_CONTENT_LENGTH exceeded')
 
         # recompress KML to KMZ
         if content_type == MIME_KML:
