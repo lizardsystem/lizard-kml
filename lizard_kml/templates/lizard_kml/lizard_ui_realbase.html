@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 {% load utility i18n %}
-{% load compress %}
 <html>
   <head>
     <title>
       {% block title %}
       {% endblock title %}
     </title>
-    {% compress css %}
     {% block css %}
     {# Sprites: all icons (print, info, etc) in one cacheable image. #}
     <link rel="stylesheet"
@@ -25,9 +23,7 @@
           type="text/css"
           media="screen, projection" />
     {% endblock css %}
-    {% endcompress %}
 
-    {% compress js %}
     {% block javascript %}
     {# Jquery #}
     <script type="text/javascript"
@@ -39,7 +35,6 @@
     <script type="text/javascript"
             src="{{ STATIC_URL }}lizard_kml/lizard_ui_lizard.js"></script>
     {% endblock javascript %}
-    {% endcompress %}
 
     {% block map-javascript %}
     {% endblock map-javascript %}
