@@ -1196,7 +1196,7 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     if ((id_max - id_min) < 500) {
         this.showMainBalloon(
             '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
-            '<img src="' + url + '" alt="Loading..." />'
+            '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />'
         );
     }
     else {
