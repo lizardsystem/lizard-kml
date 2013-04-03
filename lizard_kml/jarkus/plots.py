@@ -175,7 +175,7 @@ def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
             cross_shore,
             minz,
             zfilled[-i,:],
-            alpha=0.3,
+            alpha=1.0,
             color=sm.to_rgba(t),
             where=minz > zfilled[-i,:],
             interpolate=True,
@@ -193,8 +193,8 @@ def jarkusmean(id_min, id_max, plotproperties=None):
         ids_all = dataset.variables['id'][:]
         # idx, = (id == 7004000).nonzero()
         ids = ((ids_all < id_max) & (ids_all > id_min)).nonzero()[0]
-        if len(ids) > 15:
-            raise WouldTakeTooLong()
+        if len(ids) > 30:
+            raise WouldTakeTooLong('Too much data selected')
         timevar = dataset.variables['time']
         time = netcdftime.num2date(timevar[:], timevar.units)
         cross_shore = dataset.variables['cross_shore'][:]
