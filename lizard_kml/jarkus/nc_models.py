@@ -50,10 +50,8 @@ proj = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.3876388888888
 
 
 class NoDataForTransect(Exception):
-    def __init__(self, transect_id, closest_transect_id):
-        self.transect_id = transect_id
-        self.closest_transect_id = closest_transect_id
-        message = "Could not find transect data for transect {}, closest is {}".format(transect_id, closest_transect_id)
+    def __init__(self, transect_id):
+        message = "Could not find transect data for transect {}".format(transect_id)
         super(NoDataForTransect, self).__init__(message)
 
 
@@ -225,21 +223,28 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
 
     transectidx = get_transectidx(ds, transect)
 
-    year = ds.variables['year'][:]
-    time = np.array([datetime.datetime(x, 1, 1) for x in year])
+    if transectidx is None:
+        time = np.zeros(0)
+        mean_high_water = np.zeros(0)
+        mean_low_water = np.zeros(0)
+        dune_foot = np.zeros(0)
+        year = np.zeros(0)
+    else:
+        mean_high_water = ds.variables['MHW'][transectidx,:]
+        mean_low_water = ds.variables['MLW'][transectidx,:]
+        dune_foot = ds.variables['DF'][transectidx,:]
 
-    filter = get_time_filter(time, dt_from, dt_to)
+        year = ds.variables['year'][:]
+        time = np.array([datetime.datetime(x, 1, 1) for x in year])
+        filter = get_time_filter(time, dt_from, dt_to)
 
-    year = year[filter]
-    time = time[filter]
+        time = time[filter]
+        mean_high_water = mean_high_water[filter]
+        mean_low_water = mean_low_water[filter]
+        dune_foot = dune_foot[filter]
+        year = year[filter]
 
-    mean_high_water = ds.variables['MHW'][transectidx,:]
-    mean_low_water = ds.variables['MLW'][transectidx,:]
-    dune_foot = ds.variables['DF'][transectidx,:]
-
-    mean_high_water = mean_high_water[filter]
-    mean_low_water = mean_low_water[filter]
-    dune_foot = dune_foot[filter]
+    ds.close()
 
     shorelinedf = pandas.DataFrame(
         data=dict(
@@ -250,7 +255,6 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
             year=year
         )
     )
-
     return shorelinedf
 
 
@@ -258,10 +262,17 @@ def maketransectdf(transect, dt_from=None, dt_to=None):
     """Read some transect data"""
     transectidx, filter, vardict, ds = prepare_vardict(transect, 'transect', False, dt_from, dt_to)
 
-    alongshore = ds.variables['alongshore'][transectidx]
-    areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
-    mean_high_water = ds.variables['mean_high_water'][transectidx]
-    mean_low_water = ds.variables['mean_low_water'][transectidx]
+    if transectidx is None:
+        alongshore = np.zeros(0)
+        areaname = np.zeros(0)
+        mean_high_water = np.zeros(0)
+        mean_low_water = np.zeros(0)
+    else:
+        alongshore = ds.variables['alongshore'][transectidx]
+        areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
+        mean_high_water = ds.variables['mean_high_water'][transectidx]
+        mean_low_water = ds.variables['mean_low_water'][transectidx]
+
     ds.close()
 
     transectdf = pandas.DataFrame(
@@ -282,6 +293,11 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     ds = netCDF4.Dataset(NC_RESOURCE['suppleties'], 'r')
 
     transectidx = get_transectidx(ds, transect)
+
+    # Can't continue when this Netcdf doesn't have our data
+    if transectidx is None:
+        raise NoDataForTransect(transect)
+
     alongshore = ds.variables['alongshore'][transectidx]
 
     # TODO fix this name, it's missing
@@ -305,7 +321,9 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
 
     # this is specified in the unit decam, which should be dekam according to udunits specs.
     assert ds.variables['beg_stretch'].units == 'decam'
+
     ds.close()
+
     # Put the data in a frame
     nourishmentdf = pandas.DataFrame.from_dict(vardict)
     # Compute nourishment volume in m3/m
@@ -338,11 +356,17 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
 def makemkldf(transect, dt_from=None, dt_to=None):
     """the momentary coastline data"""
     transectidx, filter, vardict, ds = prepare_vardict(transect, 'MKL', False, dt_from, dt_to)
-    # Deal with nan's in an elegant way:
-    mkltime = ds.variables['time_MKL'][:,transectidx][filter]
-    mkltime = np.ma.masked_array(mkltime, mask=np.isnan(mkltime))
-    vardict['time_MKL'] = netCDF4.netcdftime.num2date(mkltime, ds.variables['time_MKL'].units)
+
+    if transectidx is None:
+        vardict['time_MKL'] = np.zeros(0)
+    else:
+        # Deal with nan's in an elegant way:
+        mkltime = ds.variables['time_MKL'][:,transectidx][filter]
+        mkltime = np.ma.masked_array(mkltime, mask=np.isnan(mkltime))
+        vardict['time_MKL'] = netCDF4.netcdftime.num2date(mkltime, ds.variables['time_MKL'].units)
+
     ds.close()
+
     mkldf = pandas.DataFrame(vardict)
     mkldf = mkldf[np.logical_not(pandas.isnull(mkldf['time_MKL']))]
     return mkldf
@@ -351,7 +375,9 @@ def makemkldf(transect, dt_from=None, dt_to=None):
 def makebkldf(transect, dt_from=None, dt_to=None):
     """the basal coastline data"""
     transectidx, filter, vardict, ds = prepare_vardict(transect, 'BKL_TKL_TND', False, dt_from, dt_to)
+
     ds.close()
+
     bkldf = pandas.DataFrame(vardict)
     return bkldf
 
@@ -359,7 +385,9 @@ def makebkldf(transect, dt_from=None, dt_to=None):
 def makebwdf(transect, dt_from=None, dt_to=None):
     """read the beachwidth data"""
     transectidx, filter, vardict, ds = prepare_vardict(transect, 'strandbreedte', False, dt_from, dt_to)
+
     ds.close()
+
     bwdf = pandas.DataFrame(vardict)
     return bwdf
 
@@ -367,7 +395,9 @@ def makebwdf(transect, dt_from=None, dt_to=None):
 def makedfdf(transect, dt_from=None, dt_to=None):
     """read the dunefoot data"""
     transectidx, filter, vardict, ds = prepare_vardict(transect, 'DF', True, dt_from, dt_to)
+
     ds.close()
+
     dfdf = pandas.DataFrame(vardict)
     return dfdf
 
@@ -385,11 +415,8 @@ def get_time_filter(time_arr, dt_from=None, dt_to=None):
 def get_transectidx(ds, transect):
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
-    return transectidx
+    if ds.variables['id'][transectidx] == transect:
+        return transectidx
 
 
 def prepare_vardict(transect, nc_resource_name, reversed_order=False, dt_from=None, dt_to=None):
@@ -401,21 +428,24 @@ def prepare_vardict(transect, nc_resource_name, reversed_order=False, dt_from=No
 
     transectidx = get_transectidx(ds, transect)
 
-    # Convert all variables that are a function of time to a dataframe
-    # Note the inconsistent dimension ordering, so dimension_order needs to be passed
-    dimension_order = ('alongshore', 'time') if reversed_order else ('time', 'alongshore')
-    vars = [name for name, var in ds.variables.items() if var.dimensions == dimension_order]
-    time = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-
-    # Filter out data from datetimes we dont need
-    filter = get_time_filter(time, dt_from, dt_to)
-
-    if reversed_order:
-        vardict = dict((var, ds.variables[var][transectidx,:][filter]) for var in vars)
+    if transectidx is None:
+        # Include all vars in the result, but assign empty arrays for them
+        vardict = dict((var, np.zeros(0)) for var in vars)
     else:
-        vardict = dict((var, ds.variables[var][:,transectidx][filter]) for var in vars)
+        # Convert all variables that are a function of time to a dataframe
+        # Note the inconsistent dimension ordering, so dimension_order needs to be passed
+        dimension_order = ('alongshore', 'time') if reversed_order else ('time', 'alongshore')
+        vars = [name for name, var in ds.variables.items() if var.dimensions == dimension_order]
+        time = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
 
-    vardict['time'] = time[filter]
+        # Filter out data from datetimes we dont need
+        filter = get_time_filter(time, dt_from, dt_to)
+
+        if reversed_order:
+            vardict = dict((var, ds.variables[var][transectidx,:][filter]) for var in vars)
+        else:
+            vardict = dict((var, ds.variables[var][:,transectidx][filter]) for var in vars)
+        vardict['time'] = time[filter]
 
     return transectidx, filter, vardict, ds
 

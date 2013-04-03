@@ -19,10 +19,7 @@ import datetime
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
-from lizard_kml.jarkus.nc_models import (
-    makejarkustransect,
-    NoDataForTransect
-)
+from lizard_kml.jarkus.nc_models import makejarkustransect
 from lizard_kml.jarkus.plots import (
     eeg,
     jarkustimeseries,
@@ -131,13 +128,7 @@ class ChartView(View):
                 fd = jarkustimeseries(transect, {'format':'png'})
             elif chart_type == 'nourishment':
                 id = int(id)
-                try:
-                    fd = nourishment(id, dt_from, dt_to, {'format':'png'})
-                except NoDataForTransect as ndft:
-                    # use the closest transect which does have data
-                    # instead
-                    id = int(ndft.closest_transect_id)
-                    fd = nourishment(id, dt_from, dt_to, {'format':'png'})
+                fd = nourishment(id, dt_from, dt_to, {'format':'png'})
             elif chart_type == 'jarkusmean':
                 id_min = int(request.GET['id_min']) # e.g. 7003001
                 id_max = int(request.GET['id_max']) # e.g. 7003150
