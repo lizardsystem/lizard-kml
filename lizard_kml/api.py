@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.http import HttpResponse
-from django.utils import simplejson
+from django.utils import simplejson as json
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.views.decorators.cache import never_cache
@@ -17,7 +17,7 @@ class JsonView(View):
         if isinstance(data, HttpResponse):
             return data
         else:
-            serialized_data = simplejson.dumps(data)
+            serialized_data = json.dumps(data)
             return HttpResponse(serialized_data, content_type='application/json')
 
 class CategoryTreeView(JsonView):

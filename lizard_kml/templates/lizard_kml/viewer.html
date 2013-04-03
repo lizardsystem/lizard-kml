@@ -8,7 +8,7 @@
 {{ block.super }}
 <link rel="stylesheet"
       type="text/css"
-      href="{{ STATIC_URL }}lizard_kml/extjs-4.1.1a/resources/css/ext-all.css" />
+      href="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/resources/ext-theme-classic/ext-theme-classic-all.css" />
 <link rel="stylesheet"
       type="text/css"
       href="{{ STATIC_URL }}lizard_kml/viewer.css" />
@@ -17,15 +17,13 @@
 {% block javascript %}
 {{ block.super }}
 <script type="text/javascript">
-if (typeof lizard === 'undefined') {
-    var lizard = {};
-}
-lizard.static_url = '{{ STATIC_URL }}';
-lizard.kml = {};
-lizard.kml.api_url = '{% absurl lizard-kml-api %}';
-lizard.kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkusmean" %}';
+window.lizard_settings = {};
+window.lizard_settings.static_url = '{{ STATIC_URL }}';
+window.lizard_settings.lizard_kml = {};
+window.lizard_settings.lizard_kml.api_url = '{% absurl lizard-kml-api %}';
+window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkusmean" %}';
 </script>
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.1.1a/ext-all.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/ext-all-debug.js"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
 {% endblock javascript %}
@@ -42,6 +40,7 @@ lizard.kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkus
 <span class="icon-backward kml-action-rewind"></span>
 <span class="icon-play kml-action-playpause"></span>
 <span id="ext-play-rate-slider"></span>
+<span id="ext-year-span-slider"></span>
 {% endspaceless %}
 {% endblock %}
 
@@ -61,5 +60,8 @@ lizard.kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkus
 <div id="loader">
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Voor weergave van deze site is een browser met ondersteuning voor Javascript nodig.</noscript></div>
+</div>
+<div class="img-preloader" style="width:1px; height:1px; visibility:hidden; overflow:hidden;">
+    <img src="{{ STATIC_URL }}lizard_kml/spinner.gif" />
 </div>
 {% endblock page %}

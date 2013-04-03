@@ -1,59 +1,63 @@
 (function (global) {
-// fix missing console logging
+// Fix missing console logging on browsers like IE.
 if (!window.console) window.console = {};
 if (!window.console.log) window.console.log = function () { };
 
-// load Google Earth plugin
+// Load the Google Earth plugin API.
 google.load('earth', '1');
 
-// configure Ext JS
+// Set up Ext JS.
 var isExtReady = false;
-Ext.BLANK_IMAGE_URL = lizard.static_url + '/lizard_kml/extjs-4.1.1-rc2/resources/themes/images/default/tree/s.gif';
-Ext.form.Labelable.errorIconWidth = 16 // fix for Extjs bug
+Ext.BLANK_IMAGE_URL = window.lizard_settings.static_url + '/lizard_kml/extjs-4.2.0/resources/themes/images/default/tree/s.gif';
+// Fix an Ext JS bug.
+Ext.form.Labelable.errorIconWidth = 16;
 Ext.onReady(function () {
-    console.log('Ext ready');
+    console.log('Ext JS is ready');
     isExtReady = true;
 });
 
-// configure jQuery
-// disable all animations
+// Set up jQuery.
+// Disable all animations.
 $.fx.off = true;
 
-// globals and constants
+// Define some semi-configurable globals and constants.
 var geDownloadUrl = 'http://www.google.com/earth/explore/products/plugin.html';
 var minimalPluginVersion = '6.0.0';
 var ge = null;
 var kvu = null;
 var kfc = null;
-var tsc = null;
 var jarkusKmlParams = {
-    lift:40.0,
-    exaggeration:4.0,
-    extrude:0,
-    polyalpha:0.8,
-    outline:0,
-    move:0.1
+    lift: 40.0,
+    exaggeration: 4.0,
+    extrude: 0,
+    polyalpha: 0.8,
+    outline: 0,
+    move: 0.1
+};
+var chartParams = {
+    year_from: 1920,
+    year_to: 2020
 };
 var emptyGif = 'data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D';
 
-// either the Google or Ext callbacks won't work properly, so
-// solve it with an interval
+// Either the Google Earth API, or Ext JS callbacks which are supposed to notify
+// everything has been loaded won't work properly, so solve it by polling
+// for readyness.
 function refreshLoadedModules() {
     if (document.readyState === 'complete' && isExtReady && google.earth) {
         clearInterval(loadInterval);
         console.log('All ready');
-        kvu = new KmlViewerUi();
         kfc = new KmlFileCollection();
-        // object for controlling the Google Earth time slider.
-        tsc = new GETimeSliderControl();
-        strc = new GEStreamingControl();
+        kvu = new KmlViewerUi(kfc);
         kvu.init();
     }
 }
 var loadInterval = setInterval(refreshLoadedModules, 200);
 
-function kmlViewerSetColormap(colormap) {
-    jarkusKmlParams['colormap'] = colormap;
+// This is still referenced in a Django template fragment (via an <a href="javascript:">).
+// This should be refactored to dynamicly load the popup content.
+window.kmlViewerSetColormap = function (colormap) {
+    jarkusKmlParams.colormap = colormap;
     $('#colormaps').dialog('close');
 }
 
@@ -66,12 +70,13 @@ function kmlViewerSetColormap(colormap) {
 /* ************************************************************************ */
 /* ************************************************************************ */
 
-// Production steps of ECMA-262, Edition 5, 15.4.4.18
-// Reference: http://es5.github.com/#x15.4.4.18
+/**
+ * Snippet to make old browsers compatible with the new Array.forEach helper.
+ * Production steps of ECMA-262, Edition 5, 15.4.4.18
+ * Reference: http://es5.github.com/#x15.4.4.18
+ */
 if ( !Array.prototype.forEach ) {
-
   Array.prototype.forEach = function( callback, thisArg ) {
-
     var T, k;
 
     if ( this == null ) {
@@ -101,7 +106,6 @@ if ( !Array.prototype.forEach ) {
 
     // 7. Repeat, while k < len
     while( k < len ) {
-
       var kValue;
 
       // a. Let Pk be ToString(k).
@@ -126,7 +130,7 @@ if ( !Array.prototype.forEach ) {
 }
 
 /**
- * Shim for browsers not supporting:
+ * Snippet for browsers not supporting Function.bind:
  * https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind
  * (mostly < IE9)
  */
@@ -152,7 +156,8 @@ if (!Function.prototype.bind) {
 }
 
 /**
- * Does what it says.
+ * Parse a version string like "6.3.2" to integers, so different
+ * version can be compared.
  */
 function parseVersionString(str) {
     if (typeof(str) !== 'string') { return false; }
@@ -195,7 +200,7 @@ function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
     var maxv = Math.log(tmax);
     // calculate adjustment factor
     var scale = (maxv - minv) / (fmax - fmin);
-    // build function
+    // build functions
     var fwd = function(value) {
         return Math.exp(minv + scale * (value - fmin));
     };
@@ -215,18 +220,19 @@ function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
 /* ************************************************************************ */
 
 /**
- * UI component.
+ * Class which holds all UI components and view state.
  */
-function KmlViewerUi() {
-    // fetch URLs
-    this.api_url = lizard.kml.api_url;
-    this.jarkusmean_chart_url = lizard.kml.jarkusmean_chart_url;
+function KmlViewerUi(kfc) {
+    this.kfc = kfc;
 
     // components
     this.treeStore = null;
     this.treePanel = null;
     this.jarkusPanel = null;
     this.accordion = null;
+
+    this.tsc = null;
+    this.strc = null;
 
     // etc
     this.previewImageUrl = emptyGif;
@@ -237,37 +243,45 @@ function KmlViewerUi() {
 }
 
 /**
- * This method assumes the DOM is ready.
+ * Add the UI components to the DOM. This method assumes the DOM is ready.
  */
 KmlViewerUi.prototype.init = function () {
-    // (lizard-ui) resize the ui
+    // Object for controlling the Google Earth time slider.
+    this.tsc = new GETimeSliderControl();
+    // Object for reading the streaming percentage status of Google Earth.
+    this.strc = new GEStreamingControl();
+    // Resize the ui to its proper sizes (lizard-ui legacy).
 	setupLizardUi();
-    // build the Ext.js controls
+    // Build the Ext JS controls.
     this.initControls();
-    // bind above-content links etc.
+    // Bind above-content links like play/pause et cetera.
     this.bindUiEvents();
+    // Initialize the small preview image in the lower-left area.
     this.initPreviewImage();
-    // remove loading overlay
-    // don't initialize Google Earth until after this is done 
+    // All ready, remove the loading overlay.
+    // Don't initialize Google Earth, until after this is done.
     this.removeLoadingOverlay(this.initGoogleEarth.bind(this));
 };
 
 /**
+ * Bind the click handlers of the three play/pause buttons on top.
  */
 KmlViewerUi.prototype.bindUiEvents = function () {
+    var self = this;
+
     $('.kml-action-defaultview').click(function () {
-        kvu.setDefaultView();
+        self.setDefaultView();
     });
     $('.kml-action-rewind').click(function () {
-        tsc.rewind();
+        self.tsc.rewind();
     });
     $('.kml-action-playpause').click(function () {
-        tsc.togglePlayPause();
+        self.tsc.togglePlayPause();
     });
 };
 
 /**
- * Initialize the main Google Earth plugin instance.
+ * Initialize the Google Earth plugin instance.
  */
 KmlViewerUi.prototype.initGoogleEarth = function () {
     if (!google.earth.isSupported()) {
@@ -291,7 +305,15 @@ KmlViewerUi.prototype.initGoogleEarth = function () {
     }
 };
 
+/**
+ * Shorthand for Ext.create('Ext.slider.Single', args), which sets some sane defaults
+ * and adds support for a logarithmic scale.
+ */
 function buildSlider (args) {
+    // Define some sane defaults:
+    // - disable animation for performance
+    // - show/hide tips when entering/leaving the slider control
+    // - immediate show, move and update tip when slider value is changed
     var defaultArgs = {
         animate: false,
         checkChangeBuffer: 100,
@@ -309,18 +331,21 @@ function buildSlider (args) {
             },
             change: function (slider, newValue, thumb, eOpts) {
                 slider.plugins[0].onSlide(slider, undefined, slider.thumbs[0]);
+                this.fireEvent('mychange', slider, newValue, thumb, eOpts);
             }
         }
     };
 
+    // Merge with passed arguments, which always take preference.
     args = Ext.merge(defaultArgs, args);
 
+    // Add some extra event handlers when the slider has a logarithmic scale.
     var logarithmic = args['logarithmic'];
     if (logarithmic) {
-        // delete our custom signaling flag
+        // Delete our custom attribute.
         delete args['logarithmic'];
 
-        // build a function which can be used to calculate the logarithmic scale
+        // Build a function which can be used to calculate the logarithmic scale.
         var min = args['minValue'];
         var max = args['maxValue'];
         var logaFuncs = buildLogaScaleFuncs(0, 100, min, max);
@@ -329,24 +354,25 @@ function buildSlider (args) {
         delete args['minValue']; // so this defaults to 0
         delete args['maxValue']; // so this defaults to 100
 
-        // ensure snapping is disabled
+        // Ensure value snapping is disabled.
         delete args['increment'];
 
-        // set initial value, but be sure to reverse it (map to 0-100 range)
+        // Set initial value, but be sure to reverse it (map to 0-100 range).
         args['value'] = logaFuncRev(args['value']);
 
-        // set logarithmicValue on change
+        // Set logarithmicValue, when slider is dragged.
         args['listeners']['beforechange'] = function (slider, newValue, oldValue, eOpts) {
             slider.logarithmicValue = Ext.util.Format.round(logaFuncFwd(newValue), slider.decimalPrecision);
         };
 
-        // replace tipText so it uses the logarithmicValue
+        // Replace tipText, so it uses the logarithmicValue.
         var oldTipText = args['tipText'];
         args['tipText'] = function (thumb) {
             return oldTipText({value: thumb.slider.logarithmicValue});
         };
 
-        // see if a logarithmicOnChange event is defined
+        // See if a logarithmicOnChange event listener is defined.
+        // If it is, make sure to pass the it the new value.
         var logarithmicOnChange = args['logarithmicOnChange'];
         if (logarithmicOnChange) {
             args['listeners']['change'] = function (slider, newValue, thumb, eOpts) {
@@ -357,11 +383,90 @@ function buildSlider (args) {
         }
     }
 
+    // Build the actual slider with our new args.
     var slider = Ext.create('Ext.slider.Single', args);
+
+    // Calculate the initial value.
     if (logarithmic) {
-        // calculate initial value
         slider.logarithmicValue = Ext.util.Format.round(logaFuncFwd(slider.getValue()), slider.decimalPrecision);
     }
+
+    return slider;
+}
+
+/**
+ * Shorthand for Ext.create('Ext.slider.Multi', args), which fixes things
+ * regarding the tooltips.
+ */
+function buildMultiTipSlider (args) {
+    // Manually instanciate the Tip plugins.
+    // ExtJS 4.2.0 properly deals with this ("hasTip").
+    var thumbCount = args.values.length;
+    var plugins = [];
+    for (var i=0; i<thumbCount; i++) {
+        var plugin = new Ext.slider.Tip(args.tipText ? {getText: args.tipText} : {});
+        plugins.push(plugin);
+    }
+
+    // Define some sane defaults:
+    // - disable animation for performance
+    // - show/hide tips when entering/leaving the slider control
+    // - immediate show, move and update tip when slider value is changed
+    var defaultArgs = {
+        animate: false,
+        checkChangeBuffer: 100,
+        checkChangeEvents: ['change'],
+        plugins: plugins,
+        listeners: {
+            afterrender: function (c) {
+                // We need to attach to the actual DOM element, after the control has been rendered.
+                this.onMyMouseEnter = function () { this.fireEvent('mymouseenter', c); };
+                this.onMyMouseLeave = function () { this.fireEvent('mymouseleave', c); };
+                c.getEl().on('mouseenter', this.onMyMouseEnter, c);
+                c.getEl().on('mouseleave', this.onMyMouseLeave, c);
+            },
+            mymouseenter: function (slider) {
+                for (var i=0; i<slider.plugins.length; i++) {
+                    slider.plugins[i].onSlide(slider, undefined, slider.thumbs[i]);
+                }
+            },
+            mymouseleave: function (slider) {
+                for (var i=0; i<slider.plugins.length; i++) {
+                    slider.plugins[i].hide();
+                }
+            },
+            change: function (slider, newValue, thumb, eOpts) {
+                var pluginIndex = slider.thumbs.indexOf(thumb);
+                if (pluginIndex !== -1) {
+                    slider.plugins[pluginIndex].onSlide(slider, undefined, thumb);
+                }
+                this.fireEvent('mychange', slider, newValue, thumb, eOpts);
+            },
+            destroy: function (c) {
+                c.getEl().un('mouseenter', this.onMyMouseEnter, c);
+                c.getEl().un('mouseleave', this.onMyMouseLeave, c);
+            }
+        }
+    };
+
+    // Update default args with passed args.
+    args = Ext.merge(defaultArgs, args);
+
+    // Instanciate the actual slider.
+    var slider = Ext.create('Ext.slider.Multi', args);
+
+    // Remove original event handlers, which don't deal with multiple tips.
+    for (var i=0; i<slider.plugins.length; i++) {
+        var plugin = slider.plugins[i];
+        slider.un({
+            scope    : plugin,
+            dragstart: plugin.onSlide,
+            drag     : plugin.onSlide,
+            dragend  : plugin.hide
+        });
+    }
+
+    // Return the slider instance for later customisation.
     return slider;
 }
 
@@ -369,12 +474,13 @@ function buildSlider (args) {
  * Build the ExtJS controls.
  */
 KmlViewerUi.prototype.initControls = function () {
-    // create a panel containing the preview and other
+    var self = this;
+
+    // create a panel containing the preview image, and other
     // context-sensitive items
     var previewPanel = Ext.create('Ext.panel.Panel', {
         id: 'previewpanel',
         title: 'Voorbeeld',
-        //collapsed: true,
         height: 190,
         html: '<div id="kml-preview-container"><img id="kml-preview" src="' + emptyGif + '" alt="preview" width="200" height="150" /></div>'
     });
@@ -386,7 +492,7 @@ KmlViewerUi.prototype.initControls = function () {
     });
     Ext.data.NodeInterface.decorate(KmlResourceNode);
 
-    // create a store for adapting the json output
+    // create a store for adapting the json output to KmlResourceNode instances
     this.treeStore = Ext.create('Ext.data.TreeStore', {
         listeners: {
             single: true,
@@ -416,7 +522,7 @@ KmlViewerUi.prototype.initControls = function () {
         },
         proxy: {
             type: 'ajax',
-            url: this.api_url + '?format=json',
+            url: window.lizard_settings.lizard_kml.api_url + '?format=json',
             reader: {
                 type: 'json'
             }
@@ -431,9 +537,10 @@ KmlViewerUi.prototype.initControls = function () {
                 iconCls: 'icon-zoom-in',
                 handler: function (thisItem, event) {
                     var id = thisItem.parentMenu.node.get('kml_id');
-                    var kmlFile = kfc.get(id);
-                    if (kmlFile)
+                    var kmlFile = self.kfc.get(id);
+                    if (kmlFile) {
                         kmlFile.zoomToExtent();
+                    }
                 }
             },
         ]
@@ -471,7 +578,7 @@ KmlViewerUi.prototype.initControls = function () {
                         if (node.get('slug') === 'jarkus') {
                             kvu.setJarkusPanelEnabled(checked);
                         }
-                        kfc.fireUpdate();
+                        self.kfc.fireUpdate();
                     }
                 }
             },
@@ -549,16 +656,43 @@ KmlViewerUi.prototype.initControls = function () {
         },
         logarithmic: true,
         logarithmicOnChange: function (newValue) {
-            tsc.setRate(newValue);
+            self.tsc.setRate(newValue);
         },
         renderTo: Ext.get('ext-play-rate-slider')
+    });
+
+    // create a slider for controlling the yearspan
+    // used for drawing charts
+    var yearSpan = buildMultiTipSlider({
+        fieldLabel: 'Jaarspanne grafieken',
+        labelWidth: 120,
+        width: 400,
+        minValue: 1840,
+        maxValue: 2020,
+        increment: 1,
+        values: [chartParams.year_from, chartParams.year_to],
+        tipText: function (thumb) {
+            return Ext.String.format('{0}', thumb.value);
+        },
+        listeners: {
+            mychange: function (slider, newValue, thumb, eOpts) {
+                var idx = slider.thumbs.indexOf(thumb);
+                if (idx === 0) {
+                    chartParams.year_from = newValue;
+                }
+                else if (idx === 1) {
+                    chartParams.year_to = newValue;
+                }
+            }
+        },
+        renderTo: Ext.get('ext-year-span-slider')
     });
 };
 
 /**
  */
 KmlViewerUi.prototype.initJarkusPanel = function () {
-    var me = this;
+    var self = this;
 
     // build colormaps dialog
     $("#colormaps").dialog({
@@ -574,33 +708,40 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         fieldLabel: 'Ophoging',
         minValue: 0.0,
         maxValue: 200.0,
-        value: 40.0,
+        value: jarkusKmlParams.lift,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0} meter', thumb.value);
         },
         logarithmic: true
     });
-    lift.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/ophoging.gif'));
+    lift.on(
+        'mouseenter',
+        this.showPreviewImage.bind(this, window.lizard_settings.static_url + '/lizard_kml/ophoging.gif')
+    );
     lift.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var exaggeration = buildSlider({
         fieldLabel: 'Opschaling',
         minValue: 1.0,
         maxValue: 50.0,
-        value: 4.0,
+        value: jarkusKmlParams.exaggeration,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0} meter', thumb.value);
         },
         logarithmic: true
     });
-    exaggeration.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/opschaling.gif'));
+    exaggeration.on('mouseenter', this.showPreviewImage.bind(
+        this,
+        window.lizard_settings.static_url + '/lizard_kml/opschaling.gif'
+    ));
     exaggeration.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var extrude = Ext.create('Ext.form.field.Checkbox', {
         fieldLabel: 'Uitvullen',
         boxLabel: 'Ja',
+        checked: jarkusKmlParams.extrude == 1,
         listeners: {
             afterrender: function (c) {
                 c.getEl().on('mouseenter', function () { this.fireEvent('mouseenter', c); }, c);
@@ -608,7 +749,10 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
             }
         }
     });
-    extrude.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/uitvullen.png'));
+    extrude.on('mouseenter', this.showPreviewImage.bind(
+        this,
+        window.lizard_settings.static_url + '/lizard_kml/uitvullen.png'
+    ));
     extrude.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var colormaps = Ext.create('Ext.button.Button', {
@@ -623,7 +767,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         increment: 0.1,
         minValue: 0.0,
         maxValue: 1.0,
-        value: 0.8,
+        value: jarkusKmlParams.polyalpha,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0}%', thumb.value * 100);
@@ -635,31 +779,34 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         increment: 0.1,
         minValue: 0.0,
         maxValue: 2.0,
-        value: 0.1,
+        value: jarkusKmlParams.move,
         decimalPrecision: 1,
         tipText: function (thumb) {
             return Ext.String.format('{0}m', thumb.value);
         }
     });
-    move.on('mouseenter', this.showPreviewImage.bind(this, lizard.static_url + '/lizard_kml/verschuiving.png'));
+    move.on('mouseenter', this.showPreviewImage.bind(
+        this,
+        window.lizard_settings.static_url + '/lizard_kml/verschuiving.png'
+    ));
     move.on('mouseleave', this.hidePreviewImage.bind(this));
 
     var confirm = Ext.create('Ext.button.Button', {
         text: 'Wijzig weergave',
         handler: function() {
-            jarkusKmlParams['lift'] = lift.logarithmicValue;
-            jarkusKmlParams['exaggeration'] = exaggeration.logarithmicValue;
-            jarkusKmlParams['extrude'] = extrude.getValue() ? 1 : 0;
-            jarkusKmlParams['polyalpha'] = polyalpha.getValue();
-            jarkusKmlParams['move'] = move.getValue();
-            kfc.reloadAllDynamic();
+            jarkusKmlParams.lift = lift.logarithmicValue;
+            jarkusKmlParams.exaggeration = exaggeration.logarithmicValue;
+            jarkusKmlParams.extrude = extrude.getValue() ? 1 : 0;
+            jarkusKmlParams.polyalpha = polyalpha.getValue();
+            jarkusKmlParams.move = move.getValue();
+            self.kfc.reloadAllDynamic();
         }
     });
 
     var multiselect = Ext.create('Ext.button.Button', {
         text: 'Grafiek over meerdere raaien',
         handler: function() {
-            me.toggleMultiSelect();
+            self.toggleMultiSelect();
         }
     });
 
@@ -716,11 +863,11 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
  * Attach loading event to the preview image.
  */
 KmlViewerUi.prototype.initPreviewImage = function () {
-    var me = this;
+    var self = this;
     $('#kml-preview').load(function() {
         // only continue if the users mouse is still on the element
         // for which the preview is shown
-        if ($(this).attr('src') == me.previewImageUrl) {
+        if ($(this).attr('src') == self.previewImageUrl) {
             $('#kml-preview-container').show();
         }
     });
@@ -806,7 +953,7 @@ KmlViewerUi.prototype.removeLoadingOverlay = function (callback) {
 };
 
 /**
- * Called by the Google Earth plugin 
+ * Called by the Google Earth plugin.
  */
 KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     // determine version
@@ -826,7 +973,7 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
 
         // enable international borders
         //ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
-    
+
         // enable the sun
         //ge.getSun().setVisibility(true);
 
@@ -843,10 +990,10 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
         this.setDefaultView();
     
         // start timeslider control
-        tsc.startControl();
+        this.tsc.startControl();
 
         // start streaming pct checker
-        strc.startControl();
+        this.strc.startControl();
 
         // add the global click handler
         this.addGlobalClickHandler();
@@ -896,6 +1043,10 @@ KmlViewerUi.prototype.replaceMapWithErrorMessage = function (html) {
     }
 };
 
+/**
+ * Display either the playing or pause icon in the UI. Can be called from
+ * GETimeSliderControl, when upper time limit has been reached.
+ */
 KmlViewerUi.prototype.setPlaying = function (playing) {
     if (playing) {
         $(".kml-action-playpause").addClass("icon-pause");
@@ -907,6 +1058,9 @@ KmlViewerUi.prototype.setPlaying = function (playing) {
     }
 };
 
+/**
+ * Mark a node in the Tree as "loading" and show a spinner.
+ */
 KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
     this.treePanel.getRootNode().cascadeBy(function (node) {
         var kml_id = node.get('kml_id');
@@ -917,12 +1071,19 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
     });
 };
 
+/**
+ * Show a big modal balloon in the center of the map, which isn't
+ * attached to a feature.
+ */
 KmlViewerUi.prototype.showMainBalloon = function (html) {
     var balloon = ge.createHtmlStringBalloon('');
     balloon.setContentString(html);
     ge.setBalloon(balloon);
 };
 
+/**
+ * Enables or disables multiselection.
+ */
 KmlViewerUi.prototype.toggleMultiSelect = function () {
     if (this.isMultiSelectEnabled) {
         this.stopMultiSelect();
@@ -967,10 +1128,11 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                 // don't show the normal balloon
                 event.preventDefault();
                 var url = $link.attr('href');
-                // retrieve the info
+                var urlParams = $.extend({}, chartParams);
+                // retrieve the info HTML fragment
                 $.get(
                     url,
-                    {},
+                    urlParams,
                     function (data) {
                         var balloon = ge.createHtmlDivBalloon('');
                         balloon.setFeature(target);
@@ -981,9 +1143,9 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                         balloon.setContentDiv(div);
                         // minimum size to fit nourishment plot
                         balloon.setMinWidth(800);
-                        balloon.setMinHeight(400);
+                        balloon.setMinHeight(600);
                         balloon.setMaxWidth(800);
-                        balloon.setMaxHeight(400);
+                        balloon.setMaxHeight(600);
                         ge.setBalloon(balloon);
                         // fill out the div
                         var $tabs = $(div).find('.tabs');
@@ -994,7 +1156,7 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                         // fix tabs height causing jumping behaviour
                         // the tab contents should scroll
                         $tabs.find('.ui-tabs-panel.ui-widget-content').css({
-                            'height': 340,
+                            'height': 510,
                             'overflow-y': 'auto'
                         });
                     }
@@ -1029,8 +1191,8 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     // stop multi selection mode
     this.stopMultiSelect();
 
-    // show the graph
-    var url = this.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
+    // show the chart
+    var url = window.lizard_settings.lizard_kml.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
     if ((id_max - id_min) < 500) {
         this.showMainBalloon(
             '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
@@ -1052,7 +1214,7 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
 /* ************************************************************************ */
 
 /**
- * Google Earth timeslider control.
+ * Google Earth timeslider / play / pause control.
  */
 function GETimeSliderControl() {
     /**
@@ -1143,10 +1305,16 @@ GETimeSliderControl.prototype.getExtentEnd = function () {
     return extents.getEnd().get();
 };
 
+/**
+ * Returns true when we are playing past the max time of the loaded KML data.
+ */
 GETimeSliderControl.prototype.isPastEnd = function () {
     return this.getCurrentTimeEnd() >= this.getExtentEnd();
 };
 
+/**
+ * Returns the current datetime.
+ */
 GETimeSliderControl.prototype.getCurrentTimeEnd = function () {
     var currentTime = ge.getTime().getTimePrimitive();
     var currentTimeEnd;
@@ -1158,6 +1326,10 @@ GETimeSliderControl.prototype.getCurrentTimeEnd = function () {
     return currentTimeEnd;
 };
 
+
+/**
+ * Jump to a specific time.
+ */
 GETimeSliderControl.prototype.setCurrentTime = function (time) {
     var timeStamp = ge.createTimeStamp('');
     timeStamp.getWhen().set(time);
@@ -1182,10 +1354,16 @@ function GEStreamingControl() {
     this.interval = null;
 }
 
+/**
+ * Start listening for changes in Google Earths getStreamingPercent.
+ */
 GEStreamingControl.prototype.startControl = function () {
     this.interval = window.setInterval(this.tick.bind(this), 500);
 };
 
+/**
+ * Update the UI with the new value of ge.getStreamingPercent.
+ */
 GEStreamingControl.prototype.tick = function () {
     var pct = ge.getStreamingPercent();
     if (pct != 0) {
@@ -1217,7 +1395,7 @@ function KmlFileCollection() {
      */
     this.kmlFiles = {};
     /**
-     * True while an update is happening.
+     * Timeout reference, while an update is scheduled.
      */
     this.updateTimeout = null;
 }
@@ -1226,27 +1404,31 @@ function KmlFileCollection() {
  * Ensure that an update of the loaded KML files happens somewhere in the near future.
  */
 KmlFileCollection.prototype.fireUpdate = function () {
-    // stop the old timeout
+    // Prevent the previous update from occurring.
     if (this.updateTimeout !== null) {
         clearTimeout(this.updateTimeout);
     }
 
-    // set a new one
-    this.updateTimeout = setTimeout(this.update.bind(this), 300);
+    // Start a new one.
+    var self = this;
+    this.updateTimeout = setTimeout(function () {
+        self.update();
+        // Reset the timeout so we know none are scheduled anymore.
+        self.updateTimeout = null;
+    }, 300);
 };
 
 /**
- * Refreshes the loaded Kml files based on the state of the checkboxes in the
+ * Refreshes the loaded KML files based on the state of the checkboxes in the
  * checkbox tree.
+ *
+ * Fired after a while, so user can rapidly click some checkboxes and not break things.
  */
 KmlFileCollection.prototype.update = function () {
-    // reset the timeout
-    this.updateTimeout = null;
-
-    // get a assoc. array of checked items
+    // Get an assoc. array of checked items from the Tree control.
     var checked = kvu.getChecked();
 
-    // unload nonchecked kml files
+    // Unload any non-checked KML files.
     for (var i in this.kmlFiles) {
         var kmlFile = this.kmlFiles[i];
         if (!(kmlFile.id in checked)) {
@@ -1255,7 +1437,7 @@ KmlFileCollection.prototype.update = function () {
         }
     }
 
-    // load all checked kml files
+    // Load all checked KML files.
     for (var i in checked) {
         var item = checked[i];
         if (!(item.id in this.kmlFiles)) {
@@ -1265,7 +1447,7 @@ KmlFileCollection.prototype.update = function () {
 };
 
 /**
- * Create a new KmlFile entry and try loading it in the Google Earth plugin.
+ * Create a new KmlFile entry, and try loading it in the Google Earth plugin.
  */
 KmlFileCollection.prototype.startLoadingKmlFile = function (id, url, slug) {
     var k = new KmlFile(id, url, slug);
@@ -1276,7 +1458,8 @@ KmlFileCollection.prototype.startLoadingKmlFile = function (id, url, slug) {
 };
 
 /**
- * Call this when params (lift, exaggeration etc) change.
+ * Reloads all 'special' KML files in the collection.
+ * Called when params (lift, exaggeration etc) change.
  */
 KmlFileCollection.prototype.reloadAllDynamic = function () {
     for (var i in this.kmlFiles) {
@@ -1289,6 +1472,7 @@ KmlFileCollection.prototype.reloadAllDynamic = function () {
 };
 
 /**
+ * Find a KML file by id (primary key, '4').
  */
 KmlFileCollection.prototype.get = function (id) {
     for (var i in this.kmlFiles) {
@@ -1300,6 +1484,7 @@ KmlFileCollection.prototype.get = function (id) {
 };
 
 /**
+ * Find a KML file by slug ('jarkus').
  */
 KmlFileCollection.prototype.getBySlug = function (slug) {
     for (var i in this.kmlFiles) {
@@ -1311,7 +1496,7 @@ KmlFileCollection.prototype.getBySlug = function (slug) {
 };
 
 /**
- * Remove all loaded KML files.
+ * Unload and remove all loaded KML files.
  */
 KmlFileCollection.prototype.unloadAll = function () {
     for (var i in this.kmlFiles) {
@@ -1331,7 +1516,7 @@ KmlFileCollection.prototype.unloadAll = function () {
 /* ************************************************************************ */
 
 /**
- * A KML resource which can add and remove itself from the Google Earth plugin.
+ * A KML resource, which can add and remove itself from the Google Earth plugin.
  */
 function KmlFile(id, baseUrl, slug) {
     this.id = id;
@@ -1345,10 +1530,10 @@ function KmlFile(id, baseUrl, slug) {
  */
 KmlFile.prototype.fullUrl = function () {
     if (this.slug === "jarkus") {
-        // circumvent Google Earths aggressive caching
+        // Circumvent Google Earths aggressive caching by adding a random parameter.
         var random = (new Date()).toString();
-        var params = $.extend({'random': random}, jarkusKmlParams);
-        return this.baseUrl + '?' + jQuery.param(params);
+        var params = $.extend({}, jarkusKmlParams, {'random': random});
+        return this.baseUrl + '?' + $.param(params);
     }
     else {
         return this.baseUrl;
@@ -1357,8 +1542,10 @@ KmlFile.prototype.fullUrl = function () {
 
 /**
  * Ask Google Earth to fetch the KML and convert it to an object.
- * Ensures beforeAddCallback is called before actually adding the object,
- * based on its return value.
+ * Ensures beforeAddCallback is called before actually adding the object.
+ *
+ * The return value of beforeAddCallback determines whether to continue once loaded,
+ * so the user can decide to not continue at all.
  */
 KmlFile.prototype.load = function (beforeAddCallback) {
     var self = this;
@@ -1377,13 +1564,13 @@ KmlFile.prototype.load = function (beforeAddCallback) {
 KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
     if (kmlObject) {
         console.log("loaded " + this);
-        // check if the KML is still needed
+        // Check if the KML is still needed.
         var doContinue = true;
         if (beforeAddCallback !== undefined) {
             doContinue = beforeAddCallback();
         }
         if (doContinue) { 
-            // add new features
+            // Add new features to Google Earth.
             this.kmlObject = kmlObject;
             ge.getFeatures().appendChild(kmlObject);
         }
@@ -1408,7 +1595,7 @@ KmlFile.prototype.unload = function () {
 };
 
 /**
- * Zoom to extent if KML file has one defined.
+ * Zoom to extent, if KML file has one defined.
  */
 KmlFile.prototype.zoomToExtent = function () {
     var view = this.kmlObject.getAbstractView();

@@ -21,7 +21,7 @@
     margin:0 auto;
 }
 
-/* jquery overrides */
+/* jquery ui overrides */
 .ui-tabs .ui-tabs-panel {
     padding:0;
 }
@@ -44,7 +44,7 @@
     margin-top:3px;
 }
 
-/* loader */
+/* loader overlay */
 #loader {
 	padding:0;
 	margin:0;
@@ -74,7 +74,7 @@
     margin-left:-100px;
 }
 
-/* error message */
+/* error message block, when Google Earth isn't installed */
 #map3d-error-message {
     border:1px solid;
     margin:100px auto 0 auto;
@@ -95,7 +95,7 @@ hr {
     height:1px !important;
 }
 
-/* above-content */
+/* above-content controls, like play/pause etc */
 #above-content {
 }
 
@@ -127,7 +127,8 @@ hr {
     background-color:#af6;
 }
 
-#ext-play-rate-slider {
+#ext-play-rate-slider,
+#ext-year-span-slider {
     margin-left:10px;
     vertical-align:middle;
     display:inline-block;
@@ -143,6 +144,7 @@ hr {
     font-weight:bold;
 }
 
+/* popups, when click on map features */
 .placemark-info-popup .holder li span.loading {
     background-image: url('/static_media/lizard_kml/loading.gif');
 }
@@ -150,4 +152,17 @@ hr {
 .placemark-info-popup .holder li span.broken {
     background-image: url('/static_media/lizard_kml/broken.png');
     background-color: #be3730;
+}
+
+img.spinner-when-loading.broken { background-image: url('broken.png'); background-color: #be3730; }
+img.spinner-when-loading {
+    background-image: url('spinner.gif');
+    background-color: #fff;
+    background-position: center center;
+    background-repeat: no-repeat;
+    /*left: 0;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    top: 0;*/
 }

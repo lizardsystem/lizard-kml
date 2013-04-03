@@ -7,13 +7,16 @@
             <li><a href="#info-{{ view.id }}-tabs-nourishment">Nourishment</a></li>
         </ul>
         <div id="info-{{ view.id }}-tabs-eeg">
-            <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}"/>
+            <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}?{{ view.url_params }}"
+                 width="700" height="300" class="spinner-when-loading" />
         </div>
         <div id="info-{{ view.id }}-tabs-timeseries">
-            <img src="{% absurl lizard-kml-chart chart_type='jarkustimeseries' id=view.id %}"/>
+            <img src="{% absurl lizard-kml-chart chart_type='jarkustimeseries' id=view.id %}?{{ view.url_params }}"
+                 width="700" height="300" class="spinner-when-loading" />
         </div>
         <div id="info-{{ view.id }}-tabs-nourishment">
-            <p><img src="{% absurl lizard-kml-chart chart_type='nourishment' id=view.id %}"/></p>
+            <p><img src="{% absurl lizard-kml-chart chart_type='nourishment' id=view.id %}?{{ view.url_params }}"
+                    width="700" height="900" class="spinner-when-loading" /></p>
         </div>
     </div>
     <p>Download data als: <a href="{% absurl lizard-kml-xls id=view.id %}">xls</a></p>
