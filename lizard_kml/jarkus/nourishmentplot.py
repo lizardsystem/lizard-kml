@@ -42,7 +42,7 @@ beachcolors = {
 
 def combinedplot(dfs):
     """Create a combined plot of the coastal data"""
-    
+
     shorelinedf = dfs['shorelinedf']
     transectdf = dfs['transectdf']
     nourishmentdf = dfs['nourishmentdf']
@@ -53,18 +53,18 @@ def combinedplot(dfs):
 
     transect = transectdf['transect'].irow(0)
     areaname = transectdf['areaname'].irow(0)
-    
+
     # Plot the results.
     fig = plt.figure(figsize=(7,9))
     # We define a grid of 3 areas 
     gs = matplotlib.gridspec.GridSpec(4, 1, height_ratios=[5, 2, 2, 2]) 
     gs.update(hspace=0.1)
-    
+
     # Some common style properties, also store they style information file for ggplot style in the directory where the script is.
     props = dict(linewidth=2, alpha=0.7, markeredgewidth=0, markersize=8, linestyle='-', marker='.')
 
     #Figuur 1: momentane kustlijn / te toetsenkustlijn / basiskustlijn, oftewel onderstaand tweede figuur. Bij voorkeur wel in het Nederlands en volgens mij klopt de tekst bij de as nu niet (afstand tot RSP (meters))
-  
+
     # The first axis contains the coastal indicators related to volume
     # Create the axis, based on the gridspec
 
@@ -76,7 +76,7 @@ def combinedplot(dfs):
     ax1.plot(date2num(mkldf['time_MKL']), mkldf['momentary_coastline'], label='momentane kustlijn', **props)
     ax1.plot(date2num(bkldf['time']), bkldf['basal_coastline'], label='basiskustlijn', **props)
     ax1.plot(date2num(bkldf['time']), bkldf['testing_coastline'], label='te toetsenkustlijn', **props)
-    
+
     # Plot the legend. This uses the label
     ax1.legend(loc='upper left')
     # Show the y axis label
@@ -89,7 +89,6 @@ def combinedplot(dfs):
         # No date set on axes, because of no data. No worries...
         pass
 
-    
     # Figuur 2: duinvoet / hoogwater / laagwater, vanaf (ongeveer) 1848 voor raai om de kilometer. Voor andere raaien vanaf 1965 (Jarkus) 
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
     ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
@@ -103,7 +102,7 @@ def combinedplot(dfs):
     locs = [ax2.yaxis.get_ticklocs()[0], ax2.yaxis.get_ticklocs()[-1]]
     # We don't want too much cluttering
     ax2.yaxis.set_ticks(locs)
-    
+
     # Again remove the xaxis labels
     try:
         for label in ax2.xaxis.get_ticklabels():
@@ -112,7 +111,7 @@ def combinedplot(dfs):
         # No dates no problem
         pass
     ax2.set_ylabel('Afstand [m]') 
-    
+
     # Figuur 3 strandbreedte bij hoogwater / strandbreedte bij laagwater (ook vanaf ongeveer 1848 voor raai om de kilometer, voor andere raaien vanaf 1965 )
     # Create another axis for the width and position parameters
     # Share the x axis with axes ax1
@@ -125,7 +124,7 @@ def combinedplot(dfs):
     '''
     ax3.plot(date2num(dfdf['time']), dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
     # Dune foot is position but relative to RSP, so we can call it a width
-    ax3.set_ylabel('Breedte [m]') 
+    ax3.set_ylabel('Breedte [m]')
     # Look up the location of the tick labels, because we're removing all but the first and last.
     locs = [ax3.yaxis.get_ticklocs()[0], ax3.yaxis.get_ticklocs()[-1]]
     # We don't want too much cluttering
@@ -140,10 +139,8 @@ def combinedplot(dfs):
         pass
     # Place the legend
     ax3.legend(loc='upper left')
-    
-    
+
     # Figuur 4 uitgevoerde suppleties (laatste figuure onderaan), tekst bij de as bij voorkeur Volume (m3/m)
-    
     # Create the third axes, again sharing the x-axis
     ax4 = fig.add_subplot(gs[3],sharex=ax1)
     # We need to store labels and a "proxy artist". 

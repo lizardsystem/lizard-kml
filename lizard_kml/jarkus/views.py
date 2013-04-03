@@ -14,6 +14,8 @@ from django.conf import settings
 from PIL import Image, ImageDraw
 import cStringIO
 import textwrap
+import urllib
+import datetime
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
@@ -58,11 +60,27 @@ class InfoView(ViewContextMixin, TemplateView):
     Renders a html containing charts about a certain transect.
     """
     template_name = "jarkus/info.html"
+    id = None
+    url_params = None
 
     def get(self, request, id=None):
-        """generate info into a response"""
-
+        """
+        generate info into a response
+        """
         self.id = int(id)
+
+        url_params = {}
+
+        year_from = request.GET.get('year_from', None)
+        if year_from:
+            url_params['year_from'] = int(year_from)
+
+        year_to = request.GET.get('year_to', None)
+        if year_to:
+            url_params['year_to'] = int(year_to)
+
+        self.url_params = urllib.urlencode(url_params)
+
         return super(InfoView, self).get(self, request)
 
     def gettable(self):
@@ -96,31 +114,36 @@ class ChartView(View):
 
     def get(self, request, chart_type, id=None):
         """generate info into a response"""
+        year_from = request.GET.get('year_from')
+        year_to = request.GET.get('year_to')
+        dt_from = datetime.datetime(int(year_from), 1, 1) if year_from else None
+        dt_to = datetime.datetime(int(year_to), 12, 31, 23, 59, 59) if year_to else None
 
         # TODO, sanitize the GET.... (pass format=png/pdf, width/height etc?)
         try:
             if chart_type == 'eeg':
                 id = int(id)
-                transect = makejarkustransect(id)
+                transect = makejarkustransect(id, dt_from, dt_to)
                 fd = eeg(transect, {'format':'png'})
             elif chart_type == 'jarkustimeseries':
                 id = int(id)
-                transect = makejarkustransect(id)
+                transect = makejarkustransect(id, dt_from, dt_to)
                 fd = jarkustimeseries(transect, {'format':'png'})
             elif chart_type == 'nourishment':
                 id = int(id)
                 try:
-                    fd = nourishment(id, {'format':'png'})
+                    fd = nourishment(id, dt_from, dt_to, {'format':'png'})
                 except NoDataForTransect as ndft:
                     # use the closest transect which does have data
                     # instead
                     id = int(ndft.closest_transect_id)
-                    fd = nourishment(id, {'format':'png'})
+                    fd = nourishment(id, dt_from, dt_to, {'format':'png'})
             elif chart_type == 'jarkusmean':
                 id_min = int(request.GET['id_min']) # e.g. 7003001
                 id_max = int(request.GET['id_max']) # e.g. 7003150
                 fd = jarkusmean(id_min, id_max, {'format':'png'})
         except Exception as ex:
+            logger.exception('exception while rendering chart')
             fd = message_in_png(str(ex))
         # wrap the file descriptor as a generator (8 KB reads)
         wrapper = FileWrapper(fd)

@@ -8,7 +8,7 @@ from functools import partial
 import logging
 
 # numpy/scipy
-from numpy import any, all, ma, apply_along_axis, nonzero, array, isnan, logical_or, nan
+from numpy import any, all, ma, apply_along_axis, nonzero, array, isnan, logical_or, nan, logical_and
 from numpy.ma import filled
 import numpy as np
 from scipy.interpolate import interp1d
@@ -48,12 +48,14 @@ if '4.1.3' in netCDF4.getlibversion():
 
 proj = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs')
 
+
 class NoDataForTransect(Exception):
     def __init__(self, transect_id, closest_transect_id):
         self.transect_id = transect_id
         self.closest_transect_id = closest_transect_id
         message = "Could not find transect data for transect {}, closest is {}".format(transect_id, closest_transect_id)
         super(NoDataForTransect, self).__init__(message)
+
 
 class Transect(object):
     """Transect that has coordinates and time"""
@@ -81,10 +83,10 @@ class Transect(object):
             return self.z
         def fillmissing(x,y):
             """fill nans in y using linear interpolation"""
-            f = interp1d(x[~isnan(y)], y[~isnan(y)], kind='linear',bounds_error=False, copy=True)
+            f = interp1d(x[~isnan(y)], y[~isnan(y)], kind='linear', bounds_error=False, copy=True)
             new_y = f(list(x)) #some bug causes it not to work if x is passed directly
             return new_y
-        # define an intorpolation for a row by partial function application
+        # define an interpolation for a row by partial function application
         rowinterp = partial(fillmissing, self.cross_shore)
         # apply to rows (along columns)
         z = apply_along_axis(rowinterp, 1, self.z)
@@ -119,8 +121,7 @@ class Transect(object):
 
 
 # Some factory functions, because the classes are dataset unaware (they were also used by other EU countries)
-# @cache.beaker_cache('id', expire=60)
-def makejarkustransect(id):
+def makejarkustransect(id, dt_from=None, dt_to=None):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
     id = int(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
@@ -129,28 +130,33 @@ def makejarkustransect(id):
 
     # Opendap is index based, so we have to do some numpy tricks to get the data over (and fast)
     # read indices for all years (only 50 or so), takes 0.17 seconds on my wireless
-    years = dataset.variables['time'][:]
+    days_since_1970 = dataset.variables['time'][:]
+    # convert to datetime objects. (netcdf only stores numbers, we use years here (ignoring the measurement date))
+    t = array([datetime.datetime.fromtimestamp(days*3600*24) for days in days_since_1970])
     # days = dataset.variables['time']
     # TODO: dates = netcdftime.num2date(days, days.units)
     # read all indices (this would be nice to cache)... takes 0.24 seconds on my wireless
-    id = dataset.variables['id'][:] 
+    id = dataset.variables['id'][:]
     alongshoreindex = nonzero(id == tr.id)
     alongshoreindex = alongshoreindex[0][0]
-    lon = dataset.variables['lon'][alongshoreindex,:] 
-    lat = dataset.variables['lat'][alongshoreindex,:] 
-    #filter out the missing to make it a bit smaller
+    lon = dataset.variables['lon'][alongshoreindex,:]
+    lat = dataset.variables['lat'][alongshoreindex,:]
+    # filter out the missing to make it a bit smaller
     z = dataset.variables['altitude'][:,alongshoreindex,:]
     # why are missings not taken into account?, just in case also filter out fill value.
     filter = logical_or(
         isnan(z),
         z == dataset.variables['altitude']._FillValue
-        )
+    )
+    # filter out data from datetimes we dont need
+    if dt_from is not None:
+        filter[t < dt_from,:] = True
+    if dt_to is not None:
+        filter[t > dt_to,:] = True
     # Convert from masked to regular array
     z = filled(z, nan)
-    # Make sure we set all missings and nans to nan 
+    # Make sure we set all missings and nans to nan
     z[filter] = nan
-    # convert to datetime objects. (netcdf only stores numbers, we use years here (ignoring the measurement date))
-    t = array([datetime.datetime.fromtimestamp(days*3600*24) for days in years])
     cross_shore = dataset.variables['cross_shore'][:]
     # leave out empty crossections and empty dates
     tr.lon = lon[(~filter).any(0)]
@@ -158,9 +164,9 @@ def makejarkustransect(id):
     # use lat, lon as x here...
     tr.x = tr.lon
     tr.y = tr.lat
-    # keep what is not filtered in 2 steps 
-    #         [over x            ][over t            ]
-    tr.z = z[:,(~filter).any(0)][(~filter).any(1),:] 
+    # keep what is not filtered in 2 steps
+    #       [over x            ][over t            ]
+    tr.z = z[:,(~filter).any(0)][(~filter).any(1),:]
     tr.t = t[(~filter).any(1)]
     tr.cross_shore = cross_shore[(~filter).any(0)]
 
@@ -172,12 +178,9 @@ def makejarkustransect(id):
 
     dataset.close()
     # return dict to conform to the "rendering context"
-
-    tr.lon, tr.lat
     return tr
 
 
-#TODO: @cache.beaker_cache(None, expire=600)
 def makejarkuslod():
     dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     overview = {}
@@ -185,7 +188,6 @@ def makejarkuslod():
     # For some reason index 0 leads to the whole variable being send over.
     # TODO: bug in netCDF4 + 4.1.3 library opendap index 0 with nc_get_vara doesn't use index....
     # Make sure you use netcdf >=4.2
-
     id = dataset.variables['id'][:]
     lon0 = dataset.variables['lon'][:,0]
     lat0 = dataset.variables['lat'][:,1]
@@ -195,7 +197,7 @@ def makejarkuslod():
     overview['lon1'] = lon1
     overview['lat0'] = lat0
     overview['lat1'] = lat1
-    rsp_lon = dataset.variables['rsp_lon'][:] 
+    rsp_lon = dataset.variables['rsp_lon'][:]
     rsp_lat = dataset.variables['rsp_lat'][:]
 
     # few 
@@ -207,28 +209,38 @@ def makejarkuslod():
     overview['west'] = rsp_lon - .0025
     overview['id'] = id
     dataset.close()
+
     # return dict to conform to the "rendering context"
     return overview
 
 
-# Now for a series of functions that read some datasets about the coast. I'm transforming everything to pandas dataframes
+# Now for a series of functions that read some datasets about the coast. I'm transforming everything to pandas dataframes.
 # That way the data looks a bit more relational.
 # I'm using uncached versions at the moment. Total query time is about 3seconds on my wifi, which is just a bit too much.
 # Optional we can make local copies. Through wired connections it should be a bit faster.
 
-def makeshorelinedf(transect):
+def makeshorelinedf(transect, dt_from=None, dt_to=None):
     """Read information about shorelines"""
     ds = netCDF4.Dataset(NC_RESOURCE['strandlijnen'], 'r')
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
+
+    transectidx = get_transectidx(ds, transect)
+
     year = ds.variables['year'][:]
-    time = [datetime.datetime(x, 1,1) for x in year]
+    time = np.array([datetime.datetime(x, 1, 1) for x in year])
+
+    filter = get_time_filter(time, dt_from, dt_to)
+
+    year = year[filter]
+    time = time[filter]
+
     mean_high_water = ds.variables['MHW'][transectidx,:]
     mean_low_water = ds.variables['MLW'][transectidx,:]
     dune_foot = ds.variables['DF'][transectidx,:]
+
+    mean_high_water = mean_high_water[filter]
+    mean_low_water = mean_low_water[filter]
+    dune_foot = dune_foot[filter]
+
     shorelinedf = pandas.DataFrame(
         data=dict(
             time=time, 
@@ -236,48 +248,47 @@ def makeshorelinedf(transect):
             mean_low_water=mean_low_water, 
             dune_foot=dune_foot, 
             year=year
-            )
         )
+    )
+
     return shorelinedf
 
 
-def maketransectdf(transect):
+def maketransectdf(transect, dt_from=None, dt_to=None):
     """Read some transect data"""
-    ds = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
-    transectidx = bisect.bisect_left(ds.variables['id'],transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
-    
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'transect', False, dt_from, dt_to)
+
     alongshore = ds.variables['alongshore'][transectidx]
     areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
     mean_high_water = ds.variables['mean_high_water'][transectidx]
     mean_low_water = ds.variables['mean_low_water'][transectidx]
     ds.close()
-    
-    transectdf = pandas.DataFrame(index=[transect], data=dict(transect=transect, areaname=areaname, mean_high_water=mean_high_water, mean_low_water=mean_low_water))
+
+    transectdf = pandas.DataFrame(
+        index=[transect],
+        data=dict(
+            transect=transect,
+            areaname=areaname,
+            mean_high_water=mean_high_water,
+            mean_low_water=mean_low_water
+        )
+    )
     return transectdf
 
 
 # note that the areaname is a hack, because it is currently missing
-def makenourishmentdf(transect, areaname=""):
+def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     """Read the nourishments from the dataset (only store the variables that are a function of nourishment)"""
-    
     ds = netCDF4.Dataset(NC_RESOURCE['suppleties'], 'r')
-    
-    transectidx = bisect.bisect_left(ds.variables['id'],transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
+
+    transectidx = get_transectidx(ds, transect)
     alongshore = ds.variables['alongshore'][transectidx]
+
     # TODO fix this name, it's missing
     # areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx,:])
-    
+
     alltypes = set(x.strip() for x in netCDF4.chartostring(ds.variables['type'][:]))
-   
-    
+
     # this dataset has data on nourishments and per transect. We'll use the per nourishments, for easier plotting. 
     # skip a few variables that have nasty non-ascii (TODO: check how to deal with non-ascii in netcdf)
     vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
@@ -291,7 +302,7 @@ def makenourishmentdf(transect, areaname=""):
             vardict[var] = netCDF4.chartostring(ds.variables[var][:])
         else:
             vardict[var] = ds.variables[var][:]
-    
+
     # this is specified in the unit decam, which should be dekam according to udunits specs.
     assert ds.variables['beg_stretch'].units == 'decam'
     ds.close()
@@ -299,111 +310,127 @@ def makenourishmentdf(transect, areaname=""):
     nourishmentdf = pandas.DataFrame.from_dict(vardict)
     # Compute nourishment volume in m3/m
     nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
-    
+
     # Filter by current area and match the area
-    filter = reduce(np.logical_and, [
-        alongshore >= nourishmentdf.beg_stretch,  
-        alongshore < nourishmentdf.end_stretch, 
-        nourishmentdf['kustvak'].apply(str.strip)==areaname.tostring().strip()
-        ])
-    
-    nourishmentdfsel = nourishmentdf[filter]
-    return nourishmentdfsel
+    filter = reduce(
+        np.logical_and,
+        [
+            alongshore >= nourishmentdf.beg_stretch,
+            alongshore < nourishmentdf.end_stretch,
+            nourishmentdf['kustvak'].apply(str.strip) == areaname.tostring().strip()
+        ]
+    )
+    nourishmentdf = nourishmentdf[filter]
+
+    # Filter by time
+    filter2 = reduce(
+        np.logical_and,
+        [
+            nourishmentdf['beg_date'] >= dt_from,
+            nourishmentdf['end_date'] <= dt_to,
+        ]
+    )
+    nourishmentdf = nourishmentdf[filter2]
+
+    return nourishmentdf
 
 
-def makemkldf(transect):
+def makemkldf(transect, dt_from=None, dt_to=None):
     """the momentary coastline data"""
-    ds = netCDF4.Dataset(NC_RESOURCE['MKL'], 'r')
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
-    
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'MKL', False, dt_from, dt_to)
     # Deal with nan's in an elegant way:
-    mkltime = ds.variables['time_MKL'][:,transectidx]
+    mkltime = ds.variables['time_MKL'][:,transectidx][filter]
     mkltime = np.ma.masked_array(mkltime, mask=np.isnan(mkltime))
     vardict['time_MKL'] = netCDF4.netcdftime.num2date(mkltime, ds.variables['time_MKL'].units)
     ds.close()
-    mkldf =  pandas.DataFrame(vardict)
+    mkldf = pandas.DataFrame(vardict)
     mkldf = mkldf[np.logical_not(pandas.isnull(mkldf['time_MKL']))]
     return mkldf
 
 
-def makebkldf(transect):
+def makebkldf(transect, dt_from=None, dt_to=None):
     """the basal coastline data"""
-    ds = netCDF4.Dataset(NC_RESOURCE['BKL_TKL_TND'], 'r')
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
-    
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'BKL_TKL_TND', False, dt_from, dt_to)
     ds.close()
-    bkldf =  pandas.DataFrame(vardict)
+    bkldf = pandas.DataFrame(vardict)
     return bkldf
 
 
-def makebwdf(transect):
-    # Now read the beachwidth data.
-    ds = netCDF4.Dataset(NC_RESOURCE['strandbreedte'], 'r')
-    # Use bisect to speed things up
-    transectidx = bisect.bisect_left(ds.variables['id'], transect)
-    if ds.variables['id'][transectidx] != transect:
-        idfound = ds.variables['id'][transectidx]
-        ds.close()
-        raise NoDataForTransect(transect, idfound)
-    
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('time', 'alongshore')]
-    # Convert all variables that are a function of time to a dataframe
-    vardict = dict((var, ds.variables[var][:,transectidx]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+def makebwdf(transect, dt_from=None, dt_to=None):
+    """read the beachwidth data"""
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'strandbreedte', False, dt_from, dt_to)
     ds.close()
-    bwdf =  pandas.DataFrame(vardict)
+    bwdf = pandas.DataFrame(vardict)
     return bwdf
 
 
-def makedfdf(transect):
+def makedfdf(transect, dt_from=None, dt_to=None):
     """read the dunefoot data"""
-    ds = netCDF4.Dataset(NC_RESOURCE['DF'], 'r')
-    
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'DF', True, dt_from, dt_to)
+    ds.close()
+    dfdf = pandas.DataFrame(vardict)
+    return dfdf
+
+
+def get_time_filter(time_arr, dt_from=None, dt_to=None):
+    filter = np.zeros(time_arr.shape, dtype=np.bool)
+    if dt_from is not None:
+        filter[time_arr < dt_from] = True
+    if dt_to is not None:
+        filter[time_arr > dt_to] = True
+    filter = ~filter
+    return filter
+
+
+def get_transectidx(ds, transect):
     # Use bisect to speed things up
     transectidx = bisect.bisect_left(ds.variables['id'], transect)
     if ds.variables['id'][transectidx] != transect:
         idfound = ds.variables['id'][transectidx]
         ds.close()
         raise NoDataForTransect(transect, idfound)
-    
-    vars = [name for name, var in ds.variables.items() if var.dimensions == ('alongshore', 'time')]
+    return transectidx
+
+
+def prepare_vardict(transect, nc_resource_name, reversed_order=False, dt_from=None, dt_to=None):
+    '''
+    Returns a dict of (variable: data) pairs ready for consumption by Pandas,
+    and the UNCLOSED dataset.
+    '''
+    ds = netCDF4.Dataset(NC_RESOURCE[nc_resource_name], 'r')
+
+    transectidx = get_transectidx(ds, transect)
+
     # Convert all variables that are a function of time to a dataframe
-    # Note inconcsiste dimension ordering
-    vardict = dict((var, ds.variables[var][transectidx,:]) for var in vars)
-    vardict['time'] = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
-    ds.close()
-    dfdf =  pandas.DataFrame(vardict)
-    return dfdf
+    # Note the inconsistent dimension ordering, so dimension_order needs to be passed
+    dimension_order = ('alongshore', 'time') if reversed_order else ('time', 'alongshore')
+    vars = [name for name, var in ds.variables.items() if var.dimensions == dimension_order]
+    time = netCDF4.netcdftime.num2date(ds.variables['time'], ds.variables['time'].units)
+
+    # Filter out data from datetimes we dont need
+    filter = get_time_filter(time, dt_from, dt_to)
+
+    if reversed_order:
+        vardict = dict((var, ds.variables[var][transectidx,:][filter]) for var in vars)
+    else:
+        vardict = dict((var, ds.variables[var][:,transectidx][filter]) for var in vars)
+
+    vardict['time'] = time[filter]
+
+    return transectidx, filter, vardict, ds
 
 
-def makedfs(transect):
+def makedfs(transect, dt_from=None, dt_to=None):
     """create dataframes for coastal datasets available from openearth"""
     # We could do this in a multithreading pool to speed up, but not for now.
-    shorelinedf = makeshorelinedf(transect)
-    transectdf = maketransectdf(transect)
-    nourishmentdf = makenourishmentdf(transect, areaname=transectdf['areaname'].irow(0))
-    mkldf = makemkldf(transect)
-    bkldf = makebkldf(transect)
-    bwdf = makebwdf(transect)
-    dfdf = makedfdf(transect)
+    shorelinedf = makeshorelinedf(transect, dt_from, dt_to)
+    transectdf = maketransectdf(transect, dt_from, dt_to)
+    nourishmentdf = makenourishmentdf(transect, dt_from, dt_to, areaname=transectdf['areaname'].irow(0))
+    mkldf = makemkldf(transect, dt_from, dt_to)
+    bkldf = makebkldf(transect, dt_from, dt_to)
+    bwdf = makebwdf(transect, dt_from, dt_to)
+    dfdf = makedfdf(transect, dt_from, dt_to)
+
     return dict(
         shorelinedf=shorelinedf,
         transectdf=transectdf,
@@ -412,4 +439,4 @@ def makedfs(transect):
         bkldf=bkldf,
         bwdf=bwdf,
         dfdf=dfdf
-        )
+    )

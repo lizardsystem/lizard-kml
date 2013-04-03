@@ -59,7 +59,7 @@ class TimeStagNormalize(colors.Normalize):
         print value, '=', result_value
         return result_value
 
-def jarkustimeseries(transect, plotproperties=None):
+def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
     """create a timeseries plot for a transect"""
     if plotproperties is None:
         plotproperties = {}
@@ -238,12 +238,12 @@ def jarkusmean(id_min, id_max, plotproperties=None):
     # return an 'open' file descriptor
     return buf
 
-def nourishment(transect_id, plotproperties=None):
+def nourishment(transect_id, dt_from=None, dt_to=None, plotproperties=None):
     transect_id = int(transect_id)
     if plotproperties is None:
         plotproperties = {}
 
-    dfs = makedfs(transect_id)
+    dfs = makedfs(transect_id, dt_from, dt_to)
     fig = combinedplot(dfs)
 
     buf = cStringIO.StringIO()
