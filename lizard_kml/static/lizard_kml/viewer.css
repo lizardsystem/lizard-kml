@@ -1,98 +1,103 @@
 /* main content */
-#map3d
-{
-    width:100%;
-    height:100%;
+#map3d {
+    width: 100%;
+    height: 100%;
+}
+#sidebar {
 }
 
 /* colormaps popup */
 .ui-dialog .ui-dialog-content {
-    padding:2px;
+    padding: 2px;
 }
 
 /* preview image */
 #kml-preview-container {
-    width:100%;
-    display:none;
+    width: 100%;
+    display: none;
 }
 
 #kml-preview {
-    display:block;
-    margin:0 auto;
+    display: block;
+    margin: 0 auto;
 }
 
 /* jquery ui overrides */
 .ui-tabs .ui-tabs-panel {
-    padding:0;
+    padding: 0;
 }
 
 /* extjs overrides */
 .x-fieldset {
-    padding:4px;
+    padding: 4px;
 }
 
 .x-form-item-label {
-    font-size:11px;
-    padding-top:0;
+    font-size: 11px;
+    padding-top: 0;
 }
 
 .x-field-label-cell {
-    vertical-align:middle;
+    vertical-align: middle;
 }
 
 .x-menu-item-icon.icon-zoom-in {
-    margin-top:3px;
+    margin-top: 3px;
 }
 
 /* loader overlay */
 #loader {
-	padding:0;
-	margin:0;
-	position:absolute;
-	top:0; left:0;
-	width:100%; height:100%;
-	background:#efefef;
-	opacity:0.98;
-	z-index:999;
-	vertical-align:middle;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #efefef;
+    opacity: 0.98;
+    z-index: 999;
+    vertical-align: middle;
 }
 
 #loader-inner {
-	position:absolute;
-	top:50%; left:50%;
-	width:48px; height:48px;
-	margin-top:-24px;
-	margin-left:-24px;
-	background-image:url('/static_media/lizard_kml/loader2.gif');
-	background-repeat:no-repeat;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 48px;
+    height: 48px;
+    margin-top: -24px;
+    margin-left: -24px;
+    background-image: url('/static_media/lizard_kml/loader2.gif');
+    background-repeat: no-repeat;
 }
 
 #loader-text {
-    position:absolute;
-    top:60px; left:50%;
-    width:200px;
-    margin-left:-100px;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    width: 200px;
+    margin-left: -100px;
 }
 
 /* error message block, when Google Earth isn't installed */
 #map3d-error-message {
-    border:1px solid;
-    margin:100px auto 0 auto;
-    padding:15px 10px 15px 50px;
-    background-repeat:no-repeat;
-    background-position:10px center;
-    width:400px;
-
-    color:#D8000C;
-    background-color:#FFBABA;
-    background-image:url('error.png');
+    border: 1px solid;
+    margin: 100px auto 0 auto;
+    padding: 15px 10px 15px 50px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    width: 400px;
+    color: #D8000C;
+    background-color: #FFBABA;
+    background-image: url('error.png');
 }
 
 hr {
-    border:none !important;
-    background-color:#000 !important;
-    color:#000 !important;
-    height:1px !important;
+    border: none !important;
+    background-color: #000 !important;
+    color: #000 !important;
+    height: 1px !important;
 }
 
 /* above-content controls, like play/pause etc */
@@ -100,51 +105,83 @@ hr {
 }
 
 [class^="icon-"], [class*=" icon-"] {
-    background-image:url("glyphicons-halflings.png");
-    background-position:14px 14px;
-    background-repeat:no-repeat;
-    display:inline-block;
-    height:14px;
-    line-height:14px;
-    vertical-align:middle;
-    width:14px;
+    background-image: url("glyphicons-halflings.png");
+    background-position: 14px 14px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 14px;
+    line-height: 14px;
+    vertical-align: middle;
+    width: 14px;
 }
 
-.icon-backward   { background-position:-240px -72px; }
-.icon-play       { background-position:-264px -72px; }
-.icon-pause      { background-position:-288px -72px; }
-.icon-fullscreen { background-position:-456px -144px; }
-.icon-zoom-in    { background-position:-336px 0; }
-
-[class^="kml-action-"],
-[class*="kml-action-"] {
-    cursor:pointer;
-    margin-left:10px;
+.icon-backward {
+    background-position: -240px -72px;
+}
+.icon-play {
+    background-position: -264px -72px;
+}
+.icon-pause {
+    background-position: -288px -72px;
+}
+.icon-fullscreen {
+    background-position: -456px -144px;
+}
+.icon-zoom-in {
+    background-position: -336px 0;
 }
 
-[class^="kml-action-"]:hover,
-[class*="kml-action-"]:hover {
-    background-color:#af6;
+[class^="kml-action-"], [class*="kml-action-"] {
+    cursor: pointer;
+    margin-left: 10px;
 }
 
-#ext-play-rate-slider,
-#ext-year-span-slider {
-    margin-left:10px;
-    vertical-align:middle;
-    display:inline-block;
+[class^="kml-action-"]:hover, [class*="kml-action-"]:hover {
+    background-color: #af6;
+}
+
+#ext-play-rate-slider, #ext-year-span-slider {
+    margin-left: 10px;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 #kml-stream-percentage {
-    margin-right:20px;
-    color:#c22;
+    margin-right: 20px;
+    color: #c22;
 }
 
 #kml-stream-percentage.ready {
-    color:#2a2;
-    font-weight:bold;
+    color: #2a2;
+    font-weight: bold;
 }
 
 /* popups, when click on map features */
+.placemark-info-popup {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.placemark-info-popup .tabs {
+    position: absolute;
+    top: 0;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    overflow: auto;
+}
+
+.placemark-info-popup .footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+}
+
 .placemark-info-popup .holder li span.loading {
     background-image: url('/static_media/lizard_kml/loading.gif');
 }
@@ -154,15 +191,18 @@ hr {
     background-color: #be3730;
 }
 
-img.spinner-when-loading.broken { background-image: url('broken.png'); background-color: #be3730; }
+img.spinner-when-loading.broken {
+    background-image: url('broken.png');
+    background-color: #be3730;
+}
 img.spinner-when-loading {
     background-image: url('spinner.gif');
     background-color: #fff;
     background-position: center center;
     background-repeat: no-repeat;
     /*left: 0;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    top: 0;*/
+     position: absolute;
+     right: 0;
+     bottom: 0;
+     top: 0;*/
 }

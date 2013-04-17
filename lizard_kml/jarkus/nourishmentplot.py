@@ -70,7 +70,7 @@ def combinedplot(dfs):
 
     ax1 = fig.add_subplot(gs[0])
     # Set the main title
-    ax1.set_title('Kengetallen van de toestand van de kust\ntransect %d (%s)' % (transect, str(areaname).strip()))
+    ax1.set_title('Indicatoren van de toestand van de kust\ntransect %d (%s)' % (transect, str(areaname).strip()))
     # Plot the three lines
     date2num = matplotlib.dates.date2num
     ax1.plot(date2num(mkldf['time_MKL']), mkldf['momentary_coastline'], label='momentane kustlijn', **props)

@@ -16,6 +16,7 @@ import cStringIO
 import textwrap
 import urllib
 import datetime
+import traceback
 
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
@@ -108,6 +109,7 @@ class ChartView(View):
     """
     Renders a dynamic Chart image.
     """
+    download = False
 
     def get(self, request, chart_type, id=None):
         """generate info into a response"""
@@ -116,10 +118,20 @@ class ChartView(View):
         dt_from = datetime.datetime(int(year_from), 1, 1) if year_from else None
         dt_to = datetime.datetime(int(year_to), 12, 31, 23, 59, 59) if year_to else None
 
+        id_str = ''
+        if id:
+            id = int(id)
+            id_str = str(id)
+        id_min = request.GET.get('id_min') # e.g. 7003001
+        id_max = request.GET.get('id_max') # e.g. 7003150
+        if id_min and id_max:
+            id_min = int(id_min)
+            id_max = int(id_max)
+            id_str = '{}-{}'.format(id_min, id_max)
+
         # TODO, sanitize the GET.... (pass format=png/pdf, width/height etc?)
         try:
             if chart_type == 'eeg':
-                id = int(id)
                 transect = makejarkustransect(id, dt_from, dt_to)
                 fd = eeg(transect, {'format':'png'})
             elif chart_type == 'jarkustimeseries':
@@ -130,26 +142,27 @@ class ChartView(View):
                 id = int(id)
                 fd = nourishment(id, dt_from, dt_to, {'format':'png'})
             elif chart_type == 'jarkusmean':
-                id_min = int(request.GET['id_min']) # e.g. 7003001
-                id_max = int(request.GET['id_max']) # e.g. 7003150
                 fd = jarkusmean(id_min, id_max, {'format':'png'})
+            else:
+                raise Exception('Unknown chart type')
         except Exception as ex:
             logger.exception('exception while rendering chart')
-            fd = message_in_png(str(ex))
+            fd = message_in_png(traceback.format_exc())
         # wrap the file descriptor as a generator (8 KB reads)
         wrapper = FileWrapper(fd)
         response = HttpResponse(wrapper, content_type="image/png")
-        # TODO for pdf:
-        # response['Content-Disposition'] = 'attachment; filename=transect{}.{}'.format(self.id, format=format)
+        if self.download:
+            response['Content-Disposition'] = 'attachment; filename=transect-{}-{}.png'.format(id_str, chart_type)
         return response
 
 def message_in_png(text):
     '''returns a PNG image generated using PIL'''
 
     # wrap text so it fits in the image
-    lines = textwrap.wrap(text, width=60)
+    #lines = textwrap.wrap(text, width=100, replace_whitespace=False)
+    lines = text.split('\n')
     # create image and drawer
-    im = Image.new('RGB', (400, 300))
+    im = Image.new('RGB', (800, 600))
     draw = ImageDraw.Draw(im)
     # top-left position
     x0 = 10

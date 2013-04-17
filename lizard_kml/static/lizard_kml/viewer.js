@@ -982,13 +982,13 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
 
         // enable the atmosphere
         ge.getOptions().setAtmosphereVisibility(true);
-    
+
         // make the plugin visible
         ge.getWindow().setVisibility(true);
-    
+
         // fly to default view once, on init
         this.setDefaultView();
-    
+
         // start timeslider control
         this.tsc.startControl();
 
@@ -1075,9 +1075,17 @@ KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
  * Show a big modal balloon in the center of the map, which isn't
  * attached to a feature.
  */
-KmlViewerUi.prototype.showMainBalloon = function (html) {
+KmlViewerUi.prototype.showMainBalloon = function (html, maximize) {
     var balloon = ge.createHtmlStringBalloon('');
     balloon.setContentString(html);
+    if (maximize === true) {
+        var w = Math.round($('#map3d').width() * 0.85);
+        var h = Math.round($('#map3d').height() * 0.85);
+        balloon.setMinWidth(w);
+        balloon.setMinHeight(h);
+        balloon.setMaxWidth(w);
+        balloon.setMaxHeight(h);
+    }
     ge.setBalloon(balloon);
 };
 
@@ -1135,29 +1143,30 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     urlParams,
                     function (data) {
                         var balloon = ge.createHtmlDivBalloon('');
-                        balloon.setFeature(target);
+                        //balloon.setFeature(target);
                         // create a div containing the placemark info,
                         // so we can have JavaScript augment it (using jQuery Tabs)
                         var div = document.createElement('DIV');
                         div.innerHTML = data;
                         balloon.setContentDiv(div);
-                        // minimum size to fit nourishment plot
-                        balloon.setMinWidth(800);
-                        balloon.setMinHeight(600);
-                        balloon.setMaxWidth(800);
-                        balloon.setMaxHeight(600);
+                        var w = Math.round($('#map3d').width() * 0.85);
+                        var h = Math.round($('#map3d').height() * 0.85);
+                        balloon.setMinWidth(w);
+                        balloon.setMinHeight(h);
+                        balloon.setMaxWidth(w);
+                        balloon.setMaxHeight(h);
                         ge.setBalloon(balloon);
                         // fill out the div
                         var $tabs = $(div).find('.tabs');
                         // initialize tabs, if there are any
                         $tabs.tabs({
-                            heightStyle: 'fill'
+                            //heightStyle: 'fill'
                         });
                         // fix tabs height causing jumping behaviour
                         // the tab contents should scroll
                         $tabs.find('.ui-tabs-panel.ui-widget-content').css({
-                            'height': 510,
-                            'overflow-y': 'auto'
+                            //'height': 'auto',
+                            //'overflow-y': 'auto'
                         });
                     }
                 );
@@ -1196,7 +1205,8 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     if ((id_max - id_min) < 500) {
         this.showMainBalloon(
             '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
-            '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />'
+            '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />',
+            true
         );
     }
     else {
@@ -1569,7 +1579,7 @@ KmlFile.prototype.finishedLoading = function (kmlObject, beforeAddCallback) {
         if (beforeAddCallback !== undefined) {
             doContinue = beforeAddCallback();
         }
-        if (doContinue) { 
+        if (doContinue) {
             // Add new features to Google Earth.
             this.kmlObject = kmlObject;
             ge.getFeatures().appendChild(kmlObject);
