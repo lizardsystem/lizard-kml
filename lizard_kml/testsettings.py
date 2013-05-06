@@ -147,6 +147,8 @@ for key in NC_RESOURCE:
     if os.path.isfile(path):
         logger.info('Using %s', path)
         NC_RESOURCE[key] = path
+    else:
+        logger.info('Using %s', NC_RESOURCE[key])
 
 # other local testsettings
 # TODO should move these to local test settings, and send Fedor an email about it :)

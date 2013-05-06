@@ -269,12 +269,11 @@ def maketransectdf(transect, dt_from=None, dt_to=None):
         mean_low_water = np.zeros(0)
     else:
         alongshore = ds.variables['alongshore'][transectidx]
-        areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx])
+        areaname = str(netCDF4.chartostring(ds.variables['areaname'][transectidx])).strip()
         mean_high_water = ds.variables['mean_high_water'][transectidx]
         mean_low_water = ds.variables['mean_low_water'][transectidx]
 
     ds.close()
-
     transectdf = pandas.DataFrame(
         index=[transect],
         data=dict(

@@ -54,7 +54,7 @@ class TestView(TestCase):
     # and code 200 for URLs with a trailing slash.
 
     def test_viewer(self):
-        resp = self.client.get('/viewer/')
+        resp = self.client.get('/')
         self.assertEqual(200, resp.status_code)
 
     def test_lod(self):

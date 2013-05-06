@@ -18,10 +18,10 @@ class Command(BaseCommand):
         # Get a list of the colormaps in matplotlib.  Ignore the ones that end with
         # '_r' because these are simply reversed versions of ones that don't end
         # with '_r'
+        #maps = sorted(m for m in plt.cm.datad if not m.endswith("_r"))
         maps = 'GnBu Greys Oranges autumn ' \
                'Blues cool hot hsv summer ' \
                'YlGn bwr YlOrBr'.split()
-        #maps = sorted(m for m in plt.cm.datad if not m.endswith("_r"))
         nmaps = len(maps)
         two_columns = False
 

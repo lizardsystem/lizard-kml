@@ -21,6 +21,9 @@ class JsonView(View):
             return HttpResponse(serialized_data, content_type='application/json')
 
 class CategoryTreeView(JsonView):
+    '''
+    As consumed by Ext JS.
+    '''
     def get_json(self, request):
         categories = [
             {

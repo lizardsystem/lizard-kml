@@ -25,13 +25,12 @@ def to_viewer(request):
 
 urlpatterns = patterns(
     '',
-    url(r'^$', to_viewer, name='lizard-kml-root'),
-    url(r'^viewer/$', ViewerView.as_view(), name='lizard-kml-viewer'),
+    url(r'^$', ViewerView.as_view(), name='lizard-kml-viewer'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^info/(?P<id>[0-9]+)/$', InfoView.as_view(), name='lizard-kml-info'),
     url(r'^xls/(?P<id>[0-9]+)/$', XlsView.as_view(), name='lizard-kml-xls'),
-    # for jarkusmean (min/max id via GET parameters, FIXME)
+    # for jarkusmean (no id, min/max id via GET parameters, FIXME)
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^chartdownload/(?P<chart_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', ChartView.as_view(download=True), name='lizard-kml-chart-download'),

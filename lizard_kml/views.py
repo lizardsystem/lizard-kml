@@ -26,6 +26,7 @@ import calendar
 
 logger = logging.getLogger(__name__)
 
+# Constants related to mirroring KML files.
 KML_MIRROR_CACHE_DURATION = 60 * 60 * 48 # in seconds: 24 hour
 KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
@@ -36,6 +37,10 @@ MIME_TO_EXT = {
     MIME_KML: 'kml',
     MIME_KMZ: 'kmz',
 }
+
+# Maps the name of the colormap to the pixel area in the generated color_maps.png.
+# Use the management command "gen_colormaps" for this.
+# The HTML containing <area> tags is generated in the viewer.html template.
 COLOR_MAPS = [
     ('GnBu', (0, 0, 200, 21)),
     ('Greys', (0, 25, 200, 46)),
@@ -52,14 +57,26 @@ COLOR_MAPS = [
 ]
 
 class HeadRequest(urllib2.Request):
+    '''
+    Add missing HTTP HEAD request to urllib.
+    '''
     def get_method(self):
         return "HEAD"
 
 def urlopen(request):
+    '''
+    Shorthand which returns a context-managed urlopen for use with the new "with" statement.
+    '''
     return contextlib.closing(urllib2.urlopen(request, timeout=KML_MIRROR_FETCH_TIMEOUT))
 
 @cache_result(KML_MIRROR_CACHE_DURATION, ignore_cache=False)
 def get_mirrored_kml(url):
+    '''
+    Mirror external data located at given url, so it can be served with our
+    own webserver. The downloaded data is cached for 24 hours.
+
+    Returns a tuple (content, content_type).
+    '''
     logger.info("Downloading %s.", url)
     with urlopen(urllib2.Request(url)) as response:
         headers = response.info()
@@ -99,41 +116,54 @@ def get_mirrored_kml(url):
         return content, content_type
 
 def get_wms_kml(kml_resource):
+    '''
+    Wrap a WMS url in a KML file for given KmlResource instance.
+
+    Returns a tuple (content, content_type).
+    '''
     context = {
         'name': kml_resource.name,
         'wms_url': kml_resource.url
     }
+
+    # Build KML file using a simple Django template.
     content = render_to_kmz("kml/wms.kml", context)
     content_type = MIME_KMZ
     return content, content_type
 
 class KmlResourceView(View):
+    '''
+    View which returns the KML file related to passed kml_resource_id.
+    '''
     @method_decorator(never_cache)
     def get(self, request, kml_resource_id):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
         logger.debug('Serving KML %s', kml_resource)
+
+        # Determine what to serve.
         if kml_resource.kml_type == 'static':
             content, content_type = get_mirrored_kml(kml_resource.url)
         elif kml_resource.kml_type == 'wms':
             content, content_type = get_wms_kml(kml_resource)
         else:
             raise Exception('KML is dynamic, please use its specific URL as found in urls.py.')
+
+        # Wrap the file a in HTTP response.
         response = HttpResponse(content, content_type=content_type)
-        # properly add extension, all though it's mostly ignored
+
+        # Properly add extension and filename, even though it's mostly ignored.
         ext = MIME_TO_EXT.get(content_type, 'kml')
         response['Content-Disposition'] = 'attachment; filename=kml_resource{}.{}'.format(kml_resource.pk, ext)
+
         return response
 
 class ViewerView(ViewContextMixin, TemplateView):
-    """
+    '''
+    Returns the main HTML for lizard-kml.
     Renders a simple tree with KML files available in the database.
     The KML viewer browser plugin is controlled directly via JavaScript.
-    """
-
+    '''
     template_name = 'lizard_kml/viewer.html'
-
-    def get(self, request):
-        return super(ViewerView, self).get(self, request)
 
     def color_maps(self):
         return COLOR_MAPS
