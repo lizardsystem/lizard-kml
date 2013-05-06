@@ -55,7 +55,14 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
 {% endblock %}
 
 {% block page %}
-{% include "lizard_kml/colormap.html" %}
+<map name="colormaps-map">
+    {% for row in view.color_maps %}
+    <area alt="{{ row.0 }}" href="javascript:void(0)" data-colormap="{{ row.0 }}" class="select-colormap" coords="{{ row.1 }}"/>
+    {% endfor %}
+</map>
+<div id="colormaps">
+    <img src="{{ STATIC_URL }}lizard_kml/color_maps.png" usemap="#colormaps-map" width="200" height="300">
+</div>
 {{ block.super }}
 <div id="loader">
   <div id="loader-inner"></div>

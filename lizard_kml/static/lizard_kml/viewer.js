@@ -54,13 +54,6 @@ function refreshLoadedModules() {
 }
 var loadInterval = setInterval(refreshLoadedModules, 200);
 
-// This is still referenced in a Django template fragment (via an <a href="javascript:">).
-// This should be refactored to dynamicly load the popup content.
-window.kmlViewerSetColormap = function (colormap) {
-    jarkusKmlParams.colormap = colormap;
-    $('#colormaps').dialog('close');
-}
-
 /* ************************************************************************ */
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -269,14 +262,25 @@ KmlViewerUi.prototype.init = function () {
 KmlViewerUi.prototype.bindUiEvents = function () {
     var self = this;
 
-    $('.kml-action-defaultview').click(function () {
+    $('.kml-action-defaultview').click(function (e) {
+        e.preventDefault();
         self.setDefaultView();
     });
-    $('.kml-action-rewind').click(function () {
+    $('.kml-action-rewind').click(function (e) {
+        e.preventDefault();
         self.tsc.rewind();
     });
-    $('.kml-action-playpause').click(function () {
+    $('.kml-action-playpause').click(function (e) {
+        e.preventDefault();
         self.tsc.togglePlayPause();
+    });
+    $('.select-colormap').click(function (e) {
+        e.preventDefault();
+        var colormap = $(this).data('colormap');
+        if (colormap) {
+            jarkusKmlParams.colormap = colormap;
+        }
+        $('#colormaps').dialog('close');
     });
 };
 

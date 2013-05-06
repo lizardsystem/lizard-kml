@@ -1,8 +1,0 @@
-<map name="colormaps">
-    {% for row in view.color_maps %}
-    <area alt="{{ row.0 }}" href="javascript:kmlViewerSetColormap('{{ row.0 }}')" coords="{{ row.1 }}"/>
-    {% endfor %}
-</map>
-<div id="colormaps">
-    <img src="{{ STATIC_URL }}lizard_kml/color_maps.png" usemap="#colormaps" width="200" height="300">
-</div>
