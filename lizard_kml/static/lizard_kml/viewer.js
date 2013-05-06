@@ -1,16 +1,19 @@
 (function (global) {
+
 // Fix missing console logging on browsers like IE.
 if (!window.console) window.console = {};
 if (!window.console.log) window.console.log = function () { };
 
 // Load the Google Earth plugin API.
+// This adds scripts to <head>.
 google.load('earth', '1');
 
 // Set up Ext JS.
 var isExtReady = false;
 Ext.BLANK_IMAGE_URL = window.lizard_settings.static_url + '/lizard_kml/extjs-4.2.0/resources/themes/images/default/tree/s.gif';
-// Fix an Ext JS bug.
+// Fix an Ext JS bug regarding error icons.
 Ext.form.Labelable.errorIconWidth = 16;
+// Listen to Ext JS readyness.
 Ext.onReady(function () {
     console.log('Ext JS is ready');
     isExtReady = true;
@@ -43,7 +46,7 @@ var emptyGif = 'data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAA
 // Either the Google Earth API, or Ext JS callbacks which are supposed to notify
 // everything has been loaded won't work properly, so solve it by polling
 // for readyness.
-function refreshLoadedModules() {
+function refreshLoadedModules () {
     if (document.readyState === 'complete' && isExtReady && google.earth) {
         clearInterval(loadInterval);
         console.log('All ready');
@@ -52,7 +55,7 @@ function refreshLoadedModules() {
         kvu.init();
     }
 }
-var loadInterval = setInterval(refreshLoadedModules, 200);
+var loadInterval = window.setInterval(refreshLoadedModules, 200);
 
 /* ************************************************************************ */
 /* ************************************************************************ */
@@ -152,7 +155,7 @@ if (!Function.prototype.bind) {
  * Parse a version string like "6.3.2" to integers, so different
  * version can be compared.
  */
-function parseVersionString(str) {
+function parseVersionString (str) {
     if (typeof(str) !== 'string') { return false; }
     var v = str.split('.');
     return {
@@ -166,7 +169,7 @@ function parseVersionString(str) {
  * Returns true when version string "vcurrent" is higher or equal to
  * version "vmin".
  */
-function minVersionMet(vmin, vcurrent) {
+function minVersionMet (vmin, vcurrent) {
     minimum = parseVersionString(vmin);
     running = parseVersionString(vcurrent);
     if (running.major !== minimum.major)
@@ -187,17 +190,17 @@ function minVersionMet(vmin, vcurrent) {
  * Returns two functions which convert values in the range of
  * [fmin, fmax] to the range [tmin, max] logarithmically.
  */
-function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
+function buildLogaScaleFuncs (fmin, fmax, tmin, tmax) {
     // the result should be between min and max
     var minv = tmin == 0 ? 0 : Math.log(tmin);
     var maxv = Math.log(tmax);
     // calculate adjustment factor
     var scale = (maxv - minv) / (fmax - fmin);
     // build functions
-    var fwd = function(value) {
+    var fwd = function (value) {
         return Math.exp(minv + scale * (value - fmin));
     };
-    var rev = function(value) {
+    var rev = function (value) {
         return (Math.log(value) - minv) / scale + fmin;
     };
     return [fwd, rev];
@@ -213,24 +216,32 @@ function buildLogaScaleFuncs(fmin, fmax, tmin, tmax) {
 /* ************************************************************************ */
 
 /**
- * Class which holds all UI components and view state.
+ * Class which mostly holds UI components and view state.
  */
-function KmlViewerUi(kfc) {
+function KmlViewerUi (kfc) {
+    // reference to object holding the KML file collection
     this.kfc = kfc;
 
-    // components
+    // ExtJS data store for fetching the KML tree
     this.treeStore = null;
+    // KML tree widget
     this.treePanel = null;
+    // Panel containing Jarkus specific controls
     this.jarkusPanel = null;
+    // Accordion widget containing the widgets above
     this.accordion = null;
 
+    // Time slider control, abstracts some Google Earth methods concerning the
+    // timeslider and listens to related events.
     this.tsc = null;
+    // Streaming control, watches for changes in the "Streaming" percentage, which
+    // indicates how many tiles need to be loaded et cetera.
     this.strc = null;
 
-    // etc
-    this.previewImageUrl = emptyGif;
+    // Current preview image when you hover over some controls.
+    this.currentPreviewImageUrl = emptyGif;
 
-    // for multiselection
+    // State related to Jarkus multiselect ("grafiek over meerdere raaien").
     this.isMultiSelectEnabled = false;
     this.selectedItems = [];
 }
@@ -247,7 +258,7 @@ KmlViewerUi.prototype.init = function () {
 	setupLizardUi();
     // Build the Ext JS controls.
     this.initControls();
-    // Bind above-content links like play/pause et cetera.
+    // Bind above-content links like play/pause/colormaps et cetera.
     this.bindUiEvents();
     // Initialize the small preview image in the lower-left area.
     this.initPreviewImage();
@@ -262,6 +273,7 @@ KmlViewerUi.prototype.init = function () {
 KmlViewerUi.prototype.bindUiEvents = function () {
     var self = this;
 
+    // Bind play/pause buttons.
     $('.kml-action-defaultview').click(function (e) {
         e.preventDefault();
         self.setDefaultView();
@@ -274,6 +286,8 @@ KmlViewerUi.prototype.bindUiEvents = function () {
         e.preventDefault();
         self.tsc.togglePlayPause();
     });
+
+    // Bind colormaps click handler.
     $('.select-colormap').click(function (e) {
         e.preventDefault();
         var colormap = $(this).data('colormap');
@@ -285,7 +299,7 @@ KmlViewerUi.prototype.bindUiEvents = function () {
 };
 
 /**
- * Initialize the Google Earth plugin instance.
+ * Initialize the Google Earth plugin instance or display an error if it's unavailable.
  */
 KmlViewerUi.prototype.initGoogleEarth = function () {
     if (!google.earth.isSupported()) {
@@ -480,8 +494,8 @@ function buildMultiTipSlider (args) {
 KmlViewerUi.prototype.initControls = function () {
     var self = this;
 
-    // create a panel containing the preview image, and other
-    // context-sensitive items
+    // Create a panel containing the preview image, and other
+    // context-sensitive items.
     var previewPanel = Ext.create('Ext.panel.Panel', {
         id: 'previewpanel',
         title: 'Voorbeeld',
@@ -489,18 +503,19 @@ KmlViewerUi.prototype.initControls = function () {
         html: '<div id="kml-preview-container"><img id="kml-preview" src="' + emptyGif + '" alt="preview" width="200" height="150" /></div>'
     });
 
-    // build a model for tree nodes containing some extra kml data
+    // Build a model for tree nodes.
     Ext.define('KmlResourceNode', {
         extend: 'Ext.data.Model',
         fields: ['kml_id', 'text', 'description', 'kml_url', 'slug', 'preview_image_url']
     });
     Ext.data.NodeInterface.decorate(KmlResourceNode);
 
-    // create a store for adapting the json output to KmlResourceNode instances
+    // Create a store for adapting the json output to KmlResourceNode instances.
     this.treeStore = Ext.create('Ext.data.TreeStore', {
         listeners: {
             single: true,
-            load: function (thisStore, rootNode, records, successful, eOpts){
+            load: function (thisStore, rootNode, records, successful, eOpts) {
+                // Build parent (categories) and leaf nodes (KML resources).
                 var categories = thisStore.proxy.reader.rawData.categories;
                 categories.forEach(function (category) {
                     var categoryNode = rootNode.appendChild({
@@ -526,13 +541,13 @@ KmlViewerUi.prototype.initControls = function () {
         },
         proxy: {
             type: 'ajax',
-            url: window.lizard_settings.lizard_kml.api_url + '?format=json',
+            url: window.lizard_settings.lizard_kml.api_url,
             reader: {
                 type: 'json'
             }
         }
     });
-
+    // Add a right-click menu for zoom to extent.
     var contextMenu = new Ext.menu.Menu({
         animCollapse: false,
         items: [
@@ -550,7 +565,7 @@ KmlViewerUi.prototype.initControls = function () {
         ]
     });
 
-    // create the tree panel (and view)
+    // Create the tree panel (and tree view).
     this.treePanel = Ext.create('Ext.tree.Panel', {
         title: 'Kaartlagen',
         store: this.treeStore,
@@ -565,7 +580,7 @@ KmlViewerUi.prototype.initControls = function () {
         listeners: {
             itemclick: function (thisView, node, item, index, event, eOpts) {
                 if (!node.isLeaf()) {
-                    // user clicked on a category, collapse / expand it
+                    // User clicked on a category, collapse / expand it.
                     if (node.isExpanded()) {
                         node.collapse();
                     }
@@ -575,44 +590,32 @@ KmlViewerUi.prototype.initControls = function () {
                 }
                 else {
                     if (node instanceof KmlResourceNode) {
-                        // user clicked on a 'leaf' node, set the checkbox
+                        // User clicked on a 'leaf' node, set the checkbox.
                         var checked = !(node.get('checked'));
                         node.set('checked', checked);
-                        // enable jarkus panel if use activated that
+                        // Enable Jarkus panel if this was a 'special' node.
                         if (node.get('slug') === 'jarkus') {
                             kvu.setJarkusPanelEnabled(checked);
                         }
+                        // Have the KmlFileCollection refresh the loaded (checked) KML files.
                         self.kfc.fireUpdate();
                     }
                 }
             },
-            // checkchange: function (node, checked, eOpts) {
-            // },
             itemmouseenter: function (thisView, node, item, index, event, eOpts) {
+                // Show preview image.
                 if (node instanceof KmlResourceNode) {
                     kvu.showPreviewImage(node.get('preview_image_url'));
                 }
             },
             itemmouseleave: function (thisView, node, item, index, event, eOpts) {
+                // Hide preview image.
                 if (node instanceof KmlResourceNode) {
                     kvu.hidePreviewImage();
                 }
             },
-            /*
-            mouseenter: {
-                element: 'el',
-                fn: function (thisView, event, eOpts) {
-                    previewPanel.expand();
-                }
-            },
-            mouseleave: {
-                element: 'el',
-                fn: function (thisView, event, eOpts) {
-                    previewPanel.collapse();
-                }
-            },
-            */
             itemcontextmenu: function (thisView, node, item, index, event) {
+                // Open context menu.
                 if (node instanceof KmlResourceNode) {
                     contextMenu.node = node;
                     contextMenu.showAt(event.getXY());
@@ -622,10 +625,10 @@ KmlViewerUi.prototype.initControls = function () {
         }
     });
 
-    // create the Jarkus controls
+    // Initialize the Jarkus controls.
     this.initJarkusPanel();
 
-    // create the left accordion
+    // Create the left accordion widget.
     this.accordion = Ext.create('Ext.container.Container', {
         title: 'Accordion Layout',
         defaults: {
@@ -647,7 +650,7 @@ KmlViewerUi.prototype.initControls = function () {
         renderTo: Ext.get('ext-left-controls')
     });
 
-    // create a slider for controlling the play speed
+    // Create a slider widget, for controlling the animation speed.
     var playRate = buildSlider({
         fieldLabel: 'Afspeelsnelheid',
         width: 300,
@@ -660,13 +663,14 @@ KmlViewerUi.prototype.initControls = function () {
         },
         logarithmic: true,
         logarithmicOnChange: function (newValue) {
+            // Update the animation speed.
             self.tsc.setRate(newValue);
         },
         renderTo: Ext.get('ext-play-rate-slider')
     });
 
-    // create a slider for controlling the yearspan
-    // used for drawing charts
+    // Create a slider for controlling the year span.
+    // This is used for drawing plots.
     var yearSpan = buildMultiTipSlider({
         fieldLabel: 'Jaarspanne grafieken',
         labelWidth: 120,
@@ -680,6 +684,7 @@ KmlViewerUi.prototype.initControls = function () {
         },
         listeners: {
             mychange: function (slider, newValue, thumb, eOpts) {
+                // Update the global chart parameters state.
                 var idx = slider.thumbs.indexOf(thumb);
                 if (idx === 0) {
                     chartParams.year_from = newValue;
@@ -694,11 +699,12 @@ KmlViewerUi.prototype.initControls = function () {
 };
 
 /**
+ * Build Ext JS widgets for controlling Jarkus parameters.
  */
 KmlViewerUi.prototype.initJarkusPanel = function () {
     var self = this;
 
-    // build colormaps dialog
+    // Build colormaps dialog.
     $("#colormaps").dialog({
         title: 'Selecteer kleurenmap',
         autoOpen: false,
@@ -708,6 +714,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         zIndex: 10005 // above slider thumbs
     });
 
+    // Build some sliders.
     var lift = buildSlider({
         fieldLabel: 'Ophoging',
         minValue: 0.0,
@@ -759,13 +766,15 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
     ));
     extrude.on('mouseleave', this.hidePreviewImage.bind(this));
 
+    // Opens the colormaps window.
     var colormaps = Ext.create('Ext.button.Button', {
         text: 'Kleurenmap',
-        handler: function() {
+        handler: function () {
             $("#colormaps").dialog("open");
         }
     });
 
+    // More sliders.
     var polyalpha = buildSlider({
         fieldLabel: 'Transparantie',
         increment: 0.1,
@@ -795,9 +804,10 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
     ));
     move.on('mouseleave', this.hidePreviewImage.bind(this));
 
+    // Button to let the user actually refresh the Jarkus KML.
     var confirm = Ext.create('Ext.button.Button', {
         text: 'Wijzig weergave',
-        handler: function() {
+        handler: function () {
             jarkusKmlParams.lift = lift.logarithmicValue;
             jarkusKmlParams.exaggeration = exaggeration.logarithmicValue;
             jarkusKmlParams.extrude = extrude.getValue() ? 1 : 0;
@@ -807,13 +817,16 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         }
     });
 
+    // Multi select button.
     var multiselect = Ext.create('Ext.button.Button', {
         text: 'Grafiek over meerdere raaien',
-        handler: function() {
+        handler: function () {
             self.toggleMultiSelect();
         }
     });
 
+    // Put multiselect button in a separate formset, so we can add
+    // more actions later on.
     var actions = Ext.create('Ext.form.FieldSet', {
         title: 'Acties',
         defaults: {
@@ -828,6 +841,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         ]
     });
 
+    // Another fieldset widget.
     var display = Ext.create('Ext.form.FieldSet', {
         title: 'Weergave',
         defaults: {
@@ -848,6 +862,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
         ]
     });
 
+    // The actual panel which goes in the accordion widget.
     this.jarkusPanel = Ext.create('Ext.panel.Panel', {
         title: 'Jarkus',
         collapsed: true,
@@ -868,10 +883,10 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
  */
 KmlViewerUi.prototype.initPreviewImage = function () {
     var self = this;
-    $('#kml-preview').load(function() {
-        // only continue if the users mouse is still on the element
-        // for which the preview is shown
-        if ($(this).attr('src') == self.previewImageUrl) {
+    $('#kml-preview').load(function () {
+        // Only continue if the users mouse is still on the element
+        // for which the preview is shown.
+        if ($(this).attr('src') == self.currentPreviewImageUrl) {
             $('#kml-preview-container').show();
         }
     });
@@ -881,7 +896,7 @@ KmlViewerUi.prototype.initPreviewImage = function () {
  * Load the passed URL and show the bottom left preview image.
  */
 KmlViewerUi.prototype.showPreviewImage = function (url) {
-    this.previewImageUrl = url;
+    this.currentPreviewImageUrl = url;
     $('#kml-preview').attr('src', url);
 };
 
@@ -889,7 +904,7 @@ KmlViewerUi.prototype.showPreviewImage = function (url) {
  * Hide the preview image.
  */
 KmlViewerUi.prototype.hidePreviewImage = function () {
-    this.previewImageUrl = emptyGif;
+    this.currentPreviewImageUrl = emptyGif;
     $('#kml-preview').attr('src', emptyGif);
     $('#kml-preview-container').hide();
 };
@@ -899,14 +914,16 @@ KmlViewerUi.prototype.hidePreviewImage = function () {
  */
 KmlViewerUi.prototype.setJarkusPanelEnabled = function (enabled) {
     this.jarkusPanel.setDisabled(!enabled);
-    if (enabled)
+    if (enabled) {
         this.jarkusPanel.expand();
-    else
+    }
+    else {
         this.jarkusPanel.collapse();
+    }
 };
 
 /**
- * Get an associative array of some data in the treenodes which are checked.
+ * Get an associative array of some data in treenodes which are checked.
  */
 KmlViewerUi.prototype.getChecked = function () {
     var checked = {};
@@ -922,7 +939,7 @@ KmlViewerUi.prototype.getChecked = function () {
 };
 
 /**
- * Test the treenode belonging to an kml_id is checked.
+ * Test whether the treenode belonging to a certain KML ID is checked.
  */
 KmlViewerUi.prototype.isChecked = function (id) {
     var found = false;
@@ -937,7 +954,7 @@ KmlViewerUi.prototype.isChecked = function (id) {
 };
 
 /**
- * Disable (make gray) all UI controls.
+ * Disable (make gray) or enable all UI controls.
  */
 KmlViewerUi.prototype.setControlsDisabled = function (disabled) {
     this.accordion.setDisabled(disabled);
@@ -960,8 +977,8 @@ KmlViewerUi.prototype.removeLoadingOverlay = function (callback) {
  * Called by the Google Earth plugin.
  */
 KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
-    // determine version
-    // if version detection fails, continue by default
+    // Determine Google Earth version.
+    // If version detection fails for some reason, continue by default.
     var acceptVersion = true;
     var vcurrent = pluginInstance.getPluginVersion();
     console.log('current version ' + vcurrent);
@@ -973,36 +990,37 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     }
 
     if (acceptVersion) {
+        // Make the plugin instance globally available.
         ge = pluginInstance;
 
-        // enable international borders
+        // Enable international borders.
         //ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS, true);
 
-        // enable the sun
+        // Enable the sun.
         //ge.getSun().setVisibility(true);
 
-        // enable nav control
+        // Enable nav control.
         ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
 
-        // enable the atmosphere
+        // Enable the atmosphere.
         ge.getOptions().setAtmosphereVisibility(true);
 
-        // make the plugin visible
+        // Make the plugin visible.
         ge.getWindow().setVisibility(true);
 
-        // fly to default view once, on init
+        // Fly to default view once, on init.
         this.setDefaultView();
 
-        // start timeslider control
+        // Start timeslider control, which registers to Google Earth events.
         this.tsc.startControl();
 
-        // start streaming pct checker
+        // Start streaming percentage checker.
         this.strc.startControl();
 
-        // add the global click handler
+        // Listen all click events in Google Earth.
         this.addGlobalClickHandler();
 
-        // show the right upper controls
+        // Enable the right upper controls.
         kvu.setControlsDisabled(false);
     }
     else {
@@ -1015,6 +1033,9 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
     }
 };
 
+/**
+ * Called by the Google Earth plugin.
+ */
 KmlViewerUi.prototype.geFailureCallback = function () {
     this.replaceMapWithErrorMessage(
         'De Google Earth plugin kon niet worden gestart. ' +
@@ -1023,6 +1044,9 @@ KmlViewerUi.prototype.geFailureCallback = function () {
     );
 };
 
+/**
+ * Rotate the globe and focus to The Netherlands.
+ */
 KmlViewerUi.prototype.setDefaultView = function () {
     var lookAt = ge.createLookAt('');
     lookAt.setLatitude(52.0938); // utrecht
@@ -1031,16 +1055,19 @@ KmlViewerUi.prototype.setDefaultView = function () {
     ge.getView().setAbstractView(lookAt);
 };
 
+/**
+ * Remove the map <div> and replace it with an error message.
+ */
 KmlViewerUi.prototype.replaceMapWithErrorMessage = function (html) {
     var $el;
     $el = $('#map3d-error-message');
     if ($el.length !== 0) {
-        // already a message on screen
+        // Already a message on screen. Append a message to the existing element.
         $el.append('<hr style="margin:0;"/>' + html);
     }
     else {
-        // create the message div first
-        $el = $('<div></div>')
+        // Create the message <div> first.
+        $el = $('<div>')
             .attr('id', 'map3d-error-message')
             .html(html);
         $('#map3d').replaceWith($el);
@@ -1063,7 +1090,7 @@ KmlViewerUi.prototype.setPlaying = function (playing) {
 };
 
 /**
- * Mark a node in the Tree as "loading" and show a spinner.
+ * Mark a node in the Tree as "loading", and show a spinner.
  */
 KmlViewerUi.prototype.setNodeLoading = function (id, loading) {
     this.treePanel.getRootNode().cascadeBy(function (node) {
@@ -1083,6 +1110,7 @@ KmlViewerUi.prototype.showMainBalloon = function (html, maximize) {
     var balloon = ge.createHtmlStringBalloon('');
     balloon.setContentString(html);
     if (maximize === true) {
+        // Resize to 85% of full screen.
         var w = Math.round($('#map3d').width() * 0.85);
         var h = Math.round($('#map3d').height() * 0.85);
         balloon.setMinWidth(w);
@@ -1105,89 +1133,108 @@ KmlViewerUi.prototype.toggleMultiSelect = function () {
     }
 };
 
+/**
+ * Enable multi selection. The global click handler is used to catch clicks.
+ */
 KmlViewerUi.prototype.startMultiSelect = function () {
     this.isMultiSelectEnabled = true;
     this.showMainBalloon('Klik op twee Jarkusraaien, waartussen de grafiek berekend moet worden.');
 };
 
+/**
+ * Stop multi selection.
+ */
 KmlViewerUi.prototype.stopMultiSelect = function () {
-     // clear selected items
+    // Clear selected items.
     this.selectedItems.length = 0;
     this.isMultiSelectEnabled = false;
 };
 
+/**
+ * Attach our global click handler. Much more efficient than attaching
+ * individual click handlers to all map features.
+ */
 KmlViewerUi.prototype.addGlobalClickHandler = function () {
     google.earth.addEventListener(ge.getGlobe(), 'click', this.clickHandler.bind(this));
 };
 
+/**
+ * The global click handler. Leaves Google Earth to handle the click,
+ * unless it is on one of our own placemarks.
+ */
 KmlViewerUi.prototype.clickHandler = function (event) {
     var target = event.getTarget();
     if (target.getType() === 'KmlPlacemark') {
-        // this probably means the user click on an item
-        // that originates from our custom KML data
+        // This probably means the user clicked on an item
+        // that originates from our custom KML data.
         if (this.isMultiSelectEnabled) {
-            // don't show the normal popup
+            // Don't show the normal popup.
             event.preventDefault();
-            // pass the clicked placemark
+            // Pass the clicked placemark.
             kvu.addSelectedItem(target);
         }
         else {
-            // fetch url to the info panel
+            // Fetch url to the info panel.
             var html = target.getDescription();
             var $link = $(html).find('a[data-dynamic-info="true"]');
-            // don't do anything if there's no dynamic info link
-            if ($link.length == 1) {
-                // don't show the normal balloon
+            // Don't do anything if there's no dynamic info link. The KML file could
+            // have defined its own popups.
+            if ($link.length === 1) {
+                // Don't show the normal balloon.
                 event.preventDefault();
+                // Find out the base URL.
                 var url = $link.attr('href');
+                // Append chart parameters, like the year span.
                 var urlParams = $.extend({}, chartParams);
-                // retrieve the info HTML fragment
+                // Retrieve the HTML fragment containing the info.
                 $.get(
                     url,
-                    urlParams,
-                    function (data) {
-                        var balloon = ge.createHtmlDivBalloon('');
-                        //balloon.setFeature(target);
-                        // create a div containing the placemark info,
-                        // so we can have JavaScript augment it (using jQuery Tabs)
-                        var div = document.createElement('DIV');
-                        div.innerHTML = data;
-                        balloon.setContentDiv(div);
-                        var w = Math.round($('#map3d').width() * 0.85);
-                        var h = Math.round($('#map3d').height() * 0.85);
-                        balloon.setMinWidth(w);
-                        balloon.setMinHeight(h);
-                        balloon.setMaxWidth(w);
-                        balloon.setMaxHeight(h);
-                        ge.setBalloon(balloon);
-                        // fill out the div
-                        var $tabs = $(div).find('.tabs');
-                        // initialize tabs, if there are any
-                        $tabs.tabs({
-                            //heightStyle: 'fill'
-                        });
-                        // fix tabs height causing jumping behaviour
-                        // the tab contents should scroll
-                        $tabs.find('.ui-tabs-panel.ui-widget-content').css({
-                            //'height': 'auto',
-                            //'overflow-y': 'auto'
-                        });
-                    }
-                );
+                    urlParams
+                )
+                .done(function (data) {
+                    var balloon = ge.createHtmlDivBalloon('');
+
+                    // Don't attach to a feature anymore, it is distracting.
+                    //balloon.setFeature(target);
+
+                    // Create a <div> containing the placemark info,
+                    // so we can have JavaScript augment it (using jQuery Tabs).
+                    var div = document.createElement('DIV');
+                    div.innerHTML = data;
+                    balloon.setContentDiv(div);
+                    var w = Math.round($('#map3d').width() * 0.85);
+                    var h = Math.round($('#map3d').height() * 0.85);
+                    balloon.setMinWidth(w);
+                    balloon.setMinHeight(h);
+                    balloon.setMaxWidth(w);
+                    balloon.setMaxHeight(h);
+                    ge.setBalloon(balloon);
+
+                    // Initialize jQuery tabs, if there are any.
+                    var $tabs = $(div).find('.tabs');
+                    $tabs.tabs();
+                });
             }
         }
     }
 };
 
+/**
+ * Add an item to the multiselect queue.
+ */
 KmlViewerUi.prototype.addSelectedItem = function (item) {
     var id = item.getId();
     console.log('selected ' + id);
-    // store clicked items
+
+    // Store the clicked item.
     this.selectedItems.push(parseInt(id));
+
+    // Do stuff when exactly two items are selected.
     var itemIndex = this.selectedItems.length;
     if (this.selectedItems.length === 2) {
         this.twoItemsSelected();
     }
+    // Otherwise, show a popup with what was clicked.
     else {
         var balloon = ge.createHtmlStringBalloon('');
         balloon.setFeature(item);
@@ -1196,23 +1243,28 @@ KmlViewerUi.prototype.addSelectedItem = function (item) {
     }
 };
 
+/**
+ * Render the jarkusmean plot when two transects have been selected.
+ */
 KmlViewerUi.prototype.twoItemsSelected = function () {
-    // found out ID's of the selected transects
+    // Find out ID's of the selected transects.
     var id_min = Math.min.apply(null, this.selectedItems);
     var id_max = Math.max.apply(null, this.selectedItems);
 
-    // stop multi selection mode
+    // Stop multi selection mode.
     this.stopMultiSelect();
 
-    // show the chart
+    // Show the chart.
+    // Note that this is slightly different from the other charts.
     var url = window.lizard_settings.lizard_kml.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
-    if ((id_max - id_min) < 500) {
+    if ((id_max - id_min) < 1000) {
         this.showMainBalloon(
             '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
             '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />',
             true
         );
     }
+    // Limit the amount of transects to prevent a timeout when generating the chart.
     else {
         this.showMainBalloon('Te veel items geselecteerd.');
     }
@@ -1231,37 +1283,48 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
  * Google Earth timeslider / play / pause control.
  */
 function GETimeSliderControl() {
-    /**
-     * Attributes
-     */
-    this.secondsInYear = 60 * 60 * 24 * 365; // amount of seconds in a year
+    // Amount of seconds in a year.
+    this.secondsInYear = 60 * 60 * 24 * 365;
+    // Initial play rate, can be adjusted with the slider.
     this.realSecondsPerDataYear = 5.0;
-    this.isPlaying = false; // keep our own playing / stopped state
+    // Keep our own playing / stopped state.
+    this.isPlaying = false;
+    // Interval which checks if Google Earth is playing past time extents.
     this.animationStopInterval = null;
 }
 
+/**
+ * Start checking the current time slider position.
+ */
 GETimeSliderControl.prototype.startControl = function () {
     this.animationStopInterval = window.setInterval(this.animationStopTick.bind(this), 1000);
 };
 
+/**
+ * Play or pause the animation.
+ */
 GETimeSliderControl.prototype.togglePlayPause = function () {
-    // true if an animation is playing without us having
-    // initiated it
+    // True, if an animation is playing without us having
+    // initiated it. For example clicking directly in Google Earth.
     var isPlayingExternal = ge.getTime().getRate() > 0;
+    // Play or pause.
     if (this.isPlaying || isPlayingExternal) {
-        // pause
+        // Pause
         this.pause();
     }
     else {
-        // play
+        // Play
         if (this.isPastEnd()) {
-            // at end, so rewind first
+            // Already at the end, so rewind first.
             this.rewind();
         }
         this.play();
     }
 };
 
+/**
+ * Rewind to first available timestamp.
+ */
 GETimeSliderControl.prototype.rewind = function () {
     this.pause();
     var begin = this.getExtentBegin();
@@ -1270,50 +1333,71 @@ GETimeSliderControl.prototype.rewind = function () {
     }
 };
 
+/**
+ * Change rate of playing animation.
+ */
 GETimeSliderControl.prototype.setRate = function (rate) {
     this.realSecondsPerDataYear = rate;
     if (this.isPlaying) {
-        // 'live' update the speed when playing
+        // Live update the speed while playing.
         ge.getTime().setRate(this.secondsInYear * this.realSecondsPerDataYear);
     }
 };
 
+/**
+ * Start playing the animation, when a time dimension is available any of the KMLs.
+ */
 GETimeSliderControl.prototype.play = function () {
     this.isPlaying = true;
     kvu.setPlaying(true);
     ge.getTime().setRate(this.secondsInYear * this.realSecondsPerDataYear);
 };
 
+/**
+ * Pause animation.
+ */
 GETimeSliderControl.prototype.pause = function () {
     ge.getTime().setRate(0);
     this.isPlaying = false;
     kvu.setPlaying(false);
 };
 
+/**
+ * Runs in an interval, checks whether we are playing past the extent
+ * of the KML data. Pauses the animation when this is the case.
+ *
+ * Note: this mitigates a bug in Google Earth.
+ */
 GETimeSliderControl.prototype.animationStopTick = function () {
     if (this.isPlaying) {
         if (ge.getTime().getRate() == 0) {
-            // playback has been stopped by some other means,
-            // like the timeslider
+            // Playback has been stopped by some other means,
+            // like the timeslider. Set our internal state...
             this.isPlaying = false;
-            // update the UI
+            // ... and update the UI as well.
             kvu.setPlaying(false);
         }
         else if (this.isPastEnd()) {
-            // FIX for Google bug: stop playing past extents
-            // we are past the extents, pause the animation
+            // Fix for Google bug: stop playing past extents.
+            // We are past the extents, pause the animation.
             this.pause();
-            // revert time to the end of the extents
+            // Revert time to the last available timestamp.
             this.setCurrentTime(this.getExtentEnd());
         }
     }
 };
 
+/**
+ * Determine first available timestamp of all loaded KML data.
+ */
 GETimeSliderControl.prototype.getExtentBegin = function () {
     var extents = ge.getTime().getControl().getExtents();
     return extents.getBegin().get();
 };
 
+/**
+ * Determine last available timestamp of all loaded KML data.
+ */
 GETimeSliderControl.prototype.getExtentEnd = function () {
     var extents = ge.getTime().getControl().getExtents();
     return extents.getEnd().get();
@@ -1327,7 +1411,7 @@ GETimeSliderControl.prototype.isPastEnd = function () {
 };
 
 /**
- * Returns the current datetime.
+ * Returns the datetime of the frame currently displayed.
  */
 GETimeSliderControl.prototype.getCurrentTimeEnd = function () {
     var currentTime = ge.getTime().getTimePrimitive();
@@ -1360,7 +1444,8 @@ GETimeSliderControl.prototype.setCurrentTime = function (time) {
 /* ************************************************************************ */
 
 /**
- * Google Earth streaming percentage listener.
+ * Google Earth streaming percentage listener. Draws the percentage in the
+ * upper right corner.
  */
 function GEStreamingControl() {
     this.$el = $('#kml-stream-percentage');
@@ -1409,7 +1494,8 @@ function KmlFileCollection() {
      */
     this.kmlFiles = {};
     /**
-     * Timeout reference, while an update is scheduled.
+     * Timeout reference, is active while an update is scheduled.
+     * When another update event is received, the previous timeout is cancelled.
      */
     this.updateTimeout = null;
 }
@@ -1478,7 +1564,7 @@ KmlFileCollection.prototype.startLoadingKmlFile = function (id, url, slug) {
 KmlFileCollection.prototype.reloadAllDynamic = function () {
     for (var i in this.kmlFiles) {
         var kmlFile = this.kmlFiles[i];
-        if (kmlFile.slug === "jarkus" && kmlFile.kmlObject !== null) {
+        if (kmlFile.slug === 'jarkus' && kmlFile.kmlObject !== null) {
             kmlFile.unload();
             kmlFile.load();
         }
