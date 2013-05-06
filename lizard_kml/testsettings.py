@@ -124,11 +124,9 @@ LIZARD_KML_STANDALONE = True
 
 # NetCDF databases containing transect (coastal) data, for example.
 # Local copies are highly recommended:
-# wget "http://opendap.deltares.nl/thredds/fileServer/opendap/rijkswaterstaat/jarkus/profiles/transect.nc"
+# $ bin/django sync_netcdfs
 NC_RESOURCE_LOCAL_DIR = os.path.join(BUILDOUT_DIR, 'var', 'netcdf')
-
-# by default, just use the remote versions
-NC_RESOURCE = {
+NC_RESOURCE_URLS = {
     'transect': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc',
     # Use this if we break the deltares server:
     #'transect': 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc',
@@ -139,6 +137,8 @@ NC_RESOURCE = {
     'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
     'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
 }
+# by default, just use the remote versions
+NC_RESOURCE = dict(NC_RESOURCE_URLS)
 
 # when a local copy of the .nc file is provided, use that instead
 for key in NC_RESOURCE:
