@@ -1180,6 +1180,10 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             // Don't do anything if there's no dynamic info link. The KML file could
             // have defined its own popups.
             if ($link.length === 1) {
+                // The popup content is just a single link identified by our custom
+                // "data-dynamic-info" attribute.
+                // Retrieve the content of this link asynchronously using XmlHttpRequest,
+                // and show it in a Google Earth balloon we instanciate ourselves.
                 // Don't show the normal balloon.
                 event.preventDefault();
                 // Find out the base URL.
@@ -1214,6 +1218,50 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     var $tabs = $(div).find('.tabs');
                     $tabs.tabs();
                 });
+            }
+            else if (/<link(.*)>/.test(html)) {
+                // Several Deltares popups use custom styling and scripts.
+                // These work in the Desktop edition of Google Earth, but
+                // will interfere with our own CSS styling when we use them
+                // in the browser plugin.
+                // To support them, we copy the contents to an iframe.
+                // As all KML files are controlled by us, this shouldn't pose
+                // a security threat.
+
+                // Don't show the normal balloon.
+                event.preventDefault();
+
+                // Create our own balloon.
+                var balloon = ge.createHtmlDivBalloon('');
+
+                // Attach it to the feature.
+                balloon.setFeature(target);
+
+                // Determine a suitable size for the balloon.
+                var w = Math.round($('#map3d').width() * 0.75);
+                var h = Math.round($('#map3d').height() * 0.65);
+                balloon.setMinWidth(w);
+                balloon.setMinHeight(h);
+
+                // Create a stub <iframe> and copy the HTML to it.
+                var $iframe = $('<iframe frameborder="0">')
+                .attr({
+                    width: w,
+                    height: h
+                });
+                // Iframes with custom content have to be initialized like this.
+                $iframe.load(function () {
+                    var $body = $(this).contents().find('body');
+                    // Copy the balloon HTML.
+                    $body.html(html);
+                    // Deltares likes to use jQuery tabs.
+                    // Attempt to initialize them, no problem if there aren't any.
+                    $body.find('#tabs').tabs();
+                });
+                balloon.setContentDiv($iframe.get(0));
+
+                // Open the balloon.
+                ge.setBalloon(balloon);
             }
         }
     }
@@ -1632,7 +1680,8 @@ KmlFile.prototype.fullUrl = function () {
     if (this.slug === "jarkus") {
         // Circumvent Google Earths aggressive caching by adding a random parameter.
         var random = (new Date()).toString();
-        var params = $.extend({}, jarkusKmlParams, {'random': random});
+        var moreParams = {'random': random};
+        var params = $.extend({}, jarkusKmlParams, moreParams);
         return this.baseUrl + '?' + $.param(params);
     }
     else {
