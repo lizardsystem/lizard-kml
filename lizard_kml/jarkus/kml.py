@@ -9,7 +9,7 @@ from django.contrib.gis.shortcuts import render_to_kmz, render_to_kml, compress_
 from django.utils.datastructures import SortedDict
 
 from lizard_kml.jarkus.nc_models import makejarkustransect, makejarkuslod
-from lizard_kml import helpers
+from lizard_kml.jarkus import helpers
 
 import numpy as np
 import matplotlib.cm

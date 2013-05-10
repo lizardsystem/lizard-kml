@@ -11,6 +11,10 @@ from lizard_kml.models import Category
 DEFAULT_PREVIEW_IMAGE = settings.STATIC_URL + 'lizard_kml/figures/none.png'
 
 class JsonView(View):
+    '''
+    Simple view which serializes the data returned by an overridden
+    method ``get_json`` to JSON.
+    '''
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         data = self.get_json(request, *args, **kwargs)
@@ -22,7 +26,8 @@ class JsonView(View):
 
 class CategoryTreeView(JsonView):
     '''
-    As consumed by Ext JS.
+    As consumed by Ext JS. Returns a tree structure with categories
+    and KML resources as leaf nodes.
     '''
     def get_json(self, request):
         categories = [

@@ -1249,7 +1249,9 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     width: w,
                     height: h
                 });
-                // Iframes with custom content have to be initialized like this.
+
+                // Iframes with custom content have to be initialized after the
+                // "load" event.
                 $iframe.load(function () {
                     var $body = $(this).contents().find('body');
                     // Copy the balloon HTML.
@@ -1257,7 +1259,11 @@ KmlViewerUi.prototype.clickHandler = function (event) {
                     // Deltares likes to use jQuery tabs.
                     // Attempt to initialize them, no problem if there aren't any.
                     $body.find('#tabs').tabs();
+                    // Have the iframe be the scroll focus.
+                    $(this).get(0).contentWindow.focus();
                 });
+
+                // Load the balloon contents.
                 balloon.setContentDiv($iframe.get(0));
 
                 // Open the balloon.

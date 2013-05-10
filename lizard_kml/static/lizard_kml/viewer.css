@@ -182,19 +182,6 @@ hr {
     height: 100px;
 }
 
-.placemark-info-popup .holder li span.loading {
-    background-image: url('/static_media/lizard_kml/loading.gif');
-}
-
-.placemark-info-popup .holder li span.broken {
-    background-image: url('/static_media/lizard_kml/broken.png');
-    background-color: #be3730;
-}
-
-img.spinner-when-loading.broken {
-    background-image: url('broken.png');
-    background-color: #be3730;
-}
 img.spinner-when-loading {
     background-image: url('spinner.gif');
     background-color: #fff;
