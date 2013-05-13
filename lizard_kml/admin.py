@@ -51,7 +51,7 @@ class KmlResourceInline(admin.TabularInline):
 
     def deeplink(self, obj):
         url = reverse('admin:lizard_kml_kmlresource_change', args=(obj.id,))
-        return '<a href="{}"><b>Details</b></a>'.format(url)
+        return '<a href="{0}"><b>Details</b></a>'.format(url)
     deeplink.allow_tags = True
     deeplink.short_description = 'Acties'
 

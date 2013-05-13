@@ -95,14 +95,14 @@ class XlsView(View):
         self.id = int(id)
         stream = cStringIO.StringIO()
         wb = xlwt.Workbook()
-        sheet = wb.add_sheet('Transect {}'.format(self.id))
+        sheet = wb.add_sheet('Transect {0}'.format(self.id))
         for i, row in enumerate(gettable(self.id)):
             for j, value in enumerate(row):
                 sheet.write(i, j, value)
         wb.save(stream)
         bytes = stream.getvalue()
         response = HttpResponse(bytes, content_type="application/vnd.ms-excel")
-        response['Content-Disposition'] = 'attachment; filename=transect{}.xls'.format(self.id)
+        response['Content-Disposition'] = 'attachment; filename=transect{0}.xls'.format(self.id)
         return response
 
 class ChartView(View):
@@ -127,7 +127,7 @@ class ChartView(View):
         if id_min and id_max:
             id_min = int(id_min)
             id_max = int(id_max)
-            id_str = '{}-{}'.format(id_min, id_max)
+            id_str = '{0}-{1}'.format(id_min, id_max)
 
         # TODO, sanitize the GET.... (pass format=png/pdf, width/height etc?)
         try:
@@ -152,7 +152,7 @@ class ChartView(View):
         wrapper = FileWrapper(fd)
         response = HttpResponse(wrapper, content_type="image/png")
         if self.download:
-            response['Content-Disposition'] = 'attachment; filename=transect-{}-{}.png'.format(id_str, chart_type)
+            response['Content-Disposition'] = 'attachment; filename=transect-{0}-{1}.png'.format(id_str, chart_type)
         return response
 
 def message_in_png(text):

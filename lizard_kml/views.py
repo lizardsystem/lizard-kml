@@ -153,7 +153,7 @@ class KmlResourceView(View):
 
         # Properly add extension and filename, even though it's mostly ignored.
         ext = MIME_TO_EXT.get(content_type, 'kml')
-        response['Content-Disposition'] = 'attachment; filename=kml_resource{}.{}'.format(kml_resource.pk, ext)
+        response['Content-Disposition'] = 'attachment; filename=kml_resource{0}.{1}'.format(kml_resource.pk, ext)
 
         return response
 

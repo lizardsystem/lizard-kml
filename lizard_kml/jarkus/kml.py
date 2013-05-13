@@ -43,7 +43,7 @@ def build_kml(view, kml_type, id, kml_args_dict):
         template_context.update(extra_context)
     else:
         raise Exception('KML type not supported')
-    return render_to_kmz("kml/{}.kml".format(kml_type), template_context)
+    return render_to_kmz("kml/{0}.kml".format(kml_type), template_context)
 
 def build_lod_context(overview, kml_args_dict):
     """
@@ -116,7 +116,7 @@ def build_transect_context(transect, kml_args_dict):
             'coordinates': coords,
             'begindate': helpers.kmldate(transect.begindates()[i]),
             'enddate': helpers.kmldate(transect.enddates()[i]),
-            'style': 'year{}'.format(transect.begindates()[i].year)
+            'style': 'year{0}'.format(transect.begindates()[i].year)
             }
     result['years'] = years
     return result
@@ -134,7 +134,7 @@ def build_style_context(kml_args_dict):
         # call with float 0..1 (or int 0 .. 255)
         r,g,b, alpha = colormap(float(year-1964)/float(2015-1964))
         color = matplotlib.colors.rgb2hex((b, g, r)).replace('#', '') # r and b reversed in the google, don't forget to add alpha
-        colors['year{}'.format(year)] = color
+        colors['year{0}'.format(year)] = color
     template_context['colors'] = colors
     return template_context
 
