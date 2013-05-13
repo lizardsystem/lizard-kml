@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates 
 
 import pandas
-import statsmodels.api as sm
 import netCDF4
 import matplotlib.gridspec
 

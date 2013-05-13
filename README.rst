@@ -8,15 +8,17 @@ Running the application
 
 Install the dependencies::
 
-   $> sudo apt-get install python-psycopg2 python-matplotlib python-pyproj
+   $> sudo apt-get install python-psycopg2 python-matplotlib python-pyproj wget
 
 Install build dependencies::
 
-   $> sudo apt-get install libatlas-base-dev gfortran libz-dev libpng-dev libfreetype6-dev python-dev
+   $> sudo apt-get install libatlas-base-dev gfortran g++ libz-dev libpng-dev libfreetype6-dev python-dev liblapack-dev
 
-Install some more dependencies, might want to use a virtualenv::
+Install some more dependencies, might want to use a virtualenv. These packages are incompatible with buildout.
+They refer to run-time dependencies in their setup.py, which are unavailable at "build-time".
+The packages for this in your Ubuntu repositories are probably too old.
 
-   $> easy_install scipy numpy statsmodels # or pip
+   $> easy_install numpy scipy netCDF4 pandas pytz python-dateutil six
 
 Initialize the Python interpreter paths::
 
@@ -34,7 +36,7 @@ Update the tables::
 
     $> bin/django migrate
 
-Load some testdata (fixture)::
+Load some test KMLs (fixture)::
 
     $> bin/django loaddata lizard_kml
 
@@ -50,3 +52,5 @@ Doing some more
 Need a local mirror of the NetCDF files? Free up approx. 3 GB of space and use this management command::
 
     $> bin/django sync_netcdfs
+
+This script uses ``wget``, which should be available everywhere.
