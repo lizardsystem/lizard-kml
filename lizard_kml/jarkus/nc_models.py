@@ -91,12 +91,12 @@ class Transect(object):
         # mask missings
         z = ma.masked_array(z, mask=isnan(z))
         return z
-    
+
     def move_by(self, distance):
         """
         Move the x,y coordinates by distance, perpendicular, assuming that they are lat,lon and that we can move in EPSG:28992
-        
-        >>> t = Transect(0) 
+
+        >>> t = Transect(0)
         >>> t.x = array([4.0])
         >>> t.y = array([51.0])
         >>> x,y = t.move_by(1000)
@@ -105,13 +105,13 @@ class Transect(object):
         """
         # project from wgs84 to rd, assuming x,y are lon, lat
         # compute the angle from the transect coordinates
-        
+
         x,y = proj(self.x, self.y)
-        
+
         dx = self.x[-1] - self.x[0]
         dy = self.y[-1] - self.y[0]
         angle = np.arctan2(dy,dx) + np.pi*0.5 # rotate by 90 degrees
-        
+
         x += distance * np.cos(angle);
         y += distance * np.sin(angle);
         lon, lat = proj(x,y,inverse=True)
@@ -198,7 +198,7 @@ def makejarkuslod():
     rsp_lon = dataset.variables['rsp_lon'][:]
     rsp_lat = dataset.variables['rsp_lat'][:]
 
-    # few 
+    # few
     overview['north'] = rsp_lat + 0.002
     overview['south'] = rsp_lat - 0.002
 
@@ -248,10 +248,10 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
 
     shorelinedf = pandas.DataFrame(
         data=dict(
-            time=time, 
-            mean_high_water=mean_high_water, 
-            mean_low_water=mean_low_water, 
-            dune_foot=dune_foot, 
+            time=time,
+            mean_high_water=mean_high_water,
+            mean_low_water=mean_low_water,
+            dune_foot=dune_foot,
             year=year
         )
     )
@@ -304,37 +304,61 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
 
     alltypes = set(x.strip() for x in netCDF4.chartostring(ds.variables['type'][:]))
 
-    # this dataset has data on nourishments and per transect. We'll use the per nourishments, for easier plotting. 
+    # this dataset has data on nourishments and per transect. We'll use the per nourishments, for easier plotting.
     # skip a few variables that have nasty non-ascii (TODO: check how to deal with non-ascii in netcdf)
     vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
     vardict = {}
     for var in vars:
-        if ('date' in var and 'units' in ds.variables[var].ncattrs()):
+        if var == 'date':
+            beg_date = ds.variables[var][:,0]
+            end_date = ds.variables[var][:,1]
+            if 'units' in ds.variables[var].ncattrs():
+                beg_date = netCDF4.netcdftime.num2date(beg_date, ds.variables[var].units)
+                end_date = netCDF4.netcdftime.num2date(end_date, ds.variables[var].units)
+            vardict['beg_date'] = beg_date
+            vardict['end_date'] = end_date
+        elif ('date' in var and 'units' in ds.variables[var].ncattrs()):
             # lookup the time variable
             t = netCDF4.netcdftime.num2date(ds.variables[var], ds.variables[var].units)
             vardict[var] = t
         elif 'stringsize' in ds.variables[var].dimensions:
             vardict[var] = netCDF4.chartostring(ds.variables[var][:])
+        elif var == 'stretch':
+            # convert stretched to begin and end stretch
+            vardict['beg_stretch'] = ds.variables[var][:,0]
+            vardict['end_stretch'] = ds.variables[var][:,1]
         else:
             vardict[var] = ds.variables[var][:]
 
     # this is specified in the unit decam, which should be dekam according to udunits specs.
-    assert ds.variables['beg_stretch'].units == 'decam'
+    assert ds.variables['stretch'].units == 'decam'
 
     ds.close()
 
+    for var in vardict.keys():
+        row_0 = vardict[var][0]
+        print "var: %s, type: %s" % (var, type(row_0))
+        if type(row_0) == np.ndarray:
+            print "deleting var %s from dict" % var
+            del vardict[var]
+
     # Put the data in a frame
     nourishmentdf = pandas.DataFrame.from_dict(vardict)
+
     # Compute nourishment volume in m3/m
     nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
 
     # Filter by current area and match the area
+    if hasattr(areaname, 'tostring'):
+        areaname = areaname.tostring().strip()
+    else:
+        areaname = areaname.strip()
     filter = reduce(
         np.logical_and,
         [
             alongshore >= nourishmentdf.beg_stretch,
             alongshore < nourishmentdf.end_stretch,
-            nourishmentdf['kustvak'].apply(str.strip) == areaname.tostring().strip()
+            nourishmentdf['kustvak'].apply(str.strip) == areaname
         ]
     )
     nourishmentdf = nourishmentdf[filter]
