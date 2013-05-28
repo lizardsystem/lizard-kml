@@ -819,7 +819,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
 
     // Multi select button.
     var multiselect = Ext.create('Ext.button.Button', {
-        text: 'Grafiek over meerdere raaien',
+        text: 'Geologische jarkusprofielen',
         handler: function () {
             self.toggleMultiSelect();
         }
