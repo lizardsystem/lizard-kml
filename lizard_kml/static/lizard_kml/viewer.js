@@ -1313,7 +1313,7 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     var url = window.lizard_settings.lizard_kml.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
     if ((id_max - id_min) < 1000) {
         this.showMainBalloon(
-            '<p>Gemiddelde voor raaien ' + id_min + ' tot en met ' + id_max + '</p>' +
+            '<h3>Geologische jarkusprofielen (' + id_min + ' tot en met ' + id_max + ')</h3>' +
             '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />',
             true
         );
