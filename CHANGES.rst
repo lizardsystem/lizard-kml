@@ -11,6 +11,8 @@ Changelog of lizard-kml
 
 - Fixed test settings.
 
+- Change jarkus title names and dynamic button text.
+
 
 0.3 (2012-04-22)
 ----------------
