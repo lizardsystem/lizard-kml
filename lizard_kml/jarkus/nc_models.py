@@ -329,12 +329,15 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     nourishmentdf['volm'] = nourishmentdf['vol']/(10*(nourishmentdf['end_stretch']-nourishmentdf['beg_stretch']))
 
     # Filter by current area and match the area
+    if hasattr(areaname, 'tostring'):
+        # areaname does not always have a tostring() method apparently
+        areaname = areaname.tostring()
     filter = reduce(
         np.logical_and,
         [
             alongshore >= nourishmentdf.beg_stretch,
             alongshore < nourishmentdf.end_stretch,
-            nourishmentdf['kustvak'].apply(str.strip) == areaname.tostring().strip()
+            nourishmentdf['kustvak'].apply(str.strip) == areaname.strip()
         ]
     )
     nourishmentdf = nourishmentdf[filter]
