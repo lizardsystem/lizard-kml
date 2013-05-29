@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.6 (unreleased)
+0.6 (2013-05-29)
 ----------------
 
 - Fix missing areaname.tostring() bug. 
