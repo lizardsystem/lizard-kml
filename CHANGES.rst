@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.4 (unreleased)
+0.4 (2013-05-29)
 ----------------
 
 - Removed some old tastypie code.
