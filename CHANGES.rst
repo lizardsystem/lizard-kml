@@ -13,6 +13,8 @@ Changelog of lizard-kml
 
 - Change jarkus title names and dynamic button text.
 
+- Remove netCDF4 and pandas from buildout sysegg.
+
 
 0.3 (2012-04-22)
 ----------------
