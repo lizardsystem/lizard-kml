@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.5 (unreleased)
+0.5 (2013-05-29)
 ----------------
 
 - Re-add netCDF4 and pandas. 
