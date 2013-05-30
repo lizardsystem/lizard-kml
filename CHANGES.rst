@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.7 (unreleased)
+0.7 (2013-05-30)
 ----------------
 
 - Add plot for 'faalkans eerste duinrij' netcdf. 
