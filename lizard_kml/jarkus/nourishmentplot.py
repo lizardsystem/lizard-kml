@@ -174,18 +174,18 @@ def combinedplot(dfs):
         # Strip spaces
         label = row['type'].strip()
         # Common properties
-        props = dict(alpha=0.7, linewidth=2)
+        ax4_props = dict(alpha=0.7, linewidth=2)
         # Plot a bar per nourishment
         ax4.fill_betweenx([0, row['volm']], date2num(row['beg_date']),
                           date2num(row['end_date']), edgecolor=color,
-                          color=color, **props)
+                          color=color, **ax4_props)
         if label not in labels:
             # Fill_between's are not added with labels.
             # So we'll create a proxy artist (a non plotted rectangle, with
             # the same color)
             # http://matplotlib.org/users/legend_guide.html
             proxy = matplotlib.patches.Rectangle((0, 0), 1, 1,
-                                                 facecolor=color, **props)
+                                                 facecolor=color, **ax4_props)
             proxy.set_label(label)
             proxies.append(proxy)
             labels.append(label)
