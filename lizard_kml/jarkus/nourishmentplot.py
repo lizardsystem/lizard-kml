@@ -4,7 +4,7 @@ import bisect
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.dates 
+import matplotlib.dates
 
 import pandas
 import netCDF4
@@ -49,14 +49,15 @@ def combinedplot(dfs):
     bkldf = dfs['bkldf']
     bwdf = dfs['bwdf']
     dfdf = dfs['dfdf']
+    dunefaildf = dfs['dunefaildf']
 
     transect = transectdf['transect'].irow(0)
     areaname = transectdf['areaname'].irow(0)
 
     # Plot the results.
     fig = plt.figure(figsize=(7,9))
-    # We define a grid of 3 areas 
-    gs = matplotlib.gridspec.GridSpec(4, 1, height_ratios=[5, 2, 2, 2]) 
+    # We define a grid of 5 areas
+    gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2])
     gs.update(hspace=0.1)
 
     # Some common style properties, also store they style information file for ggplot style in the directory where the script is.
@@ -88,7 +89,7 @@ def combinedplot(dfs):
         # No date set on axes, because of no data. No worries...
         pass
 
-    # Figuur 2: duinvoet / hoogwater / laagwater, vanaf (ongeveer) 1848 voor raai om de kilometer. Voor andere raaien vanaf 1965 (Jarkus) 
+    # Figuur 2: duinvoet / hoogwater / laagwater, vanaf (ongeveer) 1848 voor raai om de kilometer. Voor andere raaien vanaf 1965 (Jarkus)
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
     ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_rsp'], label='duinvoet positie', **props)
     ax2.plot(date2num(shorelinedf['time']), shorelinedf['dune_foot'], label='historische duinvoet positie', **props)
@@ -109,7 +110,7 @@ def combinedplot(dfs):
     except ValueError, e:
         # No dates no problem
         pass
-    ax2.set_ylabel('Afstand [m]') 
+    ax2.set_ylabel('Afstand [m]')
 
     # Figuur 3 strandbreedte bij hoogwater / strandbreedte bij laagwater (ook vanaf ongeveer 1848 voor raai om de kilometer, voor andere raaien vanaf 1965 )
     # Create another axis for the width and position parameters
@@ -139,10 +140,10 @@ def combinedplot(dfs):
     # Place the legend
     ax3.legend(loc='upper left')
 
-    # Figuur 4 uitgevoerde suppleties (laatste figuure onderaan), tekst bij de as bij voorkeur Volume (m3/m)
+    # Figuur 4 uitgevoerde suppleties, tekst bij de as bij voorkeur Volume (m3/m)
     # Create the third axes, again sharing the x-axis
     ax4 = fig.add_subplot(gs[3],sharex=ax1)
-    # We need to store labels and a "proxy artist". 
+    # We need to store labels and a "proxy artist".
     proxies = []
     labels = []
     # Loop over eadge row, because we need to look up colors (bit of a hack)
@@ -156,7 +157,7 @@ def combinedplot(dfs):
         # Plot a bar per nourishment
         ax4.fill_betweenx([0,row['volm']],date2num(row['beg_date']), date2num(row['end_date']), edgecolor=color, color=color, **props)
         if label not in labels:
-            # Fill_between's are not added with labels. 
+            # Fill_between's are not added with labels.
             # So we'll create a proxy artist (a non plotted rectangle, with the same color)
             # http://matplotlib.org/users/legend_guide.html
             proxy = matplotlib.patches.Rectangle((0, 0), 1, 1, facecolor=color, **props)
@@ -169,15 +170,35 @@ def combinedplot(dfs):
     ax4.yaxis.grid(False)
     #ax3.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter('%.0f'))
     ax4.set_ylabel('Volume [m3/m]')
-    ax4.set_xlabel('Tijd [jaren]')
+    # Again remove the xaxis labels
+    try:
+        for label in ax4.xaxis.get_ticklabels():
+            label.set_visible(False)
+    except ValueError, e:
+        # No dates no problem
+        pass
+    # Place the legend
+    ax4.legend(proxies, labels, loc='upper left')
+
+    # Figuur 5 Faalkans eerste duinrij (laatste figuur onderaan)
+    # Sharing the x-axis
+    ax5 = fig.add_subplot(gs[4], sharex=ax1)
+    ax5.plot(date2num(dunefaildf['time']), dunefaildf['probability_failure'], label='faalkans eerste duinrij', **props)
     # This one we want to see
-    ax4.xaxis.set_visible(True)
+    ax5.xaxis.set_visible(True)
+    # Only use first and last tick label
+    locs = [ax5.yaxis.get_ticklocs()[0], ax5.yaxis.get_ticklocs()[-1]]
+    ax5.yaxis.set_ticks(locs)
+    ax5.yaxis.grid(False)
+    ax5.set_ylabel('Kans [1/jr]')
+    ax5.set_xlabel('Tijd [jaren]')
     # Show dates at decenia
     locator = matplotlib.dates.YearLocator(base=25)
-    ax4.xaxis.set_major_locator(locator)
-    ax4.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
+    ax5.xaxis.set_major_locator(locator)
+    ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
     # Now we plot the proxies with corresponding legends.
-    legend = ax4.legend(proxies, labels, loc='upper left')
+    ax5.legend(loc='best')
+
     return fig
 
 if __name__ == '__main__':

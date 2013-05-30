@@ -404,6 +404,15 @@ def makedfdf(transect, dt_from=None, dt_to=None):
     return dfdf
 
 
+def makedunefaildf(transect, dt_from, dt_to):
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'faalkans', False, dt_from, dt_to)
+
+    ds.close()
+
+    dunefaildf = pandas.DataFrame(vardict)
+    return dunefaildf
+
+
 def get_time_filter(time_arr, dt_from=None, dt_to=None):
     filter = np.zeros(time_arr.shape, dtype=np.bool)
     if dt_from is not None:
@@ -462,6 +471,7 @@ def makedfs(transect, dt_from=None, dt_to=None):
     bkldf = makebkldf(transect, dt_from, dt_to)
     bwdf = makebwdf(transect, dt_from, dt_to)
     dfdf = makedfdf(transect, dt_from, dt_to)
+    dunefaildf = makedunefaildf(transect, dt_from, dt_to)
 
     return dict(
         shorelinedf=shorelinedf,
@@ -470,5 +480,6 @@ def makedfs(transect, dt_from=None, dt_to=None):
         mkldf=mkldf,
         bkldf=bkldf,
         bwdf=bwdf,
-        dfdf=dfdf
+        dfdf=dfdf,
+        dunefaildf=dunefaildf
     )
