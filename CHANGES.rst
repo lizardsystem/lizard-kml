@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.9 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix transect year data table data generation. 
 
 
 0.8 (2013-06-03)
