@@ -122,6 +122,7 @@ class Transect(object):
 def makejarkustransect(id, dt_from=None, dt_to=None):
     """Make a transect object, given an id (1000000xareacode + alongshore distance)"""
     id = int(id)
+    id_str = str(id)
     # TODO: Dataset does not support with ... as dataset, this can lead to too many open ports if datasets are not closed, for whatever reason
     dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     tr = Transect(id)
@@ -168,11 +169,42 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
     tr.t = t[(~filter).any(1)]
     tr.cross_shore = cross_shore[(~filter).any(0)]
 
+    # get rsp coordinates
+    rsp_lat = dataset.variables['rsp_lat'][alongshoreindex]
+    rsp_lon = dataset.variables['rsp_lon'][alongshoreindex]
+    tr.rsp_lat = rsp_lat.squeeze()
+    tr.rsp_lon = rsp_lon.squeeze()
+
     # get the water level variables
     mhw = dataset.variables['mean_high_water'][alongshoreindex]
     mlw = dataset.variables['mean_low_water'][alongshoreindex]
     tr.mhw = mhw.squeeze()
     tr.mlw = mlw.squeeze()
+
+    # get the angle
+    angle = dataset.variables['angle'][alongshoreindex]
+    tr.angle = angle.squeeze()
+
+    areaname = dataset.variables['areaname'][alongshoreindex].tostring().strip()
+    areacode = dataset.variables['areacode'][alongshoreindex]
+    tr.areaname = areaname
+    tr.areacode = areacode
+    transect_code = id_str.lstrip(str(areacode)).lstrip('0')
+    tr.transect_code = transect_code
+
+    min_cross = dataset.variables['min_cross_shore_measurement'][t!=True,alongshoreindex]
+    max_cross = dataset.variables['max_cross_shore_measurement'][t!=True,alongshoreindex]
+    time_topo = dataset.variables['time_topo'][t!=True,alongshoreindex]
+    time_topo = array([datetime.datetime.fromtimestamp(days*3600*24) for
+                          days in time_topo])
+    time_bathy = dataset.variables['time_bathy'][t!=True,alongshoreindex]
+    time_bathy = array([datetime.datetime.fromtimestamp(days*3600*24) for
+                           days in time_bathy])
+
+    # need to convert to lists because django 1.4 cannot loop over numpy array
+    # rows by index (1.5 can)
+    tr.year_data = zip(t.tolist(), min_cross.tolist(), max_cross.tolist(),
+                       time_topo.tolist(), time_bathy.tolist())
 
     dataset.close()
     # return dict to conform to the "rendering context"

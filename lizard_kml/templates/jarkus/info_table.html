@@ -1,0 +1,61 @@
+<h3>Algemene en jaarlijkse informatie over transect {{ view.id }}</h3>
+<table id="transect-table">
+    <thead>
+        <tr>
+            <th colspan="2" style="text-align: left;">Algemene informatie</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Transect id</td>
+            <td>{{ view.id }}</td>
+        </tr>
+        <tr>
+            <td>Area name</td>
+            <td>{{ view.transect.areaname }} ({{ view.transect.areacode }})</td>
+        </tr>
+        <tr>
+            <td>Transect code</td>
+            <td>{{ view.transect.transect_code }}</td>
+        </tr>
+        <tr>
+            <td>RSP coordinates</td>
+            <td>lat = {{ view.transect.rsp_lat }} decimal degrees; lon = {{ view.transect.rsp_lon }} decimal degrees</td>
+        </tr>
+        <tr>
+            <td>Angle</td>
+            <td>{{ view.transect.angle }} degrees (+ clockwise, N)</td>
+        </tr>
+        <tr>
+            <td>Mean High Water</td>
+            <td>{{ view.transect.mhw }} m (rel. to NAP)</td>
+        </tr>
+        <tr>
+            <td>Mean Low Water</td>
+            <td>{{ view.transect.mlw }} m (rel. to NAP)</td>
+        </tr>
+    </tbody>
+</table>
+
+<table id="transect-table">
+    <thead>
+        <tr>
+            <th>year</th>
+            <th>min_cross meas. [m]</th>
+            <th>max_cross meas. [m]</th>
+            <th>time_topo</th>
+            <th>time_bathy</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in view.transect.year_data %}
+        <tr>
+            <td>{{ row.0.year }}</td>
+            <td>{{ row.1 }}</td>
+            <td>{{ row.2 }}</td>
+            <td>{{ row.3.date }}</td>
+            <td>{{ row.4.date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,5 +1,5 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
-from django.template import RequestContext
+from django.template import RequestContext, Context, loader
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import simplejson as json
@@ -78,6 +78,12 @@ class InfoView(ViewContextMixin, TemplateView):
             url_params['year_to'] = int(year_to)
 
         self.url_params = urllib.urlencode(url_params)
+
+        dt_from = (datetime.datetime(int(year_from), 1, 1) if year_from else
+                   None)
+        dt_to = (datetime.datetime(int(year_to), 12, 31, 23, 59, 59) if
+                 year_to else None)
+        self.transect = makejarkustransect(self.id, dt_from, dt_to)
 
         return super(InfoView, self).get(self, request)
 

@@ -2,10 +2,14 @@
 <div class="placemark-info-popup">
     <div id="info-{{ view.id }}-tabs" class="tabs">
         <ul>
+            <li><a href="#info-{{ view.id }}-tabs-info">Info</a></li>
             <li><a href="#info-{{ view.id }}-tabs-eeg">Timestack 1</a></li>
             <li><a href="#info-{{ view.id }}-tabs-timeseries">Timestack 2</a></li>
             <li><a href="#info-{{ view.id }}-tabs-nourishment">Indicatoren</a></li>
         </ul>
+        <div id="info-{{ view.id }}-tabs-info">
+            {% include 'jarkus/info_table.html' %}
+        </div>
         <div id="info-{{ view.id }}-tabs-eeg">
             <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}?{{ view.url_params }}"
                  width="700" height="300" class="spinner-when-loading" />
