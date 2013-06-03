@@ -51,10 +51,10 @@
         {% for row in view.transect.year_data %}
         <tr>
             <td>{{ row.0.year }}</td>
-            <td>{{ row.1 }}</td>
-            <td>{{ row.2 }}</td>
-            <td>{{ row.3.date }}</td>
-            <td>{{ row.4.date }}</td>
+            <td>{% if row.1 %}{{ row.1 }}{% else %}NA{% endif %}</td>
+            <td>{% if row.2 %}{{ row.2 }}{% else %}NA{% endif %}</td>
+            <td>{% if row.3 %}{{ row.3.date }}{% else %}NA{% endif %}</td>
+            <td>{% if row.4 %}{{ row.4.date }}{% else %}NA{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>

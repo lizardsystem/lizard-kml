@@ -192,19 +192,49 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
     transect_code = id_str.lstrip(str(areacode)).lstrip('0')
     tr.transect_code = transect_code
 
-    min_cross = dataset.variables['min_cross_shore_measurement'][t!=True,alongshoreindex]
-    max_cross = dataset.variables['max_cross_shore_measurement'][t!=True,alongshoreindex]
-    time_topo = dataset.variables['time_topo'][t!=True,alongshoreindex]
-    time_topo = array([datetime.datetime.fromtimestamp(days*3600*24) for
-                          days in time_topo])
-    time_bathy = dataset.variables['time_bathy'][t!=True,alongshoreindex]
-    time_bathy = array([datetime.datetime.fromtimestamp(days*3600*24) for
-                           days in time_bathy])
+    t_subset = None
+    if dt_from and dt_to:
+        t_subset = (t > dt_from) & (t < dt_to)
+    elif dt_from:
+        t_subset = (t > dt_from)
+    else:
+        t_subset = (t < dt_to)
+
+    if t_subset is None:
+        min_cross = dataset.variables['min_cross_shore_measurement'][:,alongshoreindex]
+        max_cross = dataset.variables['max_cross_shore_measurement'][:,alongshoreindex]
+        time_topo = dataset.variables['time_topo'][:,alongshoreindex]
+        time_bathy = dataset.variables['time_bathy'][:,alongshoreindex]
+        sub_t = t[:]
+    else:
+        min_cross = dataset.variables['min_cross_shore_measurement'][t_subset,alongshoreindex]
+        max_cross = dataset.variables['max_cross_shore_measurement'][t_subset,alongshoreindex]
+        time_topo = dataset.variables['time_topo'][t_subset,alongshoreindex]
+        time_bathy = dataset.variables['time_bathy'][t_subset,alongshoreindex]
+        sub_t = t[t_subset]
+
+    time_topo_list = []
+    for days in time_topo:
+        try:
+            dt = datetime.datetime.fromtimestamp(days*3600*24)
+        except ValueError, e:
+            # data probably unavailable for the given year
+            dt = None
+        time_topo_list.append(dt)
+
+    time_bathy_list = []
+    for days in time_bathy:
+        try:
+            dt = datetime.datetime.fromtimestamp(days*3600*24)
+        except ValueError, e:
+            # data probably unavailable for the given year
+            dt = None
+        time_bathy_list.append(dt)
 
     # need to convert to lists because django 1.4 cannot loop over numpy array
     # rows by index (1.5 can)
-    tr.year_data = zip(t.tolist(), min_cross.tolist(), max_cross.tolist(),
-                       time_topo.tolist(), time_bathy.tolist())
+    tr.year_data = zip(sub_t.tolist(), min_cross.tolist(), max_cross.tolist(),
+                       time_topo_list, time_bathy_list)
 
     dataset.close()
     # return dict to conform to the "rendering context"
