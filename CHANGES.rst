@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add Jarkus info tab.
 
 
 0.7 (2013-05-30)
