@@ -386,7 +386,7 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
             vardict[var] = ds.variables[var][:]
 
     # this is specified in the unit decam, which should be dekam according to udunits specs.
-    assert ds.variables['beg_stretch'].units == 'decam'
+    assert ds.variables['stretch'].units == 'decam'
 
     ds.close()
 
