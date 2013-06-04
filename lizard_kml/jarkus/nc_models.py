@@ -373,13 +373,13 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     for var in vars:
         if (var == 'date' and 'units' in ds.variables[var].ncattrs()):
             # lookup the time variable
-            t0 = netCDF4.netcdftime.num2date(ds.variables[var][0,:], ds.variables[var].units)
+            t0 = netCDF4.netcdftime.num2date(ds.variables[var][:,0], ds.variables[var].units)
             vardict['beg_date'] = t0
-            t1 = netCDF4.netcdftime.num2date(ds.variables[var][1,:], ds.variables[var].units)
+            t1 = netCDF4.netcdftime.num2date(ds.variables[var][:,1], ds.variables[var].units)
             vardict['end_date'] = t1
         elif var == 'stretch':
-            vardict['beg_stretch'] = ds.variables[var][0,:]
-            vardict['end_stretch'] = ds.variables[var][1,:]
+            vardict['beg_stretch'] = ds.variables[var][:,0]
+            vardict['end_stretch'] = ds.variables[var][:,1]
         elif 'stringsize' in ds.variables[var].dimensions:
             vardict[var] = netCDF4.chartostring(ds.variables[var][:])
         else:
@@ -389,7 +389,7 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     assert ds.variables['stretch'].units == 'decam'
 
     ds.close()
-
+    import ipdb; ipdb.set_trace()
     # Put the data in a frame
     nourishmentdf = pandas.DataFrame.from_dict(vardict)
     # Compute nourishment volume in m3/m
