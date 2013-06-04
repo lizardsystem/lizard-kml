@@ -371,10 +371,15 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     vars = [name for name, var in ds.variables.items() if 'survey' not in name and 'other' not in name and 'nourishment' in var.dimensions]
     vardict = {}
     for var in vars:
-        if ('date' in var and 'units' in ds.variables[var].ncattrs()):
+        if (var == 'date' and 'units' in ds.variables[var].ncattrs()):
             # lookup the time variable
-            t = netCDF4.netcdftime.num2date(ds.variables[var], ds.variables[var].units)
-            vardict[var] = t
+            t0 = netCDF4.netcdftime.num2date(ds.variables[var][0,:], ds.variables[var].units)
+            vardict['beg_date'] = t0
+            t1 = netCDF4.netcdftime.num2date(ds.variables[var][1,:], ds.variables[var].units)
+            vardict['end_date'] = t1
+        elif var == 'stretch':
+            vardict['beg_stretch'] = ds.variables[var][0,:]
+            vardict['end_stretch'] = ds.variables[var][1,:]
         elif 'stringsize' in ds.variables[var].dimensions:
             vardict[var] = netCDF4.chartostring(ds.variables[var][:])
         else:
