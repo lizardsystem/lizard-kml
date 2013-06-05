@@ -146,11 +146,8 @@ def combinedplot(dfs):
         leg = ax2.legend(loc='best')
         leg.get_frame().set_alpha(0.7)
 
-        # Look up the location of the tick labels, because we're removing all but
-        # the first and last.
-        locs = [ax2.yaxis.get_ticklocs()[0], ax2.yaxis.get_ticklocs()[-1]]
-        # We don't want too much cluttering
-        ax2.yaxis.set_ticks(locs)
+        # Only show up to 5 major ticks on y-axis.
+        ax2.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
 
         # Again remove the xaxis labels
         try:
@@ -184,11 +181,8 @@ def combinedplot(dfs):
         ax3.plot(date2num(bwdf['time']), bwdf['beach_width_at_MLW'],
                  label='strandbreedte MLW', **props)
 
-        # Look up the location of the tick labels, because we're removing all
-        # but the first and last.
-        locs = [ax3.yaxis.get_ticklocs()[0], ax3.yaxis.get_ticklocs()[-1]]
-        # We don't want too much cluttering
-        ax3.yaxis.set_ticks(locs)
+        # Only show 5 major ticks on y-axis
+        ax3.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         ax3.yaxis.grid(False)
         # Again remove the xaxis labels
         try:
@@ -240,9 +234,8 @@ def combinedplot(dfs):
                 proxy.set_label(label)
                 proxies.append(proxy)
                 labels.append(label)
-        # Only use first and last tick label
-        locs = [ax4.yaxis.get_ticklocs()[0], ax4.yaxis.get_ticklocs()[-1]]
-        ax4.yaxis.set_ticks(locs)
+        # Only show 5 major ticks on y-axis
+        ax4.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         ax4.yaxis.grid(False)
         # Place the legend
         leg4 = ax4.legend(proxies, labels, loc='upper left')
@@ -266,9 +259,7 @@ def combinedplot(dfs):
                  label='faalkans eerste duinrij', **props)
         # This one we want to see
         ax5.xaxis.set_visible(True)
-        # Only use first and last tick label
-        locs = [ax5.yaxis.get_ticklocs()[0], ax5.yaxis.get_ticklocs()[-1]]
-        ax5.yaxis.set_ticks(locs)
+        ax5.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         ax5.yaxis.grid(False)
         ax5.set_yscale('log')
         # Now we plot the proxies with corresponding legends.
