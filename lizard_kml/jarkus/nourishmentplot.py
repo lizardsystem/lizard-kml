@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates
 import matplotlib.gridspec
+
+logger = logging.getLogger(__name__)
 
 # simplify for colors
 typemap = {
@@ -212,7 +216,11 @@ def combinedplot(dfs):
         labels = []
         for i, row in nourishmentdf.iterrows():
             # Look up the color based on the type of nourishment
-            color = beachcolors[typemap[row['type'].strip()]]
+            try:
+                color = beachcolors[typemap[row['type'].strip()]]
+            except KeyError, e:
+                logger.error("undefined beachcolor type: %s" % e)
+                color = beachcolors['overig']
             # Strip spaces
             label = row['type'].strip()
             # Common properties

@@ -201,7 +201,7 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
         t_subset = (t > dt_from) & (t < dt_to)
     elif dt_from:
         t_subset = (t > dt_from)
-    else:
+    elif dt_to:
         t_subset = (t < dt_to)
 
     if t_subset is None:
