@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.11 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Make nourishment plot legends transparent. 
 
 
 0.10 (2013-06-05)
