@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.13 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Only show up to 5 major ticks on the y-axis for the smaller plots. 
 
 
 0.12 (2013-06-05)
