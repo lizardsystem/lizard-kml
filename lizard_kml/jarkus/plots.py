@@ -24,7 +24,8 @@ import netCDF4
 import netcdftime
 
 from lizard_kml.jarkus import extra_cm
-from lizard_kml.jarkus.nourishmentplot import combinedplot
+from lizard_kml.jarkus.nourishmentplot import (combinedplot,
+                                               all_else_fails_plot)
 from lizard_kml.jarkus.nc_models import makedfs
 
 # web
@@ -201,7 +202,7 @@ def jarkusmean(id_min, id_max, plotproperties=None):
 
         # Define color for years
         timenum = matplotlib.dates.date2num(time)
-        sm = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
+        sm = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.YlGnBu)
         sm.set_clim(np.min(timenum), np.max(timenum))
         sm.set_array(timenum)
 
@@ -247,9 +248,20 @@ def nourishment(transect_id, dt_from=None, dt_to=None, plotproperties=None):
     fig = combinedplot(dfs)
 
     buf = cStringIO.StringIO()
-    fig.savefig(buf, **plotproperties)
+
+    try:
+        fig.savefig(buf, **plotproperties)
+    except ValueError, e:
+        logger.error("Error creating nourishment figure for %s (from %s to "
+                     "%s)" % (transect_id, dt_from, dt_to))
+        all_else_fails_fig = all_else_fails_plot(dfs)
+        buf.reset()
+        all_else_fails_fig.savefig(buf, **plotproperties)
+        # cleanup
+        all_else_fails_fig.clf()
+    else:
+        # cleanup
+        fig.clf()
     buf.seek(0)
-    # cleanup
-    fig.clf()
     # return an 'open' file descriptor
     return buf

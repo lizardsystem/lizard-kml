@@ -35,12 +35,16 @@ if settings is not None and hasattr(settings, 'NC_RESOURCE'):
 else:
     NC_RESOURCE = {
         'transect': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/jarkus/profiles/transect.nc',
+        # Use this if we break the deltares server:
+        #'transect': 'http://opendap.tudelft.nl/thredds/dodsC/data2/deltares/rijkswaterstaat/jarkus/profiles/transect.nc',
         'BKL_TKL_TND': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/BKL_TKL_TND.nc',
         'DF': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF.nc',
+        # 'DF': 'http://dtvirt5.deltares.nl:8080/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF_r2011.nc',
         'MKL': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc',
         'strandbreedte': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc',
         'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
         'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
+        'faalkans': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/faalkans_PC-Ring/faalkans.nc',
     }
 
 if '4.1.3' in netCDF4.getlibversion():
@@ -359,7 +363,7 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     if transectidx is None:
         raise NoDataForTransect(transect)
 
-    alongshore = ds.variables['alongshore'][transectidx]
+    alongshore_id = ds.variables['id'][transectidx]
 
     # TODO fix this name, it's missing
     # areaname = netCDF4.chartostring(ds.variables['areaname'][transectidx,:])
@@ -382,6 +386,9 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
             vardict['end_stretch'] = ds.variables[var][:,1]
         elif 'stringsize' in ds.variables[var].dimensions:
             vardict[var] = netCDF4.chartostring(ds.variables[var][:])
+        elif var in ['x_corner', 'y_corner']:
+            # skip these multidimensional fields
+            continue
         else:
             vardict[var] = ds.variables[var][:]
 
@@ -389,7 +396,6 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     assert ds.variables['stretch'].units == 'decam'
 
     ds.close()
-    import ipdb; ipdb.set_trace()
     # Put the data in a frame
     nourishmentdf = pandas.DataFrame.from_dict(vardict)
     # Compute nourishment volume in m3/m
@@ -402,22 +408,17 @@ def makenourishmentdf(transect, dt_from=None, dt_to=None, areaname=""):
     filter = reduce(
         np.logical_and,
         [
-            alongshore >= nourishmentdf.beg_stretch,
-            alongshore < nourishmentdf.end_stretch,
-            nourishmentdf['kustvak'].apply(str.strip) == areaname.strip()
+            alongshore_id >= nourishmentdf.beg_stretch,
+            alongshore_id < nourishmentdf.end_stretch,
         ]
     )
     nourishmentdf = nourishmentdf[filter]
 
     # Filter by time
-    filter2 = reduce(
-        np.logical_and,
-        [
-            nourishmentdf['beg_date'] >= dt_from,
-            nourishmentdf['end_date'] <= dt_to,
-        ]
-    )
-    nourishmentdf = nourishmentdf[filter2]
+    if dt_from:
+        nourishmentdf = nourishmentdf[nourishmentdf['beg_date'] >= dt_from]
+    if dt_to:
+        nourishmentdf = nourishmentdf[nourishmentdf['end_date'] <= dt_to]
 
     return nourishmentdf
 
@@ -463,7 +464,7 @@ def makebwdf(transect, dt_from=None, dt_to=None):
 
 def makedfdf(transect, dt_from=None, dt_to=None):
     """read the dunefoot data"""
-    transectidx, filter, vardict, ds = prepare_vardict(transect, 'DF', True, dt_from, dt_to)
+    transectidx, filter, vardict, ds = prepare_vardict(transect, 'DF', False, dt_from, dt_to)
 
     ds.close()
 
