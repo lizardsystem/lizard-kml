@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix t_subset filter and improve undefined beachcolor handling. 
 
 
 0.11 (2013-06-05)
