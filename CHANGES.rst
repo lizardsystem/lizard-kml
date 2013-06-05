@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix year span on x-axis. 
 
 
 0.13 (2013-06-05)
