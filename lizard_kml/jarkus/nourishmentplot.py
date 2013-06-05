@@ -110,7 +110,8 @@ def combinedplot(dfs):
     ax1.plot(date2num(bkldf['time']), bkldf['testing_coastline'],
              label='te toetsenkustlijn', **props)
     # Plot the legend. This uses the label
-    ax1.legend(loc='upper left')
+    leg1 = ax1.legend(loc='upper left')
+    leg1.get_frame().set_alpha(0.7)
     # Hide the ticks for this axis (can't use set_visible on xaxis because it
     # is shared)
     try:
@@ -193,7 +194,8 @@ def combinedplot(dfs):
             # No dates no problem
             pass
         # Place the legend
-        ax3.legend(loc='upper left')
+        leg3 = ax3.legend(loc='upper left')
+        leg3.get_frame().set_alpha(0.7)
     # Dune foot is position but relative to RSP, so we can call it a width
     # show y-label no matter what
     ax3.set_ylabel('Breedte [m]')
@@ -225,7 +227,8 @@ def combinedplot(dfs):
                 # the same color)
                 # http://matplotlib.org/users/legend_guide.html
                 proxy = matplotlib.patches.Rectangle((0, 0), 1, 1,
-                                                     facecolor=color, **ax4_props)
+                                                     facecolor=color,
+                                                     **ax4_props)
                 proxy.set_label(label)
                 proxies.append(proxy)
                 labels.append(label)
@@ -234,7 +237,8 @@ def combinedplot(dfs):
         ax4.yaxis.set_ticks(locs)
         ax4.yaxis.grid(False)
         # Place the legend
-        ax4.legend(proxies, labels, loc='upper left')
+        leg4 = ax4.legend(proxies, labels, loc='upper left')
+        leg4.get_frame().set_alpha(0.7)
         # Again remove the xaxis labels
         try:
             for label in ax4.xaxis.get_ticklabels():
@@ -260,7 +264,8 @@ def combinedplot(dfs):
         ax5.yaxis.grid(False)
         ax5.set_yscale('log')
         # Now we plot the proxies with corresponding legends.
-        ax5.legend(loc='best')
+        leg5 = ax5.legend(loc='best')
+        leg5.get_frame().set_alpha(0.7)
         ax5.set_xlabel('Tijd [jaren]')
     # Show dates at decenia
     locator = matplotlib.dates.YearLocator(base=25)
