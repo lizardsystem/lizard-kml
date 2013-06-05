@@ -266,9 +266,7 @@ def combinedplot(dfs):
         leg5 = ax5.legend(loc='best')
         leg5.get_frame().set_alpha(0.7)
         ax5.set_xlabel('Tijd [jaren]')
-    # Show dates at decenia
-    locator = matplotlib.dates.YearLocator(base=25)
-    ax5.xaxis.set_major_locator(locator)
+    ax5.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
     ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
     # show y-label no matter what
     ax5.set_ylabel('Kans [1/jr]')
