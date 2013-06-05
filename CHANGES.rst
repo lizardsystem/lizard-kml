@@ -5,7 +5,8 @@ Changelog of lizard-kml
 0.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix nourishment plots by handling missing data cases. Figure generation 
+  tests. 
 
 
 0.9 (2013-06-03)
