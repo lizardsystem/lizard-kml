@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.16 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix label width. 
 
 
 0.15 (2013-06-06)
