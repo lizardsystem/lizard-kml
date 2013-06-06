@@ -78,7 +78,7 @@ def combinedplot(dfs):
     fig = plt.figure(figsize=(7, 9))
     # We define a grid of 5 areas
     gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2],
-                                      right=0.73)
+                                      right=0.71)
     gs.update(hspace=0.1)
 
     # Some common style properties, also store they style information file for
