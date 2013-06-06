@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.15 (unreleased)
+0.15 (2013-06-06)
 -----------------
 
 - Put subplot legends to the right. 
