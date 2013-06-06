@@ -77,7 +77,8 @@ def combinedplot(dfs):
     # Plot the results.
     fig = plt.figure(figsize=(7, 9))
     # We define a grid of 5 areas
-    gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2])
+    gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2],
+                                      right=0.73)
     gs.update(hspace=0.1)
 
     # Some common style properties, also store they style information file for
@@ -114,8 +115,7 @@ def combinedplot(dfs):
     ax1.plot(date2num(bkldf['time']), bkldf['testing_coastline'],
              label='te toetsenkustlijn', **props)
     # Plot the legend. This uses the label
-    leg1 = ax1.legend(loc='upper left')
-    leg1.get_frame().set_alpha(0.7)
+    ax1.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
     # Hide the ticks for this axis (can't use set_visible on xaxis because it
     # is shared)
     try:
@@ -138,13 +138,12 @@ def combinedplot(dfs):
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_upperMKL_cross'],
                  label='Duinvoet (BKL-schijf)', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_threeNAP_cross'],
-                 label='Duinvoet (NAP+3 meter)', **props)
+                 label='Duinvoet (NAP+3m)', **props)
         ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'],
                  label='Hoogwater positie', **props)
         ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water'],
                  label='Laagwater positie', **props)
-        leg = ax2.legend(loc='best')
-        leg.get_frame().set_alpha(0.7)
+        ax2.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
 
         # Only show up to 5 major ticks on y-axis.
         ax2.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
@@ -192,8 +191,7 @@ def combinedplot(dfs):
             # No dates no problem
             pass
         # Place the legend
-        leg3 = ax3.legend(loc='upper left')
-        leg3.get_frame().set_alpha(0.7)
+        ax3.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
     # Dune foot is position but relative to RSP, so we can call it a width
     # show y-label no matter what
     ax3.set_ylabel('Breedte [m]')
@@ -238,8 +236,8 @@ def combinedplot(dfs):
         ax4.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         ax4.yaxis.grid(False)
         # Place the legend
-        leg4 = ax4.legend(proxies, labels, loc='upper left')
-        leg4.get_frame().set_alpha(0.7)
+        ax4.legend(proxies, labels, bbox_to_anchor=(1.01, 1), loc=2,
+                   borderaxespad=0.)
         # Again remove the xaxis labels
         try:
             for label in ax4.xaxis.get_ticklabels():
@@ -256,15 +254,14 @@ def combinedplot(dfs):
     ax5 = fig.add_subplot(gs[4], sharex=ax1)
     if is_not_empty(dunefaildf['probability_failure']):
         ax5.plot(date2num(dunefaildf['time']), dunefaildf['probability_failure'],
-                 label='faalkans eerste duinrij', **props)
+                 label='faalkans 1e duinrij', **props)
         # This one we want to see
         ax5.xaxis.set_visible(True)
         ax5.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
         ax5.yaxis.grid(False)
         ax5.set_yscale('log')
         # Now we plot the proxies with corresponding legends.
-        leg5 = ax5.legend(loc='best')
-        leg5.get_frame().set_alpha(0.7)
+        ax5.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
         ax5.set_xlabel('Tijd [jaren]')
     ax5.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
     ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
