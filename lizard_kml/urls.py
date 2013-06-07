@@ -34,7 +34,7 @@ urlpatterns = patterns(
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^chart/(?P<chart_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', ChartView.as_view(), name='lizard-kml-chart'),
     url(r'^chartdownload/(?P<chart_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', ChartView.as_view(download=True), name='lizard-kml-chart-download'),
-    url(r'^kml/(?P<kml_resource_id>[0-9]+)/$', KmlResourceView.as_view(), name='lizard-kml-kml'),
+    url(r'^kml/(?P<kml_resource_id>[0-9]+).(?P<ext>[a-z]+)$', KmlResourceView.as_view(), name='lizard-kml-kml'),
     url(r'^api/$', CategoryTreeView.as_view(), name='lizard-kml-api'),
 )
 
