@@ -296,9 +296,8 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
         dune_foot = np.zeros(0)
         year = np.zeros(0)
     else:
-        mean_high_water = ds.variables['MHW'][transectidx,:]
-        mean_low_water = ds.variables['MLW'][transectidx,:]
-        dune_foot = ds.variables['DF'][transectidx,:]
+        mean_high_water = ds.variables['mean_high_water_cross'][transectidx,:]
+        mean_low_water = ds.variables['mean_low_water_cross'][transectidx,:]
 
         year = ds.variables['year'][:]
         time = np.array([datetime.datetime(x, 1, 1) for x in year])
@@ -317,7 +316,6 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
             time=time,
             mean_high_water=mean_high_water,
             mean_low_water=mean_low_water,
-            dune_foot=dune_foot,
             year=year
         )
     )
