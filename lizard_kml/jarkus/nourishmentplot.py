@@ -133,15 +133,15 @@ def combinedplot(dfs):
     ax2 = fig.add_subplot(gs[1], sharex=ax1)
     if (is_not_empty(dfdf['dune_foot_upperMKL_cross']) or
             is_not_empty(dfdf['dune_foot_threeNAP_cross']) or
-            is_not_empty(shorelinedf['mean_high_water']) or
-            is_not_empty(shorelinedf['mean_low_water']) ):
+            is_not_empty(shorelinedf['mean_high_water_cross']) or
+            is_not_empty(shorelinedf['mean_low_water_cross']) ):
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_upperMKL_cross'],
                  label='Duinvoet (BKL-schijf)', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_threeNAP_cross'],
                  label='Duinvoet (NAP+3m)', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'],
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water_cross'],
                  label='Hoogwater positie', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water'],
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water_cross'],
                  label='Laagwater positie', **props)
         ax2.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
 
@@ -377,15 +377,15 @@ def test_plot_ax2(dfs):
     # Plot the four lines if at least is non-empty (= not all NaNs)
     if (is_not_empty(dfdf['dune_foot_upperMKL_cross']) or
             is_not_empty(dfdf['dune_foot_threeNAP_cross']) or
-            is_not_empty(shorelinedf['mean_high_water']) or
-            is_not_empty(shorelinedf['mean_low_water']) ):
+            is_not_empty(shorelinedf['mean_high_water_cross']) or
+            is_not_empty(shorelinedf['mean_low_water_cross']) ):
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_upperMKL_cross'],
                  label='Duinvoet (BKL-schijf)', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_threeNAP_cross'],
                  label='Duinvoet (NAP+3 meter)', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'],
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water_cross'],
                  label='Hoogwater positie', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water'],
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water_cross'],
                  label='Laagwater positie', **props)
         leg = ax2.legend(loc='best')
         leg.get_frame().set_alpha(0.7)
