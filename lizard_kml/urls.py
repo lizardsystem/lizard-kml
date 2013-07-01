@@ -26,6 +26,7 @@ def to_viewer(request):
 urlpatterns = patterns(
     '',
     url(r'^$', ViewerView.as_view(), name='lizard-kml-viewer'),
+    url(r'^viewer/$', lambda x: redirect('lizard-kml-viewer', permanent=True), name='lizard-kml-viewer-old'), # backwards compatibility
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/(?P<id>[0-9]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^jarkuskml/(?P<kml_type>[-a-zA-Z0-9_]+)/$', JarkusKmlView.as_view(), name='lizard-jarkus-kml'),
     url(r'^info/(?P<id>[0-9]+)/$', InfoView.as_view(), name='lizard-kml-info'),
