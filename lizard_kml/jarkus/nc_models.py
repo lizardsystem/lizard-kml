@@ -142,6 +142,20 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
     id = dataset.variables['id'][:]
     alongshoreindex = nonzero(id == tr.id)
     alongshoreindex = alongshoreindex[0][0]
+
+    if alongshoreindex > 0:
+        previous_index = alongshoreindex - 1
+        previous_id = id[previous_index]
+    else:
+        previous_id = None
+    if alongshoreindex < len(id):
+        next_index = alongshoreindex + 1
+        next_id = id[next_index]
+    else:
+        next_id = None
+    tr.previous_id = previous_id
+    tr.next_id = next_id
+
     lon = dataset.variables['lon'][alongshoreindex,:]
     lat = dataset.variables['lat'][alongshoreindex,:]
     # filter out the missing to make it a bit smaller

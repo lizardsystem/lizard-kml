@@ -9,6 +9,9 @@
             <LineStyle>
                 <color>33ffffff</color>
             </LineStyle>
+            <LabelStyle>
+                <scale>0</scale>
+            </LabelStyle>
         </Style>
         <Style id="thick">
             <IconStyle>
@@ -17,6 +20,9 @@
             <LineStyle>
                 <color>88ffffff</color>
             </LineStyle>
+            <LabelStyle>
+                <scale>1.1</scale>
+            </LabelStyle>
         </Style>
         <StyleMap id="whiteline">
             <Pair>

@@ -34,5 +34,13 @@
     </div>
     <div class="footer">
         <p>Download data als: <a href="{% absurl lizard-kml-xls id=view.id %}">xls</a></p>
+        {% if view.transect.previous_id %}
+{#            <a href="#">vorige ({{ view.transect.previous_id }})</a>#}
+            <a data-dynamic-info="true" href="{% absurl lizard-kml-info id=view.transect.previous_id %}">vorige ({{ view.transect.previous_id }})</a>
+        {% endif %}
+        {% if view.transect.next_id %}
+{#            <a href="#">volgende ({{ view.transect.next_id }})</a>#}
+            <a data-dynamic-info="true" href="{% absurl lizard-kml-info id=view.transect.next_id %}">volgende ({{ view.transect.next_id }})</a>
+        {% endif %}
     </div>
 </div>
