@@ -217,6 +217,11 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
         time_bathy = dataset.variables['time_bathy'][t_subset,alongshoreindex]
         sub_t = t[t_subset]
 
+    # convert indexes to meters
+    cross = dataset.variables['cross_shore'][:]
+    min_cross = cross[min_cross]
+    max_cross = cross[max_cross]
+
     time_topo_list = []
     for days in time_topo:
         try:
