@@ -136,7 +136,7 @@ class KmlResourceView(View):
     View which returns the KML file related to passed kml_resource_id.
     '''
     @method_decorator(never_cache)
-    def get(self, request, kml_resource_id):
+    def get(self, request, kml_resource_id, ext=None):
         kml_resource = get_object_or_404(KmlResource, pk=kml_resource_id)
         logger.debug('Serving KML %s', kml_resource)
 

@@ -42,7 +42,7 @@ else:
         # 'DF': 'http://dtvirt5.deltares.nl:8080/thredds/dodsC/opendap/rijkswaterstaat/DuneFoot/DF_r2011.nc',
         'MKL': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/BKL_TKL_MKL/MKL.nc',
         'strandbreedte': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandbreedte/strandbreedte.nc',
-        'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/strandlijnen/strandlijnen.nc',
+        'strandlijnen': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/MHW_MLW/MHW_MLW.nc',
         'suppleties': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/suppleties/suppleties.nc',
         'faalkans': 'http://opendap.deltares.nl/thredds/dodsC/opendap/rijkswaterstaat/faalkans_PC-Ring/faalkans.nc',
     }
@@ -301,19 +301,17 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
         dune_foot = np.zeros(0)
         year = np.zeros(0)
     else:
-        mean_high_water = ds.variables['MHW'][transectidx,:]
-        mean_low_water = ds.variables['MLW'][transectidx,:]
-        dune_foot = ds.variables['DF'][transectidx,:]
+        mean_high_water = ds.variables['mean_high_water_cross'][:,transectidx]
+        mean_low_water = ds.variables['mean_low_water_cross'][:,transectidx]
 
-        year = ds.variables['year'][:]
-        time = np.array([datetime.datetime(x, 1, 1) for x in year])
+        days_since_1970 = ds.variables['time'][:]
+        # convert to datetime objects. (netcdf only stores numbers, we use years here (ignoring the measurement date))
+        time = array([datetime.datetime.fromtimestamp(days*3600*24) for days in days_since_1970])
         filter = get_time_filter(time, dt_from, dt_to)
 
         time = time[filter]
         mean_high_water = mean_high_water[filter]
         mean_low_water = mean_low_water[filter]
-        dune_foot = dune_foot[filter]
-        year = year[filter]
 
     ds.close()
 
@@ -322,8 +320,6 @@ def makeshorelinedf(transect, dt_from=None, dt_to=None):
             time=time,
             mean_high_water=mean_high_water,
             mean_low_water=mean_low_water,
-            dune_foot=dune_foot,
-            year=year
         )
     )
     return shorelinedf

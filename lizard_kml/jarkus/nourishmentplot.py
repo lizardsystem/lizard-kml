@@ -261,7 +261,7 @@ def combinedplot(dfs):
         ax5.yaxis.grid(False)
         ax5.set_yscale('log')
         # Now we plot the proxies with corresponding legends.
-        ax5.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
+        ax5.legend(bbox_to_anchor=(1.01, 0), loc=3, borderaxespad=0.)
         ax5.set_xlabel('Tijd [jaren]')
     ax5.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
     ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
