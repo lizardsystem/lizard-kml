@@ -2,7 +2,7 @@ Changelog of lizard-kml
 ===================================================
 
 
-0.17 (unreleased)
+0.17 (2013-08-14)
 -----------------
 
 - Improve plot looks (font size, layout) and make them more consistent.
