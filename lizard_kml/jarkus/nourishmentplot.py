@@ -175,10 +175,10 @@ def combinedplot(dfs):
         #                  np.asarray(bwdf['beach_width_at_MHW']),
         #                  alpha=0.3,
         #                  color='black')
-        ax3.plot(date2num(bwdf['time']), bwdf['beach_width_at_MHW'],
-                 label='strandbreedte MHW', **props)
         ax3.plot(date2num(bwdf['time']), bwdf['beach_width_at_MLW'],
                  label='strandbreedte MLW', **props)
+        ax3.plot(date2num(bwdf['time']), bwdf['beach_width_at_MHW'],
+                 label='strandbreedte MHW', **props)
 
         # Only show 5 major ticks on y-axis
         ax3.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
