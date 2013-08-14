@@ -5,7 +5,29 @@ Changelog of lizard-kml
 0.17 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Improve plot looks (font size, layout) and make them more consistent.
+
+- Impove look of timeseries and eeg plots. 
+
+- Put next transect button in right corner. 
+
+- Improve shore line plot label order. 
+  
+- Fix maximum number of xaxis major ticks (max = 10). 
+
+- Fix beach width label order. 
+  
+- Add note about matplotlib fonts to README.
+
+- Remove unneeded right-to-left styles. 
+
+- Implement `previous` and `next` button to go to previous and next transect popups.
+
+- Improve footer height.
+
+- Improve major xaxis ticks for combined plot.
+
+- Remove old, unused extjs versions
 
 
 0.16 (2013-06-06)
