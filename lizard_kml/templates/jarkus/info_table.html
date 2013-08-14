@@ -20,7 +20,7 @@
         </tr>
         <tr>
             <td>RSP coordinates</td>
-            <td>lat = {{ view.transect.rsp_lat }} decimal degrees; lon = {{ view.transect.rsp_lon }} decimal degrees</td>
+            <td>lat = {{ view.transect.rsp_lat|floatformat:4 }} decimal degrees; lon = {{ view.transect.rsp_lon|floatformat:4 }} decimal degrees</td>
         </tr>
         <tr>
             <td>Angle</td>
@@ -51,8 +51,8 @@
         {% for row in view.transect.year_data %}
         <tr>
             <td>{{ row.0.year }}</td>
-            <td>{% if row.1 %}{{ row.1 }}{% else %}NA{% endif %}</td>
-            <td>{% if row.2 %}{{ row.2 }}{% else %}NA{% endif %}</td>
+            <td>{% if row.1 %}{{ row.1|floatformat:0 }}{% else %}NA{% endif %}</td>
+            <td>{% if row.2 %}{{ row.2|floatformat:0 }}{% else %}NA{% endif %}</td>
             <td>{% if row.3 %}{{ row.3.date }}{% else %}NA{% endif %}</td>
             <td>{% if row.4 %}{{ row.4.date }}{% else %}NA{% endif %}</td>
         </tr>

@@ -263,7 +263,11 @@ def combinedplot(dfs):
         # Now we plot the proxies with corresponding legends.
         ax5.legend(bbox_to_anchor=(1.01, 0), loc=3, borderaxespad=0.)
         ax5.set_xlabel('Tijd [jaren]')
-    ax5.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
+
+    xlim = ax5.get_xlim()
+    N = int(np.floor(np.diff(xlim) / 365 / 5))
+    xaxis_locator = matplotlib.ticker.MaxNLocator(N)
+    ax5.xaxis.set_major_locator(xaxis_locator)
     ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
     # show y-label no matter what
     ax5.set_ylabel('Kans [1/jr]')
