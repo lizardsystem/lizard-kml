@@ -266,6 +266,8 @@ def combinedplot(dfs):
 
     xlim = ax5.get_xlim()
     N = int(np.floor(np.diff(xlim) / 365 / 5))
+    if N > 10:
+        N = 10
     xaxis_locator = matplotlib.ticker.MaxNLocator(N)
     ax5.xaxis.set_major_locator(xaxis_locator)
     ax5.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y'))
