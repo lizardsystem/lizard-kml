@@ -182,6 +182,10 @@ hr {
     height: 60px;
 }
 
+.placemark-info-popup .footer .next-transect-btn {
+    float: right;
+}
+
 img.spinner-when-loading {
     background-image: url('spinner.gif');
     background-color: #fff;

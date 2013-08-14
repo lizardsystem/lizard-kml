@@ -40,7 +40,7 @@
         {% endif %}
         {% if view.transect.next_id %}
 {#            <a href="#">volgende ({{ view.transect.next_id }})</a>#}
-            <a data-dynamic-info="true" href="{% absurl lizard-kml-info id=view.transect.next_id %}">volgende ({{ view.transect.next_id }})</a>
+            <a class="next-transect-btn" data-dynamic-info="true" href="{% absurl lizard-kml-info id=view.transect.next_id %}">volgende ({{ view.transect.next_id }})</a>
         {% endif %}
     </div>
 </div>
