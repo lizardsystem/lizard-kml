@@ -54,3 +54,7 @@ Need a local mirror of the NetCDF files? Free up approx. 3 GB of space and use t
     $> bin/django sync_netcdfs
 
 This script uses ``wget``, which should be available everywhere.
+
+You might want to install the right fonts for matplotlib as well::
+
+    $> sudo apt-get install libsys-cpu-perl pcf2bdf tex-gyre ttf-bitstream-vera tv-fonts xfonts-traditional
