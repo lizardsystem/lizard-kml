@@ -78,7 +78,8 @@ def combinedplot(dfs):
     fig = plt.figure(figsize=(8, 9))
     # We define a grid of 5 areas
     gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2],
-                                      right=0.71)
+                                      left=0.08, right=0.76, top=0.96,
+                                      bottom=0.04)
     gs.update(hspace=0.1)
 
     # Some common style properties, also store they style information file for
@@ -96,7 +97,7 @@ def combinedplot(dfs):
     # Create the axis, based on the gridspec
     ax1 = fig.add_subplot(gs[0])
     # Set the main title
-    ax1.set_title('Indicatoren van de toestand van de kust\ntransect %d (%s)'
+    ax1.set_title('Indicatoren van de toestand van de kust transect %d (%s)'
                   % (transect, str(areaname).strip()))
     # Plot the three lines
     if (is_empty(mkldf['momentary_coastline']) and
@@ -216,6 +217,8 @@ def combinedplot(dfs):
                 color = beachcolors['overig']
             # Strip spaces
             label = row['type'].strip()
+            if label == 'onderwatersuppletie':  # rename this label
+                label = 'vooroeversuppletie'
             # Common properties
             ax4_props = dict(alpha=0.7, linewidth=2)
             # Plot a bar per nourishment

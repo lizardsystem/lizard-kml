@@ -13,7 +13,6 @@ from numpy.ma import filled, masked_array
 import scipy.interpolate
 
 from matplotlib import pyplot
-from matplotlib import text
 from matplotlib import colors
 from matplotlib.dates import mx2num, date2num
 import matplotlib.ticker
@@ -72,7 +71,7 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
     # use a fixed min, max for color interpolation, we have no green on beaches but it shows a lot of contrast
     # TODO: Make this stateless.... (only call methods on figures and axes)
     fig = pyplot.figure(figsize=(8, 3))
-    plot = fig.add_axes([0.06, 0.12, 0.84, 0.83])
+    plot = fig.add_axes([0.07, 0.12, 0.82, 0.83])
     mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z,
                            vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
     contours_colormap = matplotlib.cm.get_cmap('PuBu')
@@ -80,7 +79,7 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
                             levels=[transect.mlw, transect.mhw, 3],
                             cmap=contours_colormap)
 
-    cax = fig.add_axes([0.92, 0.12, 0.03, 0.83], frameon=False)
+    cax = fig.add_axes([0.9, 0.12, 0.03, 0.83], frameon=False)
     bar = fig.colorbar(mappable, cax=cax)
     bar.set_label('Height to NAP [m]')
     bar.add_lines(contours)
@@ -90,10 +89,6 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
     plot.yaxis.set_major_formatter(dateformatter)
     plot.set_xlabel('Cross shore distance [m]')
     plot.set_ylabel('Measurement time [y]')
-    for o in plot.findobj(text.Text):
-        o.set_size('x-small')
-    for o in mappable.colorbar[1].findobj(text.Text):
-        o.set_size('x-small')
 
     buf = cStringIO.StringIO()
     fig.savefig(buf, **plotproperties)
@@ -131,7 +126,7 @@ def eeg(transect, plotproperties=None):
     # create a new figure
     fig = pyplot.figure(figsize=(8, 3))
     # add axes
-    plot = fig.add_axes([0.06, 0.12, 0.84, 0.83])
+    plot = fig.add_axes([0.07, 0.12, 0.82, 0.83])
     # add the lines
     plot.add_collection(lines)
     # set the x axis
@@ -140,8 +135,7 @@ def eeg(transect, plotproperties=None):
     plot.set_ylim(t.min()-730,t.max()+730)
     plot.set_xlabel('Cross shore distance [m]')
     plot.set_ylabel('Measurement time [y]')
-    for o in plot.findobj(text.Text):
-        o.set_size('x-small')
+
     datelocator = matplotlib.dates.AutoDateLocator()
     dateformatter = matplotlib.dates.AutoDateFormatter(datelocator)
     plot.yaxis.set_major_formatter(dateformatter)

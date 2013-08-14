@@ -9,7 +9,7 @@ def set_matplotlib_defaults():
     mpl.rcParams['font.family'] = 'sans-serif'
     # Some modern fonts
     mpl.rcParams['font.sans-serif'] = 'Bitstream Vera Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif'
-    
+
     # Other different from rcdefaults
     mpl.rcParams['patch.linewidth'] = 0.5
     mpl.rcParams['patch.facecolor'] = '#348ABD'
@@ -21,8 +21,8 @@ def set_matplotlib_defaults():
     mpl.rcParams['axes.edgecolor'] = '#bcbcbc'
     mpl.rcParams['axes.linewidth'] = 1
     mpl.rcParams['axes.grid'] = True
-    mpl.rcParams['axes.titlesize'] = 'x-large'
-    mpl.rcParams['axes.labelsize'] = 'large'
+    mpl.rcParams['axes.titlesize'] = 'large'
+    mpl.rcParams['axes.labelsize'] = 'x-small'
     mpl.rcParams['axes.labelcolor'] = '#555555'
     mpl.rcParams['axes.axisbelow'] = True
     mpl.rcParams['axes.color_cycle'] = '#348ABD, #7A68A6, #A60628, #467821, #CF4457, #188487, #E24A33'
@@ -37,6 +37,7 @@ def set_matplotlib_defaults():
     mpl.rcParams['ytick.minor.pad'] = 6
     mpl.rcParams['ytick.color'] = '#555555'
     mpl.rcParams['legend.fancybox'] = True
+    mpl.rcParams['legend.fontsize'] = 'x-small'
     mpl.rcParams['figure.figsize'] = '11, 8'
     mpl.rcParams['figure.facecolor'] = '0.85'
     mpl.rcParams['figure.edgecolor'] = '0.50'
