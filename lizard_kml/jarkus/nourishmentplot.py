@@ -75,7 +75,7 @@ def combinedplot(dfs):
     areaname = transectdf['areaname'].irow(0)
 
     # Plot the results.
-    fig = plt.figure(figsize=(7, 9))
+    fig = plt.figure(figsize=(8, 9))
     # We define a grid of 5 areas
     gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2],
                                       right=0.71)
@@ -143,7 +143,7 @@ def combinedplot(dfs):
                  label='Duinvoet (BKL-schijf)', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_threeNAP_cross'],
                  label='Duinvoet (NAP+3m)', **props)
-        
+
         ax2.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
 
         # Only show up to 5 major ticks on y-axis.
