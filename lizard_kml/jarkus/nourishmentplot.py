@@ -135,14 +135,15 @@ def combinedplot(dfs):
             is_not_empty(dfdf['dune_foot_threeNAP_cross']) or
             is_not_empty(shorelinedf['mean_high_water']) or
             is_not_empty(shorelinedf['mean_low_water']) ):
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water'],
+                 label='Laagwater positie', **props)
+        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'],
+                 label='Hoogwater positie', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_upperMKL_cross'],
                  label='Duinvoet (BKL-schijf)', **props)
         ax2.plot(date2num(dfdf['time']), dfdf['dune_foot_threeNAP_cross'],
                  label='Duinvoet (NAP+3m)', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_high_water'],
-                 label='Hoogwater positie', **props)
-        ax2.plot(date2num(shorelinedf['time']), shorelinedf['mean_low_water'],
-                 label='Laagwater positie', **props)
+        
         ax2.legend(bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0.)
 
         # Only show up to 5 major ticks on y-axis.
