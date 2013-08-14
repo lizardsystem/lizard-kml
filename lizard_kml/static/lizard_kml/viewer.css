@@ -168,7 +168,7 @@ hr {
 .placemark-info-popup .tabs {
     position: absolute;
     top: 0;
-    bottom: 100px;
+    bottom: 60px;
     left: 0;
     right: 0;
     overflow: auto;
@@ -179,7 +179,7 @@ hr {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 100px;
+    height: 60px;
 }
 
 img.spinner-when-loading {
