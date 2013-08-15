@@ -121,6 +121,8 @@ hr {
 
 /* above-content controls, like play/pause etc */
 #above-content {
+    height: 24px;
+    overflow: hidden;
 }
 
 [class^="icon-"], [class*=" icon-"] {
@@ -163,6 +165,11 @@ hr {
     margin-left: 10px;
     vertical-align: middle;
     display: inline-block;
+}
+
+#hover-info {
+    margin-left: 10px;
+    font-weight: bold;
 }
 
 #kml-stream-percentage {
