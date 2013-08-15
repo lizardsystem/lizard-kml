@@ -1,6 +1,7 @@
 {% extends "lizard_kml/lizard_ui_realbase.html" %}
 {# extends "lizard_ui/realbase.html" #}
 {% load tools %}
+{% load i18n %}
 
 {% block title %}Kustviewer - Lizard{% endblock %}
 
@@ -27,6 +28,14 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
 {% endblock javascript %}
+
+{% block logo %}
+{% spaceless %}
+<a href="/" id="logo-img" title="{% trans "Back to homepage" %}">
+    <img src="{{ STATIC_URL }}lizard_kml/logo_rijksoverheid_klein.png" alt="Lizard" />
+</a>
+{% endspaceless %}
+{% endblock logo %}
 
 {% block sidebar %}
 <div id="accordion" class="sidebarbox sidebarbox-stretched">
