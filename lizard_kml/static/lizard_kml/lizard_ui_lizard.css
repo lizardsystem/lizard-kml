@@ -14,7 +14,7 @@ font-family: 'Helvetica', 'sans-serif';
 
 /* #page wraps everything, only for adding a margin l/b/r */
 #page {
-margin: 0 0.5em 0.5em 0.5em;
+margin: 0;
 }
 
 /* Blueprint's containing-everything container class.
