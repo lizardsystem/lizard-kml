@@ -1290,6 +1290,29 @@ KmlViewerUi.prototype.clickHandler = function (event) {
 KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
     var self = this;
 
+    // Open the balloon first
+
+    // Close (possible) old balloon.
+    ge.setBalloon(null);
+
+    // Create a new balloon.
+    var balloon = ge.createHtmlDivBalloon('');
+
+    // Use a spinner as the initial content
+    var div = document.createElement('DIV');
+    div.innerHTML = '<div class="still-loading"></div>';
+    balloon.setContentDiv(div);
+
+    // Create a <div> containing the placemark info,
+    // so we can have JavaScript augment it (using jQuery Tabs).
+    var w = Math.round($('#map3d').width() * 0.85);
+    var h = Math.round($('#map3d').height() * 0.85);
+    balloon.setMinWidth(w);
+    balloon.setMinHeight(h);
+    balloon.setMaxWidth(w);
+    balloon.setMaxHeight(h);
+    ge.setBalloon(balloon);
+
     // Retrieve the content of this link asynchronously using XmlHttpRequest,
     // and show it in a Google Earth balloon we instanciate ourselves.
 
@@ -1303,27 +1326,9 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
         urlParams
     )
     .done(function (data) {
-        // Close (possible) old balloon.
-        ge.setBalloon(null);
-
-        // Create a new balloon.
-        var balloon = ge.createHtmlDivBalloon('');
-
-        // Don't attach to a feature anymore, it is distracting.
-        //balloon.setFeature(target);
-
-        // Create a <div> containing the placemark info,
-        // so we can have JavaScript augment it (using jQuery Tabs).
         var div = document.createElement('DIV');
         div.innerHTML = data;
         balloon.setContentDiv(div);
-        var w = Math.round($('#map3d').width() * 0.85);
-        var h = Math.round($('#map3d').height() * 0.85);
-        balloon.setMinWidth(w);
-        balloon.setMinHeight(h);
-        balloon.setMaxWidth(w);
-        balloon.setMaxHeight(h);
-        ge.setBalloon(balloon);
 
         var $balloonContent = $(div);
         // Initialize jQuery tabs, if there are any.

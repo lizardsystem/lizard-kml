@@ -78,7 +78,11 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Voor weergave van deze site is een browser met ondersteuning voor Javascript nodig.</noscript></div>
 </div>
+{% comment %}
+This div can be used to "preload" images, so they appear smoothly when actually shown.
+{% endcomment %}
 <div class="img-preloader" style="width:1px; height:1px; visibility:hidden; overflow:hidden;">
+    <img src="{{ STATIC_URL }}lizard_kml/loader.gif" />
     <img src="{{ STATIC_URL }}lizard_kml/spinner.gif" />
 </div>
 {% endblock page %}
