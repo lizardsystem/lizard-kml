@@ -1185,7 +1185,7 @@ KmlViewerUi.prototype.mouseMoveHandler = function (event) {
     this.hoverInfoTimeout = setTimeout(function () {
         var target = event.getTarget();
         self.showHoverInfo(target);
-    }, 200);
+    }, 100);
 };
 
 /**
