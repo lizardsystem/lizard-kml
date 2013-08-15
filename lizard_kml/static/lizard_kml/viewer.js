@@ -1325,7 +1325,7 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
         url,
         urlParams
     )
-    .done(function (data) {
+    .done(function (data, textStatus, jqXHR) {
         var div = document.createElement('DIV');
         div.innerHTML = data;
         balloon.setContentDiv(div);
@@ -1342,6 +1342,11 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
             var $link2 = $(this);
             self.loadDynamicInfo($link2);
         });
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        var div = document.createElement('DIV');
+        div.innerHTML = 'Fout bij het laden van de gegevens.';
+        balloon.setContentDiv(div);
     });
 };
 
