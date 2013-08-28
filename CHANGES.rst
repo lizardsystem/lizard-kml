@@ -15,6 +15,8 @@ Changelog of lizard-kml
 
 - Make plots available as png, svg and pdf.
 
+- Improved the UI styling.
+
 
 0.17 (2013-08-14)
 -----------------

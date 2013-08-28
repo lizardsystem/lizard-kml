@@ -13,8 +13,14 @@ var isExtReady = false;
 Ext.BLANK_IMAGE_URL = window.lizard_settings.static_url + 'lizard_kml/extjs-4.2.0/resources/themes/images/default/tree/s.gif';
 // Fix an Ext JS bug regarding error icons.
 Ext.form.Labelable.errorIconWidth = 16;
+// Fix IE8 rendering: Ext likes to use tables to render buttons with
+// rounded corners and such. Totally unneccesary.
+Ext.supports['CSS3BorderRadius'] = true;
 // Listen to Ext JS readyness.
 Ext.onReady(function () {
+    // Fix IE8 rendering: Ext likes to use tables to render buttons with
+    // rounded corners and such. Totally unneccesary.
+    Ext.getBody().removeCls('x-nbr x-nlg');
     console.log('Ext JS is ready');
     isExtReady = true;
 });
@@ -640,7 +646,8 @@ KmlViewerUi.prototype.initControls = function () {
             type: 'accordion',
             animate: false,
             multi: true,
-            shrinkToFit: false
+            shrinkToFit: false,
+            hideCollapseTool: true
         },
         items: [
             this.treePanel,
@@ -829,6 +836,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
     // more actions later on.
     var actions = Ext.create('Ext.form.FieldSet', {
         title: 'Acties',
+        style: 'border-bottom: none; border-left: none; border-right: none;',
         defaults: {
             anchor: '100%'
         },
@@ -844,6 +852,7 @@ KmlViewerUi.prototype.initJarkusPanel = function () {
     // Another fieldset widget.
     var display = Ext.create('Ext.form.FieldSet', {
         title: 'Weergave',
+        style: 'border-bottom: none; border-left: none; border-right: none;',
         defaults: {
             anchor: '100%'
         },
