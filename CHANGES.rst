@@ -5,7 +5,13 @@ Changelog of lizard-kml
 0.18 (unreleased)
 -----------------
 
-- Fix cross shore index bug. Improve unavailable row data in info table (greyed out). 
+- Fix cross shore index bug. Improve unavailable row data in info table 
+  (greyed out). 
+
+- Change maximum correction days to 1000 from 730 for eeg plot to make sure 
+  upper line is displayed properly.
+
+- Make sure min_cross_idx and max_cross_idx is always masked.
 
 
 0.17 (2013-08-14)

@@ -231,6 +231,10 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
         time_bathy = dataset.variables['time_bathy'][t_subset,alongshoreindex]
         sub_t = t[t_subset]
 
+    # always make this masked because of .mask use below
+    min_cross_idx = np.ma.masked_invalid(min_cross_idx)
+    max_cross_idx = np.ma.masked_invalid(max_cross_idx)
+
     min_cross = np.zeros(min_cross_idx.shape) - 1
     max_cross = np.zeros(max_cross_idx.shape) - 1
 
@@ -239,28 +243,18 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
     min_cross[~min_cross_idx.mask] = cross[min_cross_idx[~min_cross_idx.mask]]
     max_cross[~max_cross_idx.mask] = cross[max_cross_idx[~max_cross_idx.mask]]
 
-    time_topo_list = []
-    for days in time_topo:
-        try:
-            dt = datetime.datetime.fromtimestamp(days*3600*24)
-        except ValueError, e:
-            # data probably unavailable for the given year
-            dt = None
-        time_topo_list.append(dt)
+    time_topo = np.ma.masked_invalid(time_topo)
+    time_topo_units = dataset.variables['time_topo'].units
+    time_topo = netCDF4.num2date(time_topo, time_topo_units)
 
-    time_bathy_list = []
-    for days in time_bathy:
-        try:
-            dt = datetime.datetime.fromtimestamp(days*3600*24)
-        except ValueError, e:
-            # data probably unavailable for the given year
-            dt = None
-        time_bathy_list.append(dt)
+    time_bathy = np.ma.masked_invalid(time_bathy)
+    time_bathy_units = dataset.variables['time_bathy'].units
+    time_bathy = netCDF4.num2date(time_bathy, time_bathy_units)
 
     # need to convert to lists because django 1.4 cannot loop over numpy array
     # rows by index (1.5 can)
     tr.year_data = zip(sub_t.tolist(), min_cross.tolist(), max_cross.tolist(),
-                       time_topo_list, time_bathy_list)
+                       time_topo.tolist(), time_bathy.tolist())
 
     dataset.close()
     # return dict to conform to the "rendering context"
