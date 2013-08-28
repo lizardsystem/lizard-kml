@@ -59,7 +59,7 @@ class TimeStagNormalize(colors.Normalize):
         print value, '=', result_value
         return result_value
 
-def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
+def jarkustimeseries(transect, plotproperties=None):
     """create a timeseries plot for a transect"""
     if plotproperties is None:
         plotproperties = {}

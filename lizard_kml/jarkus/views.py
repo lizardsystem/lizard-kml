@@ -130,7 +130,7 @@ class ChartView(View):
         try:
             if chart_type == 'eeg':
                 transect = makejarkustransect(id, dt_from, dt_to)
-                fd = eeg(transect, {'format':'png'})
+                fd = eeg(transect, {'format': format})
             elif chart_type == 'jarkustimeseries':
                 id = int(id)
                 transect = makejarkustransect(id, dt_from, dt_to)
