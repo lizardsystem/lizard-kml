@@ -1285,6 +1285,8 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             }
         }
     }
+    // Unless the event is prevented by code above,
+    // Google Earth will handle the balloon popup.
 };
 
 KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
