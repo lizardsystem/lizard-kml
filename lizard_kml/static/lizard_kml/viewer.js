@@ -1339,12 +1339,74 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
     .done(function (data, textStatus, jqXHR) {
         var div = document.createElement('DIV');
         div.innerHTML = data;
-        balloon.setContentDiv(div);
 
         var $balloonContent = $(div);
+
         // Initialize jQuery tabs, if there are any.
         var $tabs = $balloonContent.find('.tabs');
         $tabs.tabs();
+
+        // Determine a suitable format for the images. For example, use
+        // SVG when the browser supports it.
+        $balloonContent.find('img.dynamic-chart').each(function () {
+            var $img = $(this);
+
+            // Parse the original source URL in the <img>.
+            var url = $.url($img.attr('src'));
+
+            // Add attributes for the selected year span.
+            url.param('year_from', chartParams.year_from);
+            url.param('year_to', chartParams.year_to);
+
+            // Add desired width/height of the image, based on the balloon
+            // size.
+            var width = parseInt(balloon.getMinWidth() * 0.98);
+            var height = parseInt(balloon.getMinHeight() * 0.70);
+            // Override height for "special" plots.
+            if ($img.data('dynamic-chart-min-height')) {
+                var minHeight = parseInt($img.data('dynamic-chart-min-height'));
+                // TODO Math.max() here? Do all browsers support it?
+                if (minHeight > height) {
+                    height = minHeight;
+                }
+            }
+            url.param('width', width);
+            url.param('height', height);
+
+            // Apply calculated width and height to the <img> element.
+            $img.css({
+                'width': width,
+                'height': height
+            });
+
+            // Use an Ext.js module to detect if this browser supports SVG.
+            var supportsSvg = Ext.supports['Svg'];
+            if (supportsSvg) {
+                url.param('format', 'png');
+            }
+            else {
+                url.param('format', 'png');
+            }
+
+            // Update the <img> source.
+            $img.attr('src', url.toString());
+        });
+
+        // Add year_from and year_to to download links.
+        $balloonContent.find('a.download-link').each(function () {
+            var $a = $(this);
+
+            // Parse the original URL.
+            var url = $.url($a.attr('href'));
+
+            // Add attributes for the selected year span.
+            url.param('year_from', chartParams.year_from);
+            url.param('year_to', chartParams.year_to);
+
+            // Update the href attribute of the <a> element.
+            $a.attr('href', url.toString());
+        });
+
         // Initialize other dynamic info links
         $balloonContent.find('a[data-dynamic-info="true"]').click(function (event) {
             // Don't follow the link.
@@ -1353,6 +1415,8 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
             var $link2 = $(this);
             self.loadDynamicInfo($link2);
         });
+
+        balloon.setContentDiv(div);
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
         var div = document.createElement('DIV');

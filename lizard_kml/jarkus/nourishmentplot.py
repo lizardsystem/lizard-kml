@@ -59,8 +59,11 @@ def is_empty(array):
     return np.isnan(array).all()
 
 
-def combinedplot(dfs):
+def combinedplot(dfs, figsize=None):
     """Create a combined plot of the coastal data"""
+
+    if figsize is None:
+        figsize = (8, 9)
 
     shorelinedf = dfs['shorelinedf']
     transectdf = dfs['transectdf']
@@ -75,7 +78,7 @@ def combinedplot(dfs):
     areaname = transectdf['areaname'].irow(0)
 
     # Plot the results.
-    fig = plt.figure(figsize=(8, 9))
+    fig = plt.figure(figsize=figsize)
     # We define a grid of 5 areas
     gs = matplotlib.gridspec.GridSpec(5, 1, height_ratios=[5, 2, 2, 2, 2],
                                       left=0.08, right=0.76, top=0.96,
@@ -281,19 +284,21 @@ def combinedplot(dfs):
     return fig
 
 
-def all_else_fails_plot(dfs):
+def all_else_fails_plot(dfs, figsize=None):
     """All else fails plot. Lots of checks are put in place already. Sometimes
     though, combined plot generation may result in a matplotlib.dates
     ValueError: ordinal must be >= 1. To show a figure anyway, this figure is
     shown.
 
     """
+    if figsize is None:
+        figsize = (7, 9)
     transectdf = dfs['transectdf']
 
     transect = transectdf['transect'].irow(0)
     areaname = transectdf['areaname'].irow(0)
 
-    fig = plt.figure(figsize=(7, 9))
+    fig = plt.figure(figsize=figsize)
     gs = matplotlib.gridspec.GridSpec(1, 1)
     gs.update(hspace=0.1)
     ax = fig.add_subplot(gs[0])

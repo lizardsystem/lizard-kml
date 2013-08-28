@@ -46,7 +46,6 @@ class InfoView(ViewContextMixin, TemplateView):
     """
     template_name = "jarkus/info.html"
     id = None
-    url_params = None
 
     def get(self, request, id=None):
         """
@@ -54,17 +53,8 @@ class InfoView(ViewContextMixin, TemplateView):
         """
         self.id = int(id)
 
-        url_params = {}
-
         year_from = request.GET.get('year_from', None)
-        if year_from:
-            url_params['year_from'] = int(year_from)
-
         year_to = request.GET.get('year_to', None)
-        if year_to:
-            url_params['year_to'] = int(year_to)
-
-        self.url_params = urllib.urlencode(url_params)
 
         dt_from = (datetime.datetime(int(year_from), 1, 1) if year_from else
                    None)
@@ -105,55 +95,78 @@ class ChartView(View):
     download = False
 
     def get(self, request, chart_type, id=None, format='png'):
-        """generate info into a response"""
         year_from = request.GET.get('year_from')
         year_to = request.GET.get('year_to')
+        width = request.GET.get('width')
+        height = request.GET.get('height')
         dt_from = datetime.datetime(int(year_from), 1, 1) if year_from else None
         dt_to = datetime.datetime(int(year_to), 12, 31, 23, 59, 59) if year_to else None
 
+        # When set, override the format with the passed GET parameter 'format'.
         format = request.GET.get('format', format)
-        if not self.download and not format in ['svg', 'png']:
+        if format not in ['svg', 'png', 'pdf']:
             raise Http404
 
-        id_str = ''
+        # Sanitize transect IDs by converting them to ints.
         if id:
             id = int(id)
-            id_str = str(id)
         id_min = request.GET.get('id_min') # e.g. 7003001
         id_max = request.GET.get('id_max') # e.g. 7003150
         if id_min and id_max:
             id_min = int(id_min)
             id_max = int(id_max)
-            id_str = '{0}-{1}'.format(id_min, id_max)
 
-        # TODO, sanitize the GET.... (pass format=png/pdf, width/height etc?)
         try:
+            dpi = 100 # matplotlib default DPI
+            plotproperties = {
+                'format': format,
+                'dpi': dpi
+            }
+            if width and height:
+                figsize = (float(width) / dpi, float(height) / dpi)
+            else:
+                figsize = None
+
+            # Determine what function to use to render the chart.
             if chart_type == 'eeg':
                 transect = makejarkustransect(id, dt_from, dt_to)
-                fd = eeg(transect, {'format':'png'})
+                fd = eeg(transect, plotproperties, figsize)
             elif chart_type == 'jarkustimeseries':
-                id = int(id)
                 transect = makejarkustransect(id, dt_from, dt_to)
-                fd = jarkustimeseries(transect, {'format': format})
+                fd = jarkustimeseries(transect, plotproperties, figsize)
             elif chart_type == 'nourishment':
-                id = int(id)
-                fd = nourishment(id, dt_from, dt_to, {'format': format})
+                fd = nourishment(id, dt_from, dt_to, plotproperties, figsize)
             elif chart_type == 'jarkusmean':
-                fd = jarkusmean(id_min, id_max, {'format': format})
+                fd = jarkusmean(id_min, id_max, plotproperties, figsize)
             else:
                 raise Exception('Unknown chart type')
         except Exception as ex:
             logger.exception('exception while rendering chart')
             fd = message_in_png(traceback.format_exc())
-        # wrap the file descriptor as a generator (8 KB reads)
+            format = 'png'
+
+        # Wrap the file descriptor as a generator (8 KB reads).
         wrapper = FileWrapper(fd)
+
+        # Determine correct mimetype.
         if format == 'svg':
             mimetype = 'image/svg+xml'
         else:
             mimetype = mimetypes.types_map['.%s' % format]
+
+        # Build a response which streams the wrapped buffer.
         response = HttpResponse(wrapper, content_type=mimetype)
+
+        # Add a header containing the filename, so the browser knows how to call the saved file.
         if self.download:
+            if id_min and id_max:
+                id_str = '{0}-{1}'.format(id_min, id_max)
+            elif id:
+                id_str = str(id)
+            else:
+                id_str = ''
             response['Content-Disposition'] = 'attachment; filename=transect-{0}-{1}.{2}'.format(id_str, chart_type, format)
+
         return response
 
 def message_in_png(text):

@@ -11,24 +11,25 @@
             {% include 'jarkus/info_table.html' %}
         </div>
         <div id="info-{{ view.id }}-tabs-eeg">
-            <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}?{{ view.url_params }}"
-                 width="800" height="300" class="spinner-when-loading" />
+            <img src="{% absurl lizard-kml-chart chart_type='eeg' id=view.id %}"
+                 class="spinner-when-loading dynamic-chart" />
             <p>
-                Download grafiek: <a href="{% absurl lizard-kml-chart-download chart_type='eeg' id=view.id format='png' %}?{{ view.url_params }}">png</a> <a href="{% absurl lizard-kml-chart-download chart_type='eeg' id=view.id format='pdf' %}?{{ view.url_params }}">pdf</a>
+                Download grafiek: <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='eeg' id=view.id format='png' %}">png</a> <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='eeg' id=view.id format='pdf' %}">pdf</a>
             </p>
         </div>
         <div id="info-{{ view.id }}-tabs-timeseries">
-            <img src="{% absurl lizard-kml-chart chart_type='jarkustimeseries' id=view.id %}?{{ view.url_params }}"
-                 width="800" height="300" class="spinner-when-loading" />
+            <img src="{% absurl lizard-kml-chart chart_type='jarkustimeseries' id=view.id %}"
+                 class="spinner-when-loading dynamic-chart" />
             <p>
-                Download grafiek: <a href="{% absurl lizard-kml-chart-download chart_type='jarkustimeseries' id=view.id format='png' %}?{{ view.url_params }}">png</a> <a href="{% absurl lizard-kml-chart-download chart_type='jarkustimeseries' id=view.id format='pdf' %}?{{ view.url_params }}">pdf</a>
+                Download grafiek: <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='jarkustimeseries' id=view.id format='png' %}">png</a> <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='jarkustimeseries' id=view.id format='pdf' %}">pdf</a>
             </p>
         </div>
         <div id="info-{{ view.id }}-tabs-nourishment">
-            <img src="{% absurl lizard-kml-chart chart_type='nourishment' id=view.id %}?{{ view.url_params }}"
-                    width="800" height="900" class="spinner-when-loading" />
+            <img src="{% absurl lizard-kml-chart chart_type='nourishment' id=view.id %}"
+                    class="spinner-when-loading dynamic-chart"
+                    data-dynamic-chart-min-height="900" />
             <p>
-                Download grafiek: <a href="{% absurl lizard-kml-chart-download chart_type='nourishment' id=view.id format='png' %}?{{ view.url_params }}">png</a> <a href="{% absurl lizard-kml-chart-download chart_type='nourishment' id=view.id format='pdf' %}?{{ view.url_params }}">pdf</a>
+                Download grafiek: <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='nourishment' id=view.id format='png' %}">png</a> <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='nourishment' id=view.id format='pdf' %}">pdf</a>
             </p>
         </div>
     </div>

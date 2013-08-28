@@ -59,10 +59,12 @@ class TimeStagNormalize(colors.Normalize):
         print value, '=', result_value
         return result_value
 
-def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
+def jarkustimeseries(transect, plotproperties=None, figsize=None):
     """create a timeseries plot for a transect"""
     if plotproperties is None:
         plotproperties = {}
+    if figsize is None:
+        figsize = (8, 3)
     # interpolation function
     z = transect.interpolate_z()
     # create the plot
@@ -70,7 +72,7 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
         raise ValueError('Z should be of dim 2')
     # use a fixed min, max for color interpolation, we have no green on beaches but it shows a lot of contrast
     # TODO: Make this stateless.... (only call methods on figures and axes)
-    fig = pyplot.figure(figsize=(8, 3))
+    fig = pyplot.figure(figsize=figsize)
     plot = fig.add_axes([0.09, 0.12, 0.82, 0.83])
     mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z,
                            vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
@@ -98,11 +100,13 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
     # return an 'open' file descriptor
     return buf
 
-def eeg(transect, plotproperties=None):
+def eeg(transect, plotproperties=None, figsize=None):
     """plot eeg like plot of transects"""
 
     if plotproperties is None:
         plotproperties = {}
+    if figsize is None:
+        figsize = (8, 3)
     # from http://matplotlib.sourceforge.net/examples/pylab_examples/mri_with_eeg.html
     # get axes
     t = date2num(transect.t)
@@ -124,7 +128,7 @@ def eeg(transect, plotproperties=None):
     # create the lines
     lines = matplotlib.collections.LineCollection(segs, offsets=offsets)
     # create a new figure
-    fig = pyplot.figure(figsize=(8, 3))
+    fig = pyplot.figure(figsize=figsize)
     # add axes
     plot = fig.add_axes([0.09, 0.12, 0.82, 0.83])
     # add the lines
@@ -191,9 +195,13 @@ def timeplot(plot, cross_shore, zfilled, timenum, sm, plotlatest=False):
     if (plotlatest):
         plot.plot(cross_shore, zfilled[-1,:],'k-', alpha=0.5, linewidth=1)
 
-def jarkusmean(id_min, id_max, plotproperties=None):
+def jarkusmean(id_min, id_max, plotproperties=None, figsize=None):
     id_min = int(id_min)
     id_max = int(id_max)
+    if plotproperties is None:
+        plotproperties = {}
+    if figsize is None:
+        figsize = (8, 6)
     dataset = netCDF4.Dataset(NC_RESOURCE['transect'], 'r')
     try:
         # Lookup variables
@@ -213,7 +221,7 @@ def jarkusmean(id_min, id_max, plotproperties=None):
         sm.set_array(timenum)
 
         # Create the plot
-        fig = pyplot.figure()
+        fig = pyplot.figure(figsize=figsize)
         plot = fig.add_subplot(111)
         for i, id in enumerate(ids):
             z = dataset.variables['altitude'][:,id,:]
@@ -245,13 +253,15 @@ def jarkusmean(id_min, id_max, plotproperties=None):
     # return an 'open' file descriptor
     return buf
 
-def nourishment(transect_id, dt_from=None, dt_to=None, plotproperties=None):
+def nourishment(transect_id, dt_from=None, dt_to=None, plotproperties=None, figsize=None):
     transect_id = int(transect_id)
     if plotproperties is None:
         plotproperties = {}
+    if figsize is None:
+        figsize = (8, 9)
 
     dfs = makedfs(transect_id, dt_from, dt_to)
-    fig = combinedplot(dfs)
+    fig = combinedplot(dfs, figsize=figsize)
 
     buf = cStringIO.StringIO()
 
@@ -260,7 +270,7 @@ def nourishment(transect_id, dt_from=None, dt_to=None, plotproperties=None):
     except ValueError, e:
         logger.error("Error creating nourishment figure for %s (from %s to "
                      "%s)" % (transect_id, dt_from, dt_to))
-        all_else_fails_fig = all_else_fails_plot(dfs)
+        all_else_fails_fig = all_else_fails_plot(dfs, figsize=figsize)
         buf.reset()
         all_else_fails_fig.savefig(buf, **plotproperties)
         # cleanup
