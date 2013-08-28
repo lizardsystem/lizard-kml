@@ -231,6 +231,10 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
         time_bathy = dataset.variables['time_bathy'][t_subset,alongshoreindex]
         sub_t = t[t_subset]
 
+    # always make this masked because of .mask use below
+    min_cross_idx = np.ma.masked_invalid(min_cross_idx)
+    max_cross_idx = np.ma.masked_invalid(max_cross_idx)
+
     min_cross = np.zeros(min_cross_idx.shape) - 1
     max_cross = np.zeros(max_cross_idx.shape) - 1
 
