@@ -1,33 +1,20 @@
 # (c) Nelen & Schuurmans.  GPL licensed, see LICENSE.txt.
-from django.template import RequestContext, Context, loader
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template.loader import render_to_string
-from django.utils import simplejson as json
-from django.views.generic import TemplateView, View
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
-from django.utils.translation import ugettext as _
-from django.core.servers.basehttp import FileWrapper
-from django.conf import settings
-
+import mimetypes
 from PIL import Image, ImageDraw
 import cStringIO
-import textwrap
 import urllib
 import datetime
 import traceback
 
+from django.views.generic import TemplateView, View
+from django.http import HttpResponse, Http404
+from django.core.servers.basehttp import FileWrapper
+
 from lizard_ui.views import ViewContextMixin
 from lizard_kml.jarkus.kml import build_kml
 from lizard_kml.jarkus.nc_models import makejarkustransect
-from lizard_kml.jarkus.plots import (
-    eeg,
-    jarkustimeseries,
-    jarkusmean,
-    nourishment,
-    WouldTakeTooLong
-)
+from lizard_kml.jarkus.plots import (eeg, jarkustimeseries, jarkusmean,
+                                     nourishment)
 
 import logging
 import xlwt
@@ -117,12 +104,16 @@ class ChartView(View):
     """
     download = False
 
-    def get(self, request, chart_type, id=None):
+    def get(self, request, chart_type, id=None, format='png'):
         """generate info into a response"""
         year_from = request.GET.get('year_from')
         year_to = request.GET.get('year_to')
         dt_from = datetime.datetime(int(year_from), 1, 1) if year_from else None
         dt_to = datetime.datetime(int(year_to), 12, 31, 23, 59, 59) if year_to else None
+
+        format = request.GET.get('format', format)
+        if not self.download and not format in ['svg', 'png']:
+            raise Http404
 
         id_str = ''
         if id:
@@ -143,12 +134,12 @@ class ChartView(View):
             elif chart_type == 'jarkustimeseries':
                 id = int(id)
                 transect = makejarkustransect(id, dt_from, dt_to)
-                fd = jarkustimeseries(transect, {'format':'png'})
+                fd = jarkustimeseries(transect, {'format': format})
             elif chart_type == 'nourishment':
                 id = int(id)
-                fd = nourishment(id, dt_from, dt_to, {'format':'png'})
+                fd = nourishment(id, dt_from, dt_to, {'format': format})
             elif chart_type == 'jarkusmean':
-                fd = jarkusmean(id_min, id_max, {'format':'png'})
+                fd = jarkusmean(id_min, id_max, {'format': format})
             else:
                 raise Exception('Unknown chart type')
         except Exception as ex:
@@ -156,9 +147,13 @@ class ChartView(View):
             fd = message_in_png(traceback.format_exc())
         # wrap the file descriptor as a generator (8 KB reads)
         wrapper = FileWrapper(fd)
-        response = HttpResponse(wrapper, content_type="image/png")
+        if format == 'svg':
+            mimetype = 'image/svg+xml'
+        else:
+            mimetype = mimetypes.types_map['.%s' % format]
+        response = HttpResponse(wrapper, content_type=mimetype)
         if self.download:
-            response['Content-Disposition'] = 'attachment; filename=transect-{0}-{1}.png'.format(id_str, chart_type)
+            response['Content-Disposition'] = 'attachment; filename=transect-{0}-{1}.{2}'.format(id_str, chart_type, format)
         return response
 
 def message_in_png(text):
