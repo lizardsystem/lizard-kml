@@ -5,7 +5,7 @@ Changelog of lizard-kml
 0.18 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix cross shore index bug. Improve unavailable row data in info table (greyed out). 
 
 
 0.17 (2013-08-14)
