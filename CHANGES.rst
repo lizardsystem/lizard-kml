@@ -13,6 +13,8 @@ Changelog of lizard-kml
 
 - Make sure min_cross_idx and max_cross_idx is always masked.
 
+- Make plots available as png, svg and pdf.
+
 
 0.17 (2013-08-14)
 -----------------
