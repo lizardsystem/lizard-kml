@@ -1,6 +1,7 @@
 {% extends "lizard_kml/lizard_ui_realbase.html" %}
 {# extends "lizard_ui/realbase.html" #}
 {% load tools %}
+{% load i18n %}
 
 {% block title %}Kustviewer - Lizard{% endblock %}
 
@@ -28,6 +29,14 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
 {% endblock javascript %}
 
+{% block logo %}
+{% spaceless %}
+<a href="/" id="logo-img" title="{% trans "Back to homepage" %}">
+    <img src="{{ STATIC_URL }}lizard_kml/logo_rijksoverheid_klein.png" alt="Lizard" />
+</a>
+{% endspaceless %}
+{% endblock logo %}
+
 {% block sidebar %}
 <div id="accordion" class="sidebarbox sidebarbox-stretched">
   <div id="ext-left-controls"></div>
@@ -41,6 +50,7 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
 <span class="icon-play kml-action-playpause"></span>
 <span id="ext-play-rate-slider"></span>
 <span id="ext-year-span-slider"></span>
+<span id="hover-info"></span>
 {% endspaceless %}
 {% endblock %}
 
@@ -68,7 +78,11 @@ window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-c
   <div id="loader-inner"></div>
   <div id="loader-text"><noscript>Voor weergave van deze site is een browser met ondersteuning voor Javascript nodig.</noscript></div>
 </div>
+{% comment %}
+This div can be used to "preload" images, so they appear smoothly when actually shown.
+{% endcomment %}
 <div class="img-preloader" style="width:1px; height:1px; visibility:hidden; overflow:hidden;">
+    <img src="{{ STATIC_URL }}lizard_kml/loader.gif" />
     <img src="{{ STATIC_URL }}lizard_kml/spinner.gif" />
 </div>
 {% endblock page %}

@@ -10,18 +10,18 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'Django >= 1.4, < 1.5',
+    'Django',
     'django-extensions',
     'django-nose',
     'lizard-ui >= 3.0, < 4.0',
     'pkginfo',
     'Pillow',
     'matplotlib',
-    'pandas >= 0.9.1, < 1.0',
+    'pandas',
     'numpy',
-    'scipy >= 0.10.0, < 0.11',
-    'netCDF4 >= 1.0, < 2.0',
-    'xlwt >= 0.7.4, < 0.8',
+    'scipy',
+    'netCDF4',
+    'xlwt',
     'pyproj', # apparantly Lizard implicitly depends on this
     'ordereddict', # netCDF4 needs this in Python 2.6
     ],

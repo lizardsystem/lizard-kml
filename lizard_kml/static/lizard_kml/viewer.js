@@ -1017,8 +1017,9 @@ KmlViewerUi.prototype.geInitCallback = function (pluginInstance) {
         // Start streaming percentage checker.
         this.strc.startControl();
 
-        // Listen all click events in Google Earth.
-        this.addGlobalClickHandler();
+        // Listen to click and mouseover events on features in Google Earth.
+        this.initKmlObjectClick();
+        this.initKmlObjectHover();
 
         // Enable the right upper controls.
         kvu.setControlsDisabled(false);
@@ -1152,10 +1153,55 @@ KmlViewerUi.prototype.stopMultiSelect = function () {
 
 /**
  * Attach our global click handler. Much more efficient than attaching
- * individual click handlers to all map features.
+ * individual handlers to all map features.
  */
-KmlViewerUi.prototype.addGlobalClickHandler = function () {
+KmlViewerUi.prototype.initKmlObjectClick = function () {
     google.earth.addEventListener(ge.getGlobe(), 'click', this.clickHandler.bind(this));
+};
+
+/**
+ *
+ */
+KmlViewerUi.prototype.initKmlObjectHover = function (event) {
+    // Create a new balloon that we reuse.
+    this.$hoverInfoEl = $('#hover-info');
+
+    this.hoverInfoTimeout = null;
+
+    google.earth.addEventListener(ge.getGlobe(), 'mousemove', this.mouseMoveHandler.bind(this));
+};
+
+/**
+ *
+ */
+KmlViewerUi.prototype.mouseMoveHandler = function (event) {
+    var self = this;
+
+    if (this.hoverInfoTimeout !== null) {
+        clearTimeout(this.hoverInfoTimeout);
+        this.hoverInfoTimeout = null;
+    }
+
+    this.hoverInfoTimeout = setTimeout(function () {
+        var target = event.getTarget();
+        self.showHoverInfo(target);
+    }, 100);
+};
+
+/**
+ *
+ */
+KmlViewerUi.prototype.showHoverInfo = function (target) {
+    var self = this;
+
+    if (target.getType() === 'KmlPlacemark') {
+        var text = target.getName();
+
+        this.$hoverInfoEl.text(text);
+    }
+    else {
+        this.$hoverInfoEl.text('');
+    }
 };
 
 /**
@@ -1180,9 +1226,12 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             // Don't do anything if there's no dynamic info link. The KML file could
             // have defined its own popups.
             if ($link.length === 1) {
+                // Don't show the normal balloon.
+                event.preventDefault();
+
                 // The popup content is just a single link identified by our custom
                 // "data-dynamic-info" attribute.
-                this.loadDynamicInfo($link, event);
+                this.loadDynamicInfo($link);
             }
             else if (/<link(.*)>/.test(html)) {
                 // Several Deltares popups use custom styling and scripts.
@@ -1238,13 +1287,35 @@ KmlViewerUi.prototype.clickHandler = function (event) {
     }
 };
 
-KmlViewerUi.prototype.loadDynamicInfo = function ($link, originalEvent) {
+KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
     var self = this;
+
+    // Open the balloon first
+
+    // Close (possible) old balloon.
+    ge.setBalloon(null);
+
+    // Create a new balloon.
+    var balloon = ge.createHtmlDivBalloon('');
+
+    // Use a spinner as the initial content
+    var div = document.createElement('DIV');
+    div.innerHTML = '<div class="still-loading"></div>';
+    balloon.setContentDiv(div);
+
+    // Create a <div> containing the placemark info,
+    // so we can have JavaScript augment it (using jQuery Tabs).
+    var w = Math.round($('#map3d').width() * 0.85);
+    var h = Math.round($('#map3d').height() * 0.85);
+    balloon.setMinWidth(w);
+    balloon.setMinHeight(h);
+    balloon.setMaxWidth(w);
+    balloon.setMaxHeight(h);
+    ge.setBalloon(balloon);
 
     // Retrieve the content of this link asynchronously using XmlHttpRequest,
     // and show it in a Google Earth balloon we instanciate ourselves.
-    // Don't show the normal balloon.
-    originalEvent.preventDefault();
+
     // Find out the base URL.
     var url = $link.attr('href');
     // Append chart parameters, like the year span.
@@ -1254,24 +1325,10 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link, originalEvent) {
         url,
         urlParams
     )
-    .done(function (data) {
-        var balloon = ge.createHtmlDivBalloon('');
-
-        // Don't attach to a feature anymore, it is distracting.
-        //balloon.setFeature(target);
-
-        // Create a <div> containing the placemark info,
-        // so we can have JavaScript augment it (using jQuery Tabs).
+    .done(function (data, textStatus, jqXHR) {
         var div = document.createElement('DIV');
         div.innerHTML = data;
         balloon.setContentDiv(div);
-        var w = Math.round($('#map3d').width() * 0.85);
-        var h = Math.round($('#map3d').height() * 0.85);
-        balloon.setMinWidth(w);
-        balloon.setMinHeight(h);
-        balloon.setMaxWidth(w);
-        balloon.setMaxHeight(h);
-        ge.setBalloon(balloon);
 
         var $balloonContent = $(div);
         // Initialize jQuery tabs, if there are any.
@@ -1279,9 +1336,17 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link, originalEvent) {
         $tabs.tabs();
         // Initialize other dynamic info links
         $balloonContent.find('a[data-dynamic-info="true"]').click(function (event) {
+            // Don't follow the link.
+            event.preventDefault();
+
             var $link2 = $(this);
-            self.loadDynamicInfo($link2, event);
+            self.loadDynamicInfo($link2);
         });
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        var div = document.createElement('DIV');
+        div.innerHTML = 'Fout bij het laden van de gegevens.';
+        balloon.setContentDiv(div);
     });
 };
 

@@ -71,7 +71,7 @@ def jarkustimeseries(transect, displayproperties={}, plotproperties=None):
     # use a fixed min, max for color interpolation, we have no green on beaches but it shows a lot of contrast
     # TODO: Make this stateless.... (only call methods on figures and axes)
     fig = pyplot.figure(figsize=(8, 3))
-    plot = fig.add_axes([0.07, 0.12, 0.82, 0.83])
+    plot = fig.add_axes([0.09, 0.12, 0.82, 0.83])
     mappable = plot.pcolor(transect.cross_shore, date2num(transect.t), z,
                            vmin=-20, vmax=20, cmap=extra_cm.GMT_drywet_r)
     contours_colormap = matplotlib.cm.get_cmap('PuBu')
@@ -126,7 +126,7 @@ def eeg(transect, plotproperties=None):
     # create a new figure
     fig = pyplot.figure(figsize=(8, 3))
     # add axes
-    plot = fig.add_axes([0.07, 0.12, 0.82, 0.83])
+    plot = fig.add_axes([0.09, 0.12, 0.82, 0.83])
     # add the lines
     plot.add_collection(lines)
     # set the x axis
