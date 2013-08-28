@@ -1,10 +1,41 @@
 /* main content */
+body {
+    background-color: #7cb7e2;
+    background-image: none;
+}
+
 #map3d {
     width: 100%;
     height: 100%;
 }
 
 #sidebar {
+    border: none;
+}
+
+#collapser {
+    background-color: #046f96;
+}
+
+#collapser:hover {
+    background-color: #347fa6;
+}
+
+.sidebar-open #collapser {
+    background-image: url("arrow_collapse.png");
+}
+
+.sidebar-closed #collapser {
+    background-image: url("arrow_expand.png");
+}
+
+#menubar {
+    background-color: #046f96;
+    background-image: none;
+}
+
+#menubar, #footer {
+    border: none;
 }
 
 #header {
@@ -25,12 +56,23 @@
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0594c8', endColorstr='#ff046f96', GradientType=0);
 }
 
+#rightlogo {
+    border-radius: 0 0 0 22px;
+    float: right;
+    background-color: #fff;
+}
+
+#above-content {
+    height: 26px;
+    overflow: hidden;
+}
+
 /* colormaps popup */
 .ui-dialog .ui-dialog-content {
     padding: 2px;
 }
 
-/* preview image */
+/* preview image on the lower left side */
 #kml-preview-container {
     width: 100%;
     display: none;
@@ -62,6 +104,85 @@
 
 .x-menu-item-icon.icon-zoom-in {
     margin-top: 3px;
+}
+
+.x-accordion-item .x-accordion-hd {
+    background: #7cb7e2;
+    border: 1px solid #7cb7e2;
+    box-shadow: none;
+    padding: 2px 2px;
+}
+
+.x-panel-header-default-top {
+    box-shadow: none;
+}
+
+.x-slider-horz .x-slider-thumb {
+    background-image: none;
+    background-color: #000000;
+    border: none;
+    border-radius: 1px;
+    height: 13px;
+    margin-left: -2px;
+    margin-top: 1px;
+    width: 4px;
+}
+
+.x-slider-horz .x-slider-thumb.x-slider-thumb-over {
+}
+
+.x-slider-horz .x-slider-thumb.x-slider-thumb-drag {
+}
+
+.x-slider-horz {
+    background: none no-repeat scroll 0 -15px transparent;
+    padding-left: 7px;
+}
+
+.x-slider-horz .x-slider-end {
+    background: none no-repeat scroll right -30px transparent;
+    padding-right: 7px;
+}
+
+.x-slider-horz,
+.x-slider-horz .x-slider-end,
+.x-slider-horz .x-slider-inner {
+    background: url('slider-bg.png') repeat-x scroll 0 0 transparent;
+}
+
+.x-panel-header {
+    /*background: #9764d6;*/
+    border-color: #000;
+
+    background-color: #EEEEEE;
+    background-image: url("/static_media/lizard_ui/bar_background.png");
+    background-repeat: repeat-x;
+}
+
+.x-tip-default {
+    background-color: #fff;
+    border-radius: 3px;
+    border: 1px solid #000;
+}
+
+.x-tip-body-default {
+    color: #222;
+}
+
+.x-btn-default-small {
+    background-color: #bbddf1;
+    background-image: none;
+    border: none;
+}
+
+.x-btn-default-small-over {
+    background-color: #aaccf1;
+    background-image: none;
+    border: none;
+}
+
+.x-btn-default-small .x-btn-inner {
+    color: #222;
 }
 
 /* loader overlay */
@@ -128,12 +249,7 @@ height: 4em;
 width: 100%;
 }
 
-/* above-content controls, like play/pause etc */
-#above-content {
-    height: 24px;
-    overflow: hidden;
-}
-
+/* above-content controls, like play/pause etc, in the menubar */
 [class^="icon-"], [class*=" icon-"] {
     background-image: url("glyphicons-halflings.png");
     background-position: 14px 14px;
@@ -148,15 +264,19 @@ width: 100%;
 .icon-backward {
     background-position: -240px -72px;
 }
+
 .icon-play {
     background-position: -264px -72px;
 }
+
 .icon-pause {
     background-position: -288px -72px;
 }
+
 .icon-fullscreen {
     background-position: -456px -144px;
 }
+
 .icon-zoom-in {
     background-position: -336px 0;
 }
@@ -184,11 +304,12 @@ width: 100%;
 #kml-stream-percentage {
     margin-right: 20px;
     color: #c22;
+    font-weight: bold;
 }
 
 #kml-stream-percentage.ready {
-    color: #2a2;
-    font-weight: bold;
+    color: #000;
+    font-weight: normal;
 }
 
 /* popups, when click on map features */

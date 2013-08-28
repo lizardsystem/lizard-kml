@@ -10,7 +10,7 @@ google.load('earth', '1');
 
 // Set up Ext JS.
 var isExtReady = false;
-Ext.BLANK_IMAGE_URL = window.lizard_settings.static_url + '/lizard_kml/extjs-4.2.0/resources/themes/images/default/tree/s.gif';
+Ext.BLANK_IMAGE_URL = window.lizard_settings.static_url + 'lizard_kml/extjs-4.2.0/resources/themes/images/default/tree/s.gif';
 // Fix an Ext JS bug regarding error icons.
 Ext.form.Labelable.errorIconWidth = 16;
 // Listen to Ext JS readyness.
@@ -1285,6 +1285,8 @@ KmlViewerUi.prototype.clickHandler = function (event) {
             }
         }
     }
+    // Unless the event is prevented by code above,
+    // Google Earth will handle the balloon popup.
 };
 
 KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
