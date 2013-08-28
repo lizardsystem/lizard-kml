@@ -132,7 +132,9 @@ def eeg(transect, plotproperties=None):
     # set the x axis
     plot.set_xlim(transect.cross_shore.min(), transect.cross_shore.max())
     # set the y axis (add a bit of room cause the wiggles go over a few years)
-    plot.set_ylim(t.min()-730,t.max()+730)
+    # changed maximum correction days to 1000 from 730 (2 years), because
+    # sometimes upper line was outside the y limits
+    plot.set_ylim(t.min()-730,t.max()+1000)
     plot.set_xlabel('Cross shore distance [m]')
     plot.set_ylabel('Measurement time [y]')
 
