@@ -219,22 +219,25 @@ def makejarkustransect(id, dt_from=None, dt_to=None):
         t_subset = (t < dt_to)
 
     if t_subset is None:
-        min_cross = dataset.variables['min_cross_shore_measurement'][:,alongshoreindex]
-        max_cross = dataset.variables['max_cross_shore_measurement'][:,alongshoreindex]
+        min_cross_idx = dataset.variables['min_cross_shore_measurement'][:,alongshoreindex]
+        max_cross_idx = dataset.variables['max_cross_shore_measurement'][:,alongshoreindex]
         time_topo = dataset.variables['time_topo'][:,alongshoreindex]
         time_bathy = dataset.variables['time_bathy'][:,alongshoreindex]
         sub_t = t[:]
     else:
-        min_cross = dataset.variables['min_cross_shore_measurement'][t_subset,alongshoreindex]
-        max_cross = dataset.variables['max_cross_shore_measurement'][t_subset,alongshoreindex]
+        min_cross_idx = dataset.variables['min_cross_shore_measurement'][t_subset,alongshoreindex]
+        max_cross_idx = dataset.variables['max_cross_shore_measurement'][t_subset,alongshoreindex]
         time_topo = dataset.variables['time_topo'][t_subset,alongshoreindex]
         time_bathy = dataset.variables['time_bathy'][t_subset,alongshoreindex]
         sub_t = t[t_subset]
 
+    min_cross = np.zeros(min_cross_idx.shape) - 1
+    max_cross = np.zeros(max_cross_idx.shape) - 1
+
     # convert indexes to meters
     cross = dataset.variables['cross_shore'][:]
-    min_cross = cross[min_cross]
-    max_cross = cross[max_cross]
+    min_cross[~min_cross_idx.mask] = cross[min_cross_idx[~min_cross_idx.mask]]
+    max_cross[~max_cross_idx.mask] = cross[max_cross_idx[~max_cross_idx.mask]]
 
     time_topo_list = []
     for days in time_topo:

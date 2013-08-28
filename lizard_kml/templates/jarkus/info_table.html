@@ -49,10 +49,10 @@
     </thead>
     <tbody>
         {% for row in view.transect.year_data %}
-        <tr>
+        <tr{% ifequal row.1 -1 %} class="notavailable"{% endifequal %}>
             <td>{{ row.0.year }}</td>
-            <td>{% if row.1 %}{{ row.1|floatformat:0 }}{% else %}NA{% endif %}</td>
-            <td>{% if row.2 %}{{ row.2|floatformat:0 }}{% else %}NA{% endif %}</td>
+            <td>{% ifnotequal row.1 -1 %}{{ row.1|floatformat:0 }}{% else %}NA{% endifnotequal %}</td>
+            <td>{% ifnotequal row.2 -1 %}{{ row.2|floatformat:0 }}{% else %}NA{% endifnotequal %}</td>
             <td>{% if row.3 %}{{ row.3.date }}{% else %}NA{% endif %}</td>
             <td>{% if row.4 %}{{ row.4.date }}{% else %}NA{% endif %}</td>
         </tr>

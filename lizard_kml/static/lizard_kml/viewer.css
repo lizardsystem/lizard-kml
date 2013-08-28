@@ -225,6 +225,16 @@ img.spinner-when-loading {
 	color: #669;
 	border-top: 1px solid transparent;
 }
+#transect-table tr.notavailable td
+{
+	background: #e6e6e6;
+	color: #b8b8b8;
+}
+#transect-table tr.notavailable:hover td
+{
+	background: #e6e6e6;
+	color: #b8b8b8;
+}
 #transect-table tr:hover td
 {
 	background: #d0dafd;
