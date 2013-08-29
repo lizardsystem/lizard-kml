@@ -1,0 +1,11 @@
+{% load tools %}
+<div class="placemark-info-popup">
+    <h3>Geologische jarkusprofielen {{ view.id_min }} tot en met {{ view.id_max }})</h3>
+    <img src="{% absurl lizard-kml-chart chart_type='jarkusmean' %}?id_min={{ view.id_min }}&id_max={{ view.id_max }}"
+         class="spinner-when-loading dynamic-chart" />
+    <p>
+        Download grafiek:
+        <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='jarkusmean' format='png' %}?id_min={{ view.id_min }}&id_max={{ view.id_max }}">png</a>
+        <a class="download-link" href="{% absurl lizard-kml-chart-download chart_type='jarkusmean' format='pdf' %}?id_min={{ view.id_min }}&id_max={{ view.id_max }}">pdf</a>
+    </p>
+</div>

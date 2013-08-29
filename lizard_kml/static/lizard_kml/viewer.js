@@ -1296,10 +1296,13 @@ KmlViewerUi.prototype.clickHandler = function (event) {
     // Google Earth will handle the balloon popup.
 };
 
-KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
+KmlViewerUi.prototype.loadDynamicInfo = function ($link, url) {
     var self = this;
 
-    // Open the balloon first
+    // Find out the base URL. Some url parameters are appended to it later on.
+    if ($link !== null) {
+        url = $link.attr('href');
+    }
 
     // Close (possible) old balloon.
     ge.setBalloon(null);
@@ -1323,8 +1326,6 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
     // Retrieve the content of this link asynchronously using XmlHttpRequest,
     // and show it in a Google Earth balloon we instanciate ourselves.
 
-    // Find out the base URL.
-    var url = $link.attr('href');
     // Append chart parameters, like the year span.
     var urlParams = $.extend({}, chartParams);
     // Retrieve the HTML fragment containing the info.
@@ -1457,14 +1458,10 @@ KmlViewerUi.prototype.twoItemsSelected = function () {
     this.stopMultiSelect();
 
     // Show the chart.
-    // Note that this is slightly different from the other charts.
-    var url = window.lizard_settings.lizard_kml.jarkusmean_chart_url + '?id_min=' + id_min + '&id_max=' + id_max;
+    // Note that this one is slightly different from the other charts.
+    var url = window.lizard_settings.lizard_kml.jarkusmean_info_url + '?id_min=' + id_min + '&id_max=' + id_max;
     if ((id_max - id_min) < 1000) {
-        this.showMainBalloon(
-            '<h3>Geologische jarkusprofielen (' + id_min + ' tot en met ' + id_max + ')</h3>' +
-            '<img src="' + url + '" width="1100" height="800" class="spinner-when-loading" />',
-            true
-        );
+        this.loadDynamicInfo(null, url);
     }
     // Limit the amount of transects to prevent a timeout when generating the chart.
     else {

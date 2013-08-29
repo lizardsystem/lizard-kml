@@ -67,6 +67,14 @@ class InfoView(ViewContextMixin, TemplateView):
     def gettable(self):
         return gettable(self.id)
 
+class JarkusmeanInfoView(ViewContextMixin, TemplateView):
+    template_name = "jarkus/info_jarkusmean.html"
+
+    def get(self, request):
+        self.id_min = request.GET.get('id_min')
+        self.id_max = request.GET.get('id_max')
+        return super(JarkusmeanInfoView, self).get(self, request)
+
 class XlsView(View):
     """
     Renders transect info about a transect in an Excel .xls file.
