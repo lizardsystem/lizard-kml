@@ -1125,8 +1125,6 @@ KmlViewerUi.prototype.showMainBalloon = function (html, maximize) {
         var h = Math.round($('#map3d').height() * 0.85);
         balloon.setMinWidth(w);
         balloon.setMinHeight(h);
-        balloon.setMaxWidth(w);
-        balloon.setMaxHeight(h);
     }
     ge.setBalloon(balloon);
 };
@@ -1320,8 +1318,6 @@ KmlViewerUi.prototype.loadDynamicInfo = function ($link) {
     var h = Math.round($('#map3d').height() * 0.85);
     balloon.setMinWidth(w);
     balloon.setMinHeight(h);
-    balloon.setMaxWidth(w);
-    balloon.setMaxHeight(h);
     ge.setBalloon(balloon);
 
     // Retrieve the content of this link asynchronously using XmlHttpRequest,
@@ -1672,7 +1668,9 @@ GEStreamingControl.prototype.startControl = function () {
 GEStreamingControl.prototype.tick = function () {
     var pct = ge.getStreamingPercent();
     if (pct != 0) {
-        this.$number.html(pct);
+        if (this.$number.text() != pct.toString()) {
+            this.$number.text(pct);
+        }
         if (pct == 100) {
             this.$el.addClass('ready');
         }
