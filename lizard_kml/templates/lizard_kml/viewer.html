@@ -12,7 +12,7 @@
       href="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/resources/ext-theme-classic/ext-theme-classic-all.css" />
 <link rel="stylesheet"
       type="text/css"
-      href="{{ STATIC_URL }}lizard_kml/viewer.css" />
+      href="{{ STATIC_URL }}lizard_kml/viewer.css?version=1" />
 {% endblock css %}
 
 {% block javascript %}
@@ -25,9 +25,9 @@ window.lizard_settings.lizard_kml.api_url = '{% absurl lizard-kml-api %}';
 {% comment %}window.lizard_settings.lizard_kml.jarkusmean_chart_url = '{% absurl lizard-kml-chart chart_type="jarkusmean" %}';{% endcomment %}
 </script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/ext-all.js"></script>
-<script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/purl.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js?version=1"></script>
 {% endblock javascript %}
 
 {% block logo %}
