@@ -62,6 +62,20 @@ body {
     background-color: #fff;
 }
 
+.rightbutton {
+    float: right;
+    color: #000;
+    margin-right: 10px;
+    border-radius: 0px 0px 3px 3px;
+    padding: 3px;
+    background-color: #fff;
+}
+
+.rightbutton a {
+    text-decoration: none;
+    color: #000;
+}
+
 #above-content {
     height: 26px;
     overflow: hidden;
