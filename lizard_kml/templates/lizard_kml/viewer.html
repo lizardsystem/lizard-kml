@@ -2,6 +2,7 @@
 {# extends "lizard_ui/realbase.html" #}
 {% load tools %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}Kustviewer - Lizard{% endblock %}
 
@@ -9,10 +10,10 @@
 {{ block.super }}
 <link rel="stylesheet"
       type="text/css"
-      href="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/resources/ext-theme-classic/ext-theme-classic-all.css" />
+      href="{% static 'lizard_kml/extjs-4.2.0/resources/ext-theme-classic/ext-theme-classic-all.css' %}" />
 <link rel="stylesheet"
       type="text/css"
-      href="{{ STATIC_URL }}lizard_kml/viewer.css?version=1" />
+      href="{% static 'lizard_kml/viewer.css' %}" />
 {% endblock css %}
 
 {% block javascript %}
@@ -24,16 +25,16 @@ window.lizard_settings.lizard_kml = {};
 window.lizard_settings.lizard_kml.api_url = '{% absurl lizard-kml-api %}';
 window.lizard_settings.lizard_kml.jarkusmean_info_url = '{% absurl lizard-kml-jarkusmeaninfo %}';
 </script>
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/ext-all.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/purl.js"></script>
+<script type="text/javascript" src="{% static 'lizard_kml/extjs-4.2.0/ext-all.js' %}"></script>
+<script type="text/javascript" src="{% static 'lizard_kml/purl.js' %}"></script>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}lizard_kml/viewer.js?version=1"></script>
+<script type="text/javascript" src="{% static 'lizard_kml/viewer.js' %}"></script>
 {% endblock javascript %}
 
 {% block logo %}
 {% spaceless %}
 <a href="/" id="logo-img" title="{% trans "Back to homepage" %}">
-    <img src="{{ STATIC_URL }}lizard_kml/logo_rijksoverheid_klein.png" alt="Lizard" />
+    <img src="{% static 'lizard_kml/logo_rijksoverheid_klein.png' %}" alt="Lizard" />
 </a>
 {% endspaceless %}
 {% endblock logo %}
@@ -72,7 +73,7 @@ window.lizard_settings.lizard_kml.jarkusmean_info_url = '{% absurl lizard-kml-ja
     {% endfor %}
 </map>
 <div id="colormaps">
-    <img src="{{ STATIC_URL }}lizard_kml/color_maps.png" usemap="#colormaps-map" width="200" height="300">
+    <img src="{% static 'lizard_kml/color_maps.png' %}" usemap="#colormaps-map" width="200" height="300">
 </div>
 {{ block.super }}
 <div id="loader">
@@ -83,9 +84,9 @@ window.lizard_settings.lizard_kml.jarkusmean_info_url = '{% absurl lizard-kml-ja
 This div can be used to "preload" images, so they appear smoothly when actually shown.
 {% endcomment %}
 <div class="img-preloader" style="width:1px; height:1px; visibility:hidden; overflow:hidden;">
-    <img src="{{ STATIC_URL }}lizard_kml/loader.gif" />
-    <img src="{{ STATIC_URL }}lizard_kml/spinner.gif" />
-    <img src="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/resources/ext-theme-classic/images/tree/leaf.gif" />
-    <img src="{{ STATIC_URL }}lizard_kml/extjs-4.2.0/resources/ext-theme-classic/images/tree/loading.gif" />
+    <img src="{% static 'lizard_kml/loader.gif' %}" />
+    <img src="{% static 'lizard_kml/spinner.gif' %}" />
+    <img src="{% static 'lizard_kml/extjs-4.2.0/resources/ext-theme-classic/images/tree/leaf.gif' %}" />
+    <img src="{% static 'lizard_kml/extjs-4.2.0/resources/ext-theme-classic/images/tree/loading.gif' %}" />
 </div>
 {% endblock page %}

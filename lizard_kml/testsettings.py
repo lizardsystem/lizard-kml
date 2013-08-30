@@ -70,14 +70,13 @@ INSTALLED_APPS = [
 ROOT_URLCONF = 'lizard_kml.urls'
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    # Uncomment this one if you use lizard-map.
-    # 'lizard_map.context_processors.processor.processor',
-    # Default django 1.3 processors.
+    # Default django 1.4.5 processors.
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.static",
+    "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages"
     )
 
@@ -114,11 +113,6 @@ STATIC_URL = '/static_media/'
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'static')
 MEDIA_ROOT = os.path.join(BUILDOUT_DIR, 'var', 'media')
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
-]
 
 LIZARD_KML_STANDALONE = True
 
