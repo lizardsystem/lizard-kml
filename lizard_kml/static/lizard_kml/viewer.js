@@ -48,6 +48,7 @@ var chartParams = {
     year_to: 2020
 };
 var emptyGif = 'data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw%3D%3D';
+var defaultPreviewImage = window.lizard_settings.static_url + 'lizard_kml/figures/none.png';
 
 // Either the Google Earth API, or Ext JS callbacks which are supposed to notify
 // everything has been loaded won't work properly, so solve it by polling
@@ -538,7 +539,7 @@ KmlViewerUi.prototype.initControls = function () {
                             checked: false,
                             kml_url: k.kml_url,
                             slug: k.slug,
-                            preview_image_url: k.preview_image_url
+                            preview_image_url: k.preview_image_url ? k.preview_image_url : defaultPreviewImage
                         });
                         categoryNode.appendChild(krn);
                     });

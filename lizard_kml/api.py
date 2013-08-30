@@ -8,8 +8,6 @@ from django.views.decorators.cache import never_cache
 
 from lizard_kml.models import Category
 
-DEFAULT_PREVIEW_IMAGE = settings.STATIC_URL + 'lizard_kml/figures/none.png'
-
 class JsonView(View):
     '''
     Simple view which serializes the data returned by an overridden
@@ -51,7 +49,7 @@ class CategoryTreeView(JsonView):
                 'kml_type': k.kml_type,
                 'kml_url': self._mk_kml_resource_url(k),
                 'slug': k.slug,
-                'preview_image_url': k.preview_image.url if k.preview_image else DEFAULT_PREVIEW_IMAGE
+                'preview_image_url': k.preview_image.url if k.preview_image else ''
             }
             for k in category.kmlresource_set.all()
         ]
