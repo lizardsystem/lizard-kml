@@ -150,7 +150,7 @@ class ChartView(View):
                 raise Exception('Unknown chart type')
         except Exception as ex:
             logger.exception('exception while rendering chart')
-            fd = message_in_png(traceback.format_exc())
+            fd = message_in_png(traceback.format_exc(), width, height)
             format = 'png'
 
         # Wrap the file descriptor as a generator (8 KB reads).
@@ -177,14 +177,15 @@ class ChartView(View):
 
         return response
 
-def message_in_png(text):
+def message_in_png(text, width=None, height=None):
     '''returns a PNG image generated using PIL'''
+    if not width or not height:
+        width = 800
+        height = 600
 
-    # wrap text so it fits in the image
-    #lines = textwrap.wrap(text, width=100, replace_whitespace=False)
     lines = text.split('\n')
     # create image and drawer
-    im = Image.new('RGB', (800, 600))
+    im = Image.new('RGB', (width, height))
     draw = ImageDraw.Draw(im)
     # top-left position
     x0 = 10
