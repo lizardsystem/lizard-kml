@@ -152,13 +152,6 @@ for key in NC_RESOURCE:
     else:
         logger.info('Using %s', NC_RESOURCE[key])
 
-# other local testsettings
-# TODO should move these to local test settings, and send Fedor an email about it :)
-if os.getlogin() == 'fedorbaart':
-    # fedors mac
-    NC_RESOURCE['transect'] = '/Users/fedorbaart/Downloads/transect.nc'
-    logger.info('Fedors mac, using %s', NC_RESOURCE['transect'])
-
 try:
     # Import local settings that aren't stored in svn/git.
     from lizard_kml.local_testsettings import *
