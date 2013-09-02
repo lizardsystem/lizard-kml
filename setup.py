@@ -24,6 +24,7 @@ install_requires = [
     'xlwt',
     'pyproj', # apparantly Lizard implicitly depends on this
     'ordereddict', # netCDF4 needs this in Python 2.6
+    'psycopg2',
     ],
 
 tests_require = [
