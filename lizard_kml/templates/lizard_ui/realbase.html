@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-{% load utility %}
 {% load i18n %}
 {% load static %}
 <html>
@@ -22,7 +21,7 @@
           media="screen, projection" />
     {# Lizard #}
     <link rel="stylesheet"
-          href="{% static 'lizard_kml/lizard_ui_lizard.css' %}"
+          href="{% static 'lizard_ui/lizard.css' %}"
           type="text/css"
           media="screen, projection" />
     {% endblock css %}
@@ -36,7 +35,7 @@
             src="{% static 'lizard_kml/jquery-ui/jquery-ui-1.8.24.custom.min.js' %}"></script>
     {# Lizard #}
     <script type="text/javascript"
-            src="{% static 'lizard_kml/lizard_ui_lizard.js' %}"></script>
+            src="{% static 'lizard_ui/lizard.js' %}"></script>
     {% endblock javascript %}
 
     {% block map-javascript %}
@@ -78,9 +77,6 @@
         <div id="main_area" class="clear">
           <div id="sidebar">
             {% block sidebar %}
-            {% if application_screen_slug %}
-            {% application_icons application_screen_slug %}
-            {% endif %}
             {% endblock sidebar %}
           </div>
           {# End of sidebar #}
