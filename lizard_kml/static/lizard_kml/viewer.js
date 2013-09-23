@@ -1831,16 +1831,15 @@ function KmlFile(id, baseUrl, slug) {
  * Get the url for this KML file.
  */
 KmlFile.prototype.fullUrl = function () {
+    // Circumvent Google Earths aggressive caching by adding a random parameter.
+    var random = (new Date()).getTime();
+    var params = {'random': random};
+
     if (this.slug === "jarkus") {
-        // Circumvent Google Earths aggressive caching by adding a random parameter.
-        var random = (new Date()).toString();
-        var moreParams = {'random': random};
-        var params = $.extend({}, jarkusKmlParams, moreParams);
-        return this.baseUrl + '?' + $.param(params);
+        params = $.extend({}, params, jarkusKmlParams);
     }
-    else {
-        return this.baseUrl;
-    }
+
+    return this.baseUrl + '?' + $.param(params);
 };
 
 /**
