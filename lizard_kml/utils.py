@@ -1,4 +1,5 @@
 from django.core.cache import cache
+from django.conf import settings
 
 from hashlib import sha1
 from functools import wraps
@@ -24,7 +25,7 @@ def cache_result(seconds=900, ignore_cache=False):
         def wrapper(*args, **kwargs):
                 key = sha1(str(f.__module__) + str(f.__name__) + str(args) + str(kwargs)).hexdigest()
                 result = cache.get(key)
-                if ignore_cache or result is None:
+                if ignore_cache or settings.DEBUG or result is None:
                     result = f(*args, **kwargs)
                     cache.set(key, result, seconds)
                 return result

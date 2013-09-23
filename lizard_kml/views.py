@@ -26,8 +26,8 @@ import calendar
 logger = logging.getLogger(__name__)
 
 # Constants related to mirroring KML files.
-KML_MIRROR_CACHE_DURATION = 60 * 60 * 48 # in seconds: 24 hour
-KML_MIRROR_FETCH_TIMEOUT = 30 # in seconds
+KML_MIRROR_CACHE_DURATION = 60 * 60 # in seconds
+KML_MIRROR_FETCH_TIMEOUT = 10 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
 MIME_KMZ = 'application/vnd.google-earth.kmz'
@@ -89,7 +89,7 @@ def urlopen(request):
     '''
     return contextlib.closing(urllib2.urlopen(request, timeout=KML_MIRROR_FETCH_TIMEOUT))
 
-@cache_result(KML_MIRROR_CACHE_DURATION, ignore_cache=False)
+@cache_result(KML_MIRROR_CACHE_DURATION)
 def get_mirrored_kml(url):
     '''
     Mirror external data located at given url, so it can be served with our
