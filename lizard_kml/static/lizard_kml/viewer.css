@@ -9,6 +9,11 @@ body {
     height: 100%;
 }
 
+#sidebar-spacer {
+    height: 26px;
+    background-color: #046f96;
+}
+
 #sidebar {
     border: none;
 }
