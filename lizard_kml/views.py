@@ -7,10 +7,12 @@ from django.views.generic import TemplateView, View
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext
 from django.utils.decorators import method_decorator
 from django.contrib.gis.shortcuts import render_to_kmz, compress_kml
 from django.views.decorators.cache import never_cache
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from lizard_kml.models import Category, KmlResource
 from lizard_kml.utils import cache_result
@@ -26,7 +28,6 @@ import calendar
 logger = logging.getLogger(__name__)
 
 # Constants related to mirroring KML files.
-KML_MIRROR_CACHE_DURATION = 60 * 60 # in seconds
 KML_MIRROR_FETCH_TIMEOUT = 10 # in seconds
 KML_MIRROR_MAX_CONTENT_LENGTH = 1024 * 1024 * 16 # in bytes: 16 MB
 MIME_KML = 'application/vnd.google-earth.kml+xml'
@@ -76,6 +77,13 @@ class ViewContextMixin(object):
         context.update({'view': self})
         return context
 
+class LoginRequiredMixin(object):
+    """Ensures that user must be authenticated in order to access view."""
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+
 class HeadRequest(urllib2.Request):
     '''
     Add missing HTTP HEAD request to urllib.
@@ -89,7 +97,6 @@ def urlopen(request):
     '''
     return contextlib.closing(urllib2.urlopen(request, timeout=KML_MIRROR_FETCH_TIMEOUT))
 
-@cache_result(KML_MIRROR_CACHE_DURATION)
 def get_mirrored_kml(url):
     '''
     Mirror external data located at given url, so it can be served with our
@@ -177,7 +184,7 @@ class KmlResourceView(View):
 
         return response
 
-class ViewerView(ViewContextMixin, TemplateView):
+class ViewerView(ViewContextMixin, LoginRequiredMixin, TemplateView):
     '''
     Returns the main HTML for lizard-kml.
     Renders a simple tree with KML files available in the database.
