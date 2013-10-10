@@ -184,7 +184,7 @@ class KmlResourceView(View):
 
         return response
 
-class ViewerView(ViewContextMixin, LoginRequiredMixin, TemplateView):
+class ViewerView(ViewContextMixin, TemplateView):
     '''
     Returns the main HTML for lizard-kml.
     Renders a simple tree with KML files available in the database.
